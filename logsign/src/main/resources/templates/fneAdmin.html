@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche de Notification d’Evénement (FNE)</title>
+    <link rel="stylesheet" href="/css/styles.css">
+   <!-- Ajoutez cette ligne dans le <head> pour utiliser FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+</head>
+<body>
+    <header class="navbar">
+        <!-- Section météo à gauche -->
+        <div id="meteo">
+            <span id="meteo-icon"></span>
+            <span id="meteo-temp"></span>
+            <span id="meteo-description"></span>
+        </div>
+        <div id="real-time">
+            <span id="current-date"></span>
+            <span id="current-time"></span>
+        </div>
+        <!-- Ajoutez ce bouton pour les écrans mobiles -->
+        <button class="navbar-toggle" onclick="toggleNavbar()">
+            <span></span>
+            <span></span>    
+        </button>
+        <nav class="navbar-container">
+            
+            <!-- Bouton pour recevoir tous les FNE -->
+            <div class="navbar-item" onclick="showAllFNE()">
+                <i class="fas fa-list"></i>
+                <span>FNE En Attente</span>
+            </div>
+            <!-- Bouton pour l'historique -->
+            <div class="navbar-item" onclick="showHistorique()">
+                <i class="fas fa-history"></i> 
+                <span>Historique des FNE</span>
+            </div>
+            <!-- Bouton pour les statistiques -->
+            <div class="navbar-item" onclick="showStatistiques()">
+                <i class="fas fa-chart-bar"></i> 
+                <span>Statistiques</span>
+            </div>
+            <!-- Bouton pour le guide PDF -->
+            <div class="navbar-item" onclick="showGuide()">
+                <i class="fas fa-file-pdf"></i>
+                <span>Guide PDF</span>
+            </div>
+        </nav>
+    </header>
+    <!-- Section pour les statistiques -->
+<div id="statistiques" class="navbar-content" style="display: none;">
+    <h3>Statistiques des FNE</h3>
+    <p>Ici, vous pouvez afficher des graphiques ou des chiffres clés sur les FNE.</p>
+    <!-- Exemple de contenu -->
+    <div id="statistiques-content">
+        <canvas id="statistiquesChart"></canvas> <!-- Exemple de graphique avec Chart.js -->
+    </div>
+</div>
+
+<!-- Section pour tous les FNE -->
+<div id="all-fne" class="navbar-content" style="display: none;">
+    <h3>Tous les FNE</h3>
+    <p>Liste des FNE en attente et traités :</p>
+    <ul id="fne-list">
+        <!-- Les FNE seront ajoutés dynamiquement ici -->
+    </ul>
+</div>
+    <div id="historique" class="navbar-content" style="display: none;">
+        <h3>Historique des FNE</h3>
+        <ul>
+            <li>FNE #001 - 01/01/2023</li>
+            <li>FNE #002 - 15/02/2023</li>
+            <li>FNE #003 - 30/03/2023</li>
+        </ul>
+    </div>
+    <div id="guide" class="navbar-content" style="display: none;">
+        <h3>Guide PDF</h3>
+        <iframe src="guide.pdf" width="100%" height="500px"></iframe>
+    </div>
+    
+    
+    <div class="form-container">
+
+        <div class="title-container">
+            <img src="/image/oaca.jpg" alt="Logo"> 
+            <h1>Fiche de Notification d’Evénement (FNE)</h1>
+        </div>
+        <br><br><br>
+        <!-- Notification -->
+        <div id="notification" class="notification">
+            Notification : <span id="notificationText"></span>
+        </div>
+
+        <div class="section">
+            <!-- 4 types d'événements -->
+            <label for="type_evt">Type d'événement :</label>
+            <select id="type_evt" name="type_evt" onchange="updateRefGneNumber()">
+                <option value="">Sélectionnez un type</option>
+                <option value="accident">Accident (ACCID)</option>
+                <option value="incident_grave">Incident grave (ING)</option>
+                <option value="incident">Incident (INC)</option>
+                <option value="evt_technique">Evenement Technique (EVT)</option>
+            </select>
+        
+            <label for="REF_GNE">REF GNE :</label>
+            <select id="REF_GNE" name="REF_GNE">
+                <!-- Les options seront générées dynamiquement par JavaScript -->
+            </select>
+        
+            <div id="notification" class="notification" style="display: none;">
+                <span id="notificationText"></span>
+            </div>
+        </div>
+                
+        <form>
+            <!-- Section 1: Informations générales -->
+            <section>
+                <h2>1. Informations générales / معلومات عامة</h2>
+                <table>
+                    <tr>
+                        <td>1.1 Organisme concerné</td>
+                        <td><input type="text" name="organisme" id="Organisme_concerné"></td>
+                    </tr>
+                    <tr>
+                        <td>1.2 Date</td>
+                        <td><input type="date" name="date" id="Date"></td>
+                    </tr>
+                    <tr>
+                        <td>1.3 Heure UTC</td>
+                        <td><input type="time" name="heure" id="heure_UTC"></td>
+                    </tr>                    
+                    <tr>
+                        <td>1.4 Lieu de l’événement</td>
+                        <td><input type="text" name="Lieu_EVT" id="Lieu_EVT"></td>
+                    </tr>
+                    <tr>
+                        <td>1.5 Moyen de détection</td>
+                        <td><input type="text" name="moyen_detection" id="moyen_detection"></td>
+                    </tr>
+                    <tr>
+                        <td>1.6 Impacts opérationnels</td>
+                        <td><input type="text" name="impacts_operationnels" id="impacts_operationnels"></td>
+                    </tr>
+                </table>
+            </section>
+           
+            <!-- Section 2: Aéronef(s) concerné(s) -->
+            <section>
+                <h2>2. Aéronef(s) concerné(s)/الطارات المعنية</h2>
+                <table>
+                    <tr>
+                        <th>Indicatif et immatricultion</th>
+                        <th>Code SSR</th>
+                        <th>Type appareil</th>
+                        <th>Règles de vol</th>
+                        <th>Terrain départ </th>
+                        <th>Terrain arrivée</th>
+                        <th>Cap</th>
+                        <th>Altitude/FL réel</th>
+                        <th>Altitude/FL autorisé</th>
+                        <th>Vitesse</th>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="Indicatif_immatricultion" id="Indicatif_immatricultion"></td>
+                        <td><input type="text" name="code_ssr" id="code_ssr"></td>
+                        <td><input type="text" name="type_appareil" id="type_appareil"></td>
+                        <td><select name="Règles de vol" id="regles_vol">
+                            <option value="IFR">IFR</option>
+                            <option value="VFR">VFR</option>
+                            <option value="IFR/VFR">IFR/VFR</option>
+                            <option value="VFR/IFR">VFR/IFR</option>   
+                        </select></td>
+                        <td><input type="text" name="terrain_depart" id="terrain_depart"></td>
+                        <td><input type="text" name="terrain_arrivée" id="terrain_arrivée"></td>
+                        <td><input type="text" name="cap" id="cap"></td>
+                        <td><input type="text" name="altitude_reel" id="altitude_reel"></td>
+                        <td><input type="text" name="altitude_autorise" id="altitude_autorise"></td>
+                        <td><input type="text" name="vitesse" id="vitesse"></td>
+                    </tr>
+                    
+                </table>
+            </section>
+
+            <!-- Section 3: Nombre de victimes -->
+            <section>
+                <h2>3. Nombre estimatif des victimes (si disponible) / عدد الضحايا</h2>
+                <table>
+                    <tr>                        
+                        <th>Passagers</th>
+                        <th>Personnel</th>
+                        <th>Equipage</th>
+                        <th>Autre</th>
+                    </tr>
+                    <tr>                        
+                        <td><input type="number" name="passagers" id="passagers"></td>
+                        <td><input type="number" name="personnel" id="personnel"></td>
+                        <td><input type="number" name="equipage" id="equipage"></td>
+                        <td><input type="number" name="autre" id="autre"></td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 4: Conditions météorologiques -->
+            <section>
+                <h2>4. Conditions météorologiques / الأحوال الجوية</h2>
+                <table>
+                    <tr>
+                        <th>Vent</th>
+                        <th>Visibilité</th>
+                        <th>Nébulosité</th>
+                        <th>Précipitation</th>
+                        <th>Autres phénomènes</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Direction: <input type="text" name="vent_direction" id="vent_direction"></label><br>
+                            <label>Vitesse: <input type="text" name="vent_vitesse" id="vent_vitesse"></label>
+                        </td>
+                        <td><input type="number" name="visibilite" id="visibilite"></td>
+                        <td>
+                            <select name="nebulosite" id="nebulosite">
+                                <option value="BKN">BKN</option>
+                                <option value="SCT">SCT</option>
+                                <option value="FEW">FEW</option>
+                                <option value="SKC">SKC</option>
+                                <option value="CB">CB</option>                               
+                            </select>
+                        </td>
+                        <td>
+                            <select name="precipitation" id="precipitation">
+                                <option value="Pluie">Pluie</option>
+                                <option value="Grêle">Grêle</option>
+                                <option value="Neige">Neige</option>
+                            </select>
+                        </td>
+                        <td><input type="text" name="autres_phenomenes" id="autres_phenomenes"></td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 5: Matériel, installation ou équipement -->
+            <section>
+                <h2>5. Matériel, installation ou équipement / معدات أو تجهيزات أو أجهزة</h2>
+                <table>
+                    <tr>
+                        <td>L’événement implique une installation/équipement</td>
+                        <td>
+                            <label><input type="radio" name="installation" value="oui" id="evt_implique_installation/équipement"> Oui</label>
+                            <label><input type="radio" name="installation" value="non" id="evt_implique_installation/équipement"> Non</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Le type de l’installation ou de l’équipement</td>
+                        <td><input type="text" name="type_installation" id="type_installation/équipement"></td>
+                    </tr>
+                    <tr>
+                        <td>Le nom de la compagnie d’assistance / organisme exploitant le véhicule</td>
+                        <td><input type="text" name="compagnie_assistance" id="nom_compagnie_assistance/organisme/exploitant_véhicule"></td>
+                    </tr>
+                    <tr>
+                        <td>L’événement implique un véhicule ou un matériel d’assistance au sol</td>
+                        <td>
+                            <label><input type="radio" name="vehicule" value="oui" id="evt_implique_véhicule/materiel_assistance_sol"> Oui</label>
+                            <label><input type="radio" name="vehicule" value="non" id="evt_implique_véhicule/materiel_assistance_sol"> Non</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Type du matériel / véhicule</td>
+                        <td><input type="text" name="type_vehicule" id="type_materiel/véhicule"></td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 6: Description de l’événement -->
+            <section>
+                <h2>6. Description de l’événement (croquis si nécessaire) / وصف الحدث</h2>
+                <textarea name="description" rows="10" cols="100" id="description_evt"></textarea>
+            </section>
+
+            <!-- Section 7: Nom et signature -->
+            <section>
+                <h2>7. Nom du (ou des) rédacteur(s)</h2>                
+                <input type="text" name="nom_rédacteur" id="nom_rédacteur">                 
+            </section>   
+        </form>
+        <div class="button-container">
+            <button type="submit">Soumettre</button>
+        </div>
+        
+    </div>
+       
+    <script src="/js/script.js"></script>
+    <script>
+        // Mettre à jour la date et l'heure toutes les secondes
+            setInterval(updateDateTime, 1000);
+        // Afficher la date et l'heure immédiatement au chargement de la page
+            updateDateTime();
+        //Afficher Meteo
+            fetchMeteo();
+    </script>
+    <script>
+        function showStatistiques() {
+    // Masquer toutes les autres sections
+    document.getElementById('historique').style.display = 'none';
+    document.getElementById('guide').style.display = 'none';
+    document.getElementById('all-fne').style.display = 'none';
+
+    // Afficher la section des statistiques
+    document.getElementById('statistiques').style.display = 'block';
+
+    // Charger les statistiques (exemple avec Chart.js)
+    const ctx = document.getElementById('statistiquesChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['FNE en attente', 'FNE traités', 'FNE urgents'],
+            datasets: [{
+                label: 'Nombre de FNE',
+                data: [12, 19, 3], // Exemple de données
+                backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe'],
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function showAllFNE() {
+    // Masquer toutes les autres sections
+    document.getElementById('historique').style.display = 'none';
+    document.getElementById('guide').style.display = 'none';
+    document.getElementById('statistiques').style.display = 'none';
+
+    // Afficher la section des FNE
+    document.getElementById('all-fne').style.display = 'block';
+
+    // Charger la liste des FNE (exemple)
+    const fneList = document.getElementById('fne-list');
+    fneList.innerHTML = ''; // Vider la liste actuelle
+
+    // Exemple de données (à remplacer par une requête AJAX pour récupérer les FNE)
+    const fnes = [
+        { id: 1, status: 'En attente', date: '2023-10-01' },
+        { id: 2, status: 'Traité', date: '2023-10-02' },
+        { id: 3, status: 'En attente', date: '2023-10-03' },
+    ];
+
+    fnes.forEach(fne => {
+        const li = document.createElement('li');
+        li.textContent = `FNE #${fne.id} - ${fne.status} (${fne.date})`;
+        fneList.appendChild(li);
+    });
+}
+    </script>
+</body>
+<footer class="footer">
+    <div class="footer-content">
+        <p>
+            La Fiche de Notification d’Evénement (FNE) est un document utilisé pour signaler et enregistrer les événements liés à la sécurité aérienne. Elle permet de collecter des informations précises pour analyser et prévenir les incidents futurs.
+        </p>
+        <div class="contact-info">
+            <p>
+                 <!-- Icône WhatsApp -->
+                Contactez-nous sur WhatsApp : <i class="fab fa-whatsapp"></i><a href="https://wa.me/1234567890" target="_blank">+123 456 7890</a>
+            </p>
+            <p>
+                 <!-- Icône site web -->
+                Visitez le site web de l'OACA : <i class="fas fa-globe"></i><a href="https://www.oaca.nat.tn" target="_blank">www.oaca.ma</a>
+            </p>
+        </div>
+    </div>
+</footer>
+
+
+</html>

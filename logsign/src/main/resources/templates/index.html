@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNE Alertes - Connexion et Inscription</title>
+    
+    <link rel="stylesheet" href="/css/stylesl.css"> <!-- Utilisez un seul fichier CSS pour les deux formulaires -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Partie gauche (contenu général) -->
+        <div class="left">
+            <h1>FNE Alertes</h1>
+            <p>Gérez facilement toutes les alertes de sécurité pour assurer une protection optimale des données et des systèmes.</p>
+        </div>
+
+        <!-- Partie droite (formulaires) -->
+        <div class="right">
+            <!-- Onglets pour basculer entre Connexion et Inscription -->
+            <div class="tabs">
+                <button id="login-tab" class="active" onclick="showLogin()">Connexion</button>
+                <button id="register-tab" onclick="showRegister()">Inscription</button>
+            </div>
+
+            <!-- Formulaire de Connexion -->
+            <div id="login-form-container" class="form-container active">
+                <img src="/image/oaca.jpg" alt="Connexion" class="login-image">
+                <form id="login-form" action="/auth/login" method="POST">
+                    <!-- Afficher le message d'erreur -->
+                    <div th:if="${error}" class="error-message" style="color: red;">
+                        <p th:text="${error}"></p>
+                    </div>
+            
+                    <div class="input-group">
+                        <label for="login-matricule">Matricule :</label>
+                        <input type="text" id="login-matricule" name="matricule" placeholder="Entrez votre matricule" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Mot de passe :</label>
+                        <input type="password" id="login-password" name="motDePasse" placeholder="Entrez votre mot de passe" required>
+                    </div>
+                    <button type="submit">Se connecter</button>
+                </form>
+            </div>
+
+            <!-- Formulaire d'Inscription -->
+            <div id="register-form-container" class="form-container">
+                <form id="registrationForm">
+                    <!-- Champ Nom -->
+                    <div class="input-group">
+                        <label for="nom">Nom</label>
+                        <input type="text" id="nom" name="nom" placeholder="Entrez votre nom" required>
+                    </div>
+                    <!-- Champ Prénom -->
+                    <div class="input-group">
+                        <label for="prenom">Prénom</label>
+                        <input type="text" id="prenom" name="prenom" placeholder="Entrez votre prénom" required>
+                    </div>
+                    <!-- Champ Mail -->
+                    <div class="input-group">
+                        <label for="mail">Adresse Mail</label>
+                        <input type="email" id="mail" name="email" placeholder="Entrez votre ...@gmail.com" required>
+                    </div>
+                    <!-- Champ Matricule -->
+                    <div class="input-group">
+                        <label for="register-matricule">Matricule :</label>
+                        <input type="text" id="register-matricule" name="matricule" placeholder="Entrez votre matricule" required>
+                    </div>
+                    <!-- Champ Mot de Passe -->
+                    <div class="input-group">
+                        <label for="register-motDePasse">Mot de passe :</label>
+                        <input type="password" id="register-motDePasse" name="motDePasse" placeholder="Entrez votre mot de passe" required>
+                    </div>
+                    <!-- Champ Aéroport de travail -->
+                    <div class="input-group">
+                        <label for="airport">Aéroport de travail</label>
+                        <select id="airport" name="aeroport" required>
+                            <option value="" disabled selected>Sélectionnez un aéroport</option>
+                            <option value="Tunis-Carthage (TUN)">AITC: Aéroport International Tunis Carthage</option>
+                            <option value="Djerba-Zarzis (DJE)">AIDZ: Aéroport International Djerba Zarzis</option>
+                            <option value="Monastir Habib Bourguiba (MIR)">AIMHB: Aéroport International Monastir Habib Bourguiba</option>
+                            <option value="Sfax-Thyna (SFA)">AIST: Aéroport International Sfax Thyna</option>
+                            <option value="Tozeur-Nefta (TOE)">AITN: Aéroport International Tozeur Nefta</option>
+                            <option value="Tabarka(TBJ)">AITA: Aéroport International Tabarka Aindraham</option>
+                            <option value="Gafsa (GAF)">AIGK: Aéroport International Gafsa Ksar</option>
+                            <option value="Gabès-Matmata (GAE)">AIGM: Aéroport International Gabès Matmata</option>
+                            <option value="Enfidha (NBE)">AIEH: Aéroport International Enfidha Hammamet</option>
+                        </select>
+                    </div>
+                    <!-- Champ Caché pour le Rôle -->
+                    <input type="hidden" id="role" name="role" value="SML">
+                    <!-- Bouton de soumission -->
+                    <button type="submit">Soumettre</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="/js/scriptl.js"></script>
+    <script>
+        // Afficher le formulaire de connexion par défaut
+        showLogin();
+    </script>
+</body>
+</html>
