@@ -6,7 +6,7 @@ body {
 }
 /* Styles pour la navbar */
 .navbar {
-    background-color: #76a4d6; /* Bleu ciel */
+    background-color: #76a4d6;
     padding: 10px 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -14,10 +14,31 @@ body {
     align-items: center;
 }
 
+/* Style global pour tous les liens dans la navbar */
+.navbar a {
+    color: white !important;
+    text-decoration: none !important;
+}
+
+/* Style spécifique pour les liens de navigation */
+.navbar-container a {
+    color: white !important;
+    text-decoration: none !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Style au survol */
+.navbar a:hover {
+    color: white !important;
+    text-decoration: none !important;
+}
+
 /* Conteneur pour les éléments de la navbar */
 .navbar-container {
     display: flex;
-    gap: 20px; /* Espace entre les éléments */
+    gap: 20px;
 }
 
 /* Styles pour chaque élément de la navbar */
@@ -32,9 +53,26 @@ body {
 
 /* Effet au survol */
 .navbar-item:hover {
-    color: white; /* Couleur au survol */
-    transform: translateY(-2px); /* Légère animation */
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
 }
+
+
+
+/* Styles pour les liens dans la navbar */
+.navbar-item a:link,
+.navbar-item a:visited,
+.navbar-item a:hover,
+.navbar-item a:active {
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+}
+
+
 
 /* Effet au clic */
 .navbar-item:active {
@@ -52,7 +90,6 @@ body {
     font-weight: bold;
     color: white;
     padding: 10px;
-    
     border-radius: 8px;
     margin: 0 auto; /* Centrer horizontalement */
 }
@@ -67,6 +104,7 @@ body {
     font-size: 1.5rem; /* Taille de police pour l'heure */
     color: rgb(244, 243, 243); /* Couleur plus foncée pour l'heure */
 }
+
 /* Styles pour le bouton hamburger */
 .navbar-toggle {
     display: none; /* Masqué par défaut */
@@ -83,6 +121,7 @@ body {
     background-color: white;
     border-radius: 2px;
 }
+
 /* Styles pour la section météo */
 #meteo {
     display: flex;
@@ -106,13 +145,16 @@ body {
     font-size: 1rem;
     color: white;
 }
+
 .footer {
     background-color: #76a4d6; /* Bleu ciel */
     padding: 20px;
     color: white;
     text-align: center;
     box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Ombre en haut */
+    border-top: 1px solid rgba(255, 255, 255, 0.2); /* Bordure légère */
 }
+
 .footer-content {
     max-width: 900px;
     margin: 0 auto;
@@ -145,50 +187,13 @@ body {
     color: #f0f0f0; /* Couleur plus claire au survol */
     text-decoration: underline;
 }
-.footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.2); /* Bordure légère */
-}
-@media (max-width: 768px) {
-    .footer-content {
-        padding: 10px;
-    }
 
-    .footer-content p {
-        font-size: 0.9rem;
-    }
-
-    .contact-info p {
-        font-size: 0.8rem;
-    }
-}
 .contact-info i {
     margin-right: 10px; /* Espace entre l'icône et le texte */
     font-size: 1.2rem; /* Taille de l'icône */
     vertical-align: middle; /* Aligner l'icône avec le texte */
 }
 
-/* Afficher le bouton hamburger sur les petits écrans */
-@media (max-width: 768px) {
-    .navbar-toggle {
-        display: flex;
-    }
-
-    .navbar-container {
-        display: none; /* Masquer la navbar par défaut sur mobile */
-        flex-direction: column;
-        background-color: #76a4d6;
-        position: absolute;
-        top: 60px;
-        right: 20px;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar-container.active {
-        display: flex; /* Afficher la navbar lorsque active */
-    }
-}
 .notification {
     padding: 10px;
     margin: 10px 0;
@@ -197,18 +202,23 @@ body {
     text-align: center;
     display: none; /* Masqué par défaut */
 }
+
 .red {
     background-color: red;
 }
+
 .orange {
     background-color: orange;
 }
+
 .green {
     background-color: #308d3a;
 }
+
 .gray {
     background-color: gray;
 }
+
 .title-container {
     display: flex; /* Utilise Flexbox */
     align-items: center; /* Centre verticalement */
@@ -271,6 +281,7 @@ input[type="text"], input[type="datetime-local"], input[type="number"], textarea
     border-radius: 4px;
     box-sizing: border-box;
 }
+
 button {
     background-color: #76a4d6;
     color: white;
@@ -288,8 +299,54 @@ button:hover {
     background-color: #60a4ee;
 }
 
-
-
 .section {
     margin-bottom: 20px;
+}
+
+/* Afficher le bouton hamburger sur les petits écrans */
+@media (max-width: 768px) {
+    .navbar-toggle {
+        display: flex;
+    }
+
+    .navbar-container {
+        display: none; /* Masquer la navbar par défaut sur mobile */
+        flex-direction: column;
+        background-color: #76a4d6;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+    }
+
+    .navbar-container.active {
+        display: flex; /* Afficher la navbar lorsque active */
+    }
+    
+    .footer-content {
+        padding: 10px;
+    }
+
+    .footer-content p {
+        font-size: 0.9rem;
+    }
+
+    .contact-info p {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .title-container img {
+        width: 80px;
+        left: 10px;
+    }
+    
+    .title-container h1 {
+        font-size: 18px;
+        margin-left: 90px;
+    }
 }

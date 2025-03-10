@@ -3,12 +3,13 @@ package com.example.logsign.models;
 
 import jakarta.persistence.*;
 
-@Entity
+@Entity  // Indique que cette classe est une entité JPA, elle sera mappée à une table de la base de données
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long utilisateur_id;
+    @Id // Définit cette colonne comme la clé primaire de la table
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // La stratégie IDENTITY permet à la base de données de
+                                                     // générer automatiquement la valeur de l'ID (auto-incrémentation)
 
+    private int utilisateur_id;
     private String nom;
     private String prenom;
     private String email;
@@ -18,11 +19,11 @@ public class User {
     private String aeroport;
 
     // Getters et Setters
-    public Long getId() {
+    public int getId() {
         return utilisateur_id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.utilisateur_id = id;
     }
 

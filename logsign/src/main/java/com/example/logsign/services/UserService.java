@@ -6,22 +6,26 @@ import org.springframework.stereotype.Service;
 import com.example.logsign.models.User;
 import com.example.logsign.repositories.UserRepository;
 
-@Service
+@Service // Indique que cette classe est un service Spring (logique métier)
 public class UserService {
 
-    @Autowired
+    @Autowired // Injection automatique du repository UserRepository
     private UserRepository userRepository;
 
-    // Méthode pour vérifier les informations de connexion
+    // Méthode pour authentifier un utilisateur lors de la connexion
     public User loginUser(String matricule, String motDePasse) {
+        // Utilise la méthode personnalisée du UserRepository pour trouver l'utilisateur
         return userRepository.findByMatriculeAndMotDePasse(matricule, motDePasse);
     }
 
+    // Méthode pour enregistrer un nouvel utilisateur
     public User registerUser(User user) {
-        // Vérifier si l'email existe déjà
+        // Vérification si un utilisateur avec le même email existe déjà
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            // Si oui, lève une exception avec un message d'erreur
             throw new RuntimeException("Email déjà utilisé");
         }
-        return userRepository.save(user);
+        // Si l'email est unique, enregistre l'utilisateur dans la base de données
+        return userRepository.save(user); // Enregistre l'utilisateur et renvoie l'entité sauvegardée
     }
 }

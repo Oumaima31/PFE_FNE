@@ -11,41 +11,13 @@ document.getElementById('fneForm').addEventListener('submit', function(event) {
     alert('Formulaire soumis avec succès!');
 });
 
-    // Fonction pour afficher l'historique des FNE
-function showHistorique() {
-    alert("Affichage de l'historique des FNE...");
-    
-}
-
-// Fonction pour afficher le guide PDF
-function showGuide() {
-    alert("Ouverture du guide PDF...");
-    window.open('guide.pdf', '_blank'); // Remplacez 'guide.pdf' par le chemin de votre fichier PDF
-}
 
 
-function showHistorique() {
-    hideAllContent();
-    document.getElementById('historique').style.display = 'block';
-}
-
-function showGuide() {
-    hideAllContent();
-    document.getElementById('guide').style.display = 'block';
-}
-
-
-
-function hideAllContent() {
-    const contents = document.querySelectorAll('.navbar-content');
-    contents.forEach(content => {
-        content.style.display = 'none';
-    });
-}
 function toggleNavbar() {
     const navbarContainer = document.querySelector('.navbar-container');
     navbarContainer.classList.toggle('active');
 }
+
 function updateRefGneNumber() {
     const type_evt = document.getElementById('type_evt').value;
     const REF_GNE = document.getElementById('REF_GNE');
@@ -120,8 +92,8 @@ function updateDateTime() {
     document.getElementById('current-date').textContent = formattedDate;
     document.getElementById('current-time').textContent = formattedTime;
 }
-//pour le meteo
 
+//pour le meteo
 async function fetchMeteo() {
     const apiKey = "17cf16edeaed1f9b3bb60006a242d5d1"; 
     const url = `https://api.openweathermap.org/data/2.5/weather?q=Tunis,tn&units=metric&lang=fr&appid=${apiKey}`;
@@ -154,32 +126,3 @@ async function fetchMeteo() {
         document.getElementById("meteo").innerHTML = `<span style="color:red;">Météo indisponible(${error.message})</span>`;
     }
 }
-
-
-document.getElementById('login-form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Empêche la soumission par défaut
-
-    const matricule = document.getElementById('login-matricule').value;
-    const password = document.getElementById('login-password').value;
-
-    fetch('/auth/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `email=${matricule}&motDePasse=${password}`, // Utilisez les noms des paramètres attendus par le serveur
-    })
-    .then(response => {
-        if (response.redirected) {
-            // Si la réponse est une redirection, naviguer vers l'URL de redirection
-            console.log("Redirection vers :", response.url); // Afficher l'URL de redirection dans la console
-            window.location.href = response.url;
-        } else {
-            throw new Error("Erreur lors de la connexion");
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert("Identifiant ou mot de passe incorrect"); // Affiche un message d'erreur
-    });
-});

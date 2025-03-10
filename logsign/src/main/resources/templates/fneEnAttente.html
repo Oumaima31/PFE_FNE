@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNE En Attente</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <!-- Section météo à gauche -->
+        <div id="meteo">
+            <span id="meteo-icon"></span>
+            <span id="meteo-temp"></span>
+            <span id="meteo-description"></span>
+        </div>
+        <div id="real-time">
+            <span id="current-date"></span>
+            <span id="current-time"></span>
+        </div>
+        <!-- Bouton pour les écrans mobiles -->
+        <button class="navbar-toggle" onclick="toggleNavbar()">
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="navbar-container">
+            <a class="navbar-item" href="fneAdmin.html">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a class="navbar-item" href="fne-en-attente.html">
+                <i class="fas fa-list"></i>
+                <span>FNE En Attente</span>
+            </a>
+            <a class="navbar-item" href="historique.html">
+                <i class="fas fa-history"></i>
+                <span>Historique des FNE</span>
+            </a>
+            <a class="navbar-item" href="statistiques.html">
+                <i class="fas fa-chart-bar"></i>
+                <span>Statistiques</span>
+            </a>
+            <a class="navbar-item" href="liste-utilisateurs.html">
+                <i class="fas fa-users"></i>
+                <span>Liste des Utilisateurs</span>
+            </a>
+        </nav>
+    </header>
+
+    <div class="form-container">
+        <h1>FNE En Attente</h1>
+        <ul id="fne-list">
+            <!-- Les FNE seront ajoutés dynamiquement ici -->
+        </ul>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>
