@@ -7,8 +7,7 @@ import jakarta.persistence.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "utilisateur_id") // Renommer la colonne "id" en "utilisateur_id"
-    private Long id;
+    private Long utilisateur_id;
 
     private String nom;
     private String prenom;
@@ -20,11 +19,11 @@ public class User {
 
     // Getters et Setters
     public Long getId() {
-        return id;
+        return utilisateur_id;
     }
 
     public void setId(Long id) {
-        this.id = id;
+        this.utilisateur_id = id;
     }
 
     public String getNom() {

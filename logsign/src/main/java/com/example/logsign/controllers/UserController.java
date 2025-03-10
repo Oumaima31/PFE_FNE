@@ -14,9 +14,10 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/auth")
 public class UserController {
     @GetMapping("/")
-public String home() {
-    return "index"; // Retourne la vue index.html
-} 
+    public String home() {
+        return "index"; // Retourne la vue index.html
+    }
+
     @Autowired
     private UserService userService;
 
@@ -36,30 +37,28 @@ public String home() {
 
         userService.registerUser(user);
         return "Inscription avec succès"; // Retourne un message de succès
-
-        
     }
-    // Route pour l'interface SML
+
     @GetMapping("/fneSML")
     public String fneSML() {
         return "fneSML"; // Retourne la vue FNE_SML.html
     }
 
-    // Route pour l'interface Admin
     @GetMapping("/fneAdmin")
     public String fneAdmin() {
         return "fneAdmin"; // Retourne la vue FNE_Admin.html
     }
+
     @PostMapping("/login")
     public String login(@RequestParam String matricule, @RequestParam String motDePasse, HttpSession session, Model model) {
         // Appeler le service pour vérifier les informations de connexion
         User user = userService.loginUser(matricule, motDePasse);
-    
+
         if (user != null) {
             System.out.println("Utilisateur trouvé : " + user.getMatricule() + ", Rôle : " + user.getRole());
             // Stocker l'utilisateur dans la session (optionnel, pour une utilisation ultérieure)
             session.setAttribute("user", user);
-    
+
             // Rediriger en fonction du rôle
             if (user.getRole().equals("SML")) {
                 System.out.println("Redirection vers /fneSML");
@@ -73,9 +72,8 @@ public String home() {
             // Ajouter un message d'erreur au modèle
             model.addAttribute("error", "Aucun utilisateur trouvé avec ce matricule ou ce mot de passe.");
         }
-    
+
         // Si l'utilisateur n'existe pas ou si les informations sont incorrectes
         return "index"; // Retourne la vue index.html avec le message d'erreur
     }
-
 }
