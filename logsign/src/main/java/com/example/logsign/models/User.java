@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "utilisateur_id") // Renommer la colonne "id" en "utilisateur_id"
     private Long id;
 
     private String nom;
