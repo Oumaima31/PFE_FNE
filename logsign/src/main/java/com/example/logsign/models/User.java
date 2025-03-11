@@ -9,7 +9,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // La stratégie IDENTITY permet à la base de données de
                                                      // générer automatiquement la valeur de l'ID (auto-incrémentation)
 
-    private int utilisateur_id;
+    private Long utilisateur_id;
     private String nom;
     private String prenom;
     private String email;
@@ -19,11 +19,11 @@ public class User {
     private String aeroport;
 
     // Getters et Setters
-    public int getId() {
+    public Long getId() {
         return utilisateur_id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.utilisateur_id = id;
     }
 

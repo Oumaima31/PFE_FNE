@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FNE En Attente</title>
+    <title>FNE En Attente | Tableau de bord</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/fne-table.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -25,36 +26,278 @@
             <span></span>
         </button>
         <nav class="navbar-container">
-            <a class="navbar-item" href="fneAdmin.html">
+            <a class="navbar-item" href="/auth/fneAdmin">
                 <i class="fas fa-home"></i>
                 <span>Accueil</span>
             </a>
-            <a class="navbar-item" href="fne-en-attente.html">
-                <i class="fas fa-list"></i>
-                <span>FNE En Attente</span>
-            </a>
-            <a class="navbar-item" href="historique.html">
+            
+            <a class="navbar-item" href="/auth/historique">
                 <i class="fas fa-history"></i>
                 <span>Historique des FNE</span>
             </a>
-            <a class="navbar-item" href="statistiques.html">
+            <a class="navbar-item" href="/auth/statistiques">
                 <i class="fas fa-chart-bar"></i>
                 <span>Statistiques</span>
             </a>
-            <a class="navbar-item" href="liste-utilisateurs.html">
+            <a class="navbar-item" href="/auth/utilisateurs">
                 <i class="fas fa-users"></i>
                 <span>Liste des Utilisateurs</span>
             </a>
         </nav>
     </header>
 
-    <div class="form-container">
-        <h1>FNE En Attente</h1>
-        <ul id="fne-list">
-            <!-- Les FNE seront ajoutés dynamiquement ici -->
-        </ul>
+    <main class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-clipboard-list"></i> FNE En Attente</h1>
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Rechercher...">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="filter-container">
+                    <select id="filterType">
+                        <option value="">Tous les types</option>
+                        <option value="Accident">Accident</option>
+                        <option value="Incident">Incident</option>
+                        <option value="Incident grave">Incident grave</option>
+                        <option value="Événement technique">Événement technique</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table id="fne-table" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>FNE ID</th>
+                            <th>Type</th>
+                            <th>REF GNE</th>
+                            <th>Date</th>
+                            <th>Lieu</th>
+                            <th>Aéronef</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Les données seront chargées dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                <button id="prevPage" disabled><i class="fas fa-chevron-left"></i> Précédent</button>
+                <span id="pageInfo">Page 1 sur 1</span>
+                <button id="nextPage" disabled>Suivant <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal pour afficher les détails d'une FNE -->
+    <div id="fneDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Détails de la FNE <span id="modalFneId"></span></h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="general">Informations générales</button>
+                    <button class="tab-btn" data-tab="aeronef">Aéronef</button>
+                    <button class="tab-btn" data-tab="victimes">Victimes</button>
+                    <button class="tab-btn" data-tab="meteo">Météo</button>
+                    <button class="tab-btn" data-tab="equipement">Équipement</button>
+                    <button class="tab-btn" data-tab="description">Description</button>
+                </div>
+                
+                <div id="general" class="tab-content active">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Type d'événement:</label>
+                            <span id="detail-type"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>REF GNE:</label>
+                            <span id="detail-ref"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Organisme concerné:</label>
+                            <span id="detail-organisme"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Date:</label>
+                            <span id="detail-date"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Heure UTC:</label>
+                            <span id="detail-heure"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Lieu de l'événement:</label>
+                            <span id="detail-lieu"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Moyen de détection:</label>
+                            <span id="detail-detection"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Impacts opérationnels:</label>
+                            <span id="detail-impacts"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="aeronef" class="tab-content">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Indicatif/Immatriculation:</label>
+                            <span id="detail-indicatif"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Code SSR:</label>
+                            <span id="detail-ssr"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Type d'appareil:</label>
+                            <span id="detail-appareil"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Règles de vol:</label>
+                            <span id="detail-regles"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Terrain de départ:</label>
+                            <span id="detail-depart"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Terrain d'arrivée:</label>
+                            <span id="detail-arrivee"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Cap:</label>
+                            <span id="detail-cap"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Altitude réelle:</label>
+                            <span id="detail-alt-reel"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Altitude autorisée:</label>
+                            <span id="detail-alt-auto"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Vitesse:</label>
+                            <span id="detail-vitesse"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Autres onglets de contenu -->
+                <div id="victimes" class="tab-content">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Passagers:</label>
+                            <span id="detail-passagers"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Personnel:</label>
+                            <span id="detail-personnel"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Équipage:</label>
+                            <span id="detail-equipage"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Autre:</label>
+                            <span id="detail-autre"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="meteo" class="tab-content">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Direction du vent:</label>
+                            <span id="detail-vent-dir"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Vitesse du vent:</label>
+                            <span id="detail-vent-vitesse"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Visibilité:</label>
+                            <span id="detail-visibilite"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Nébulosité:</label>
+                            <span id="detail-nebulosite"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Précipitation:</label>
+                            <span id="detail-precipitation"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Autres phénomènes:</label>
+                            <span id="detail-autres-phenomenes"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="equipement" class="tab-content">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Événement implique installation/équipement:</label>
+                            <span id="detail-implique-installation"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Type installation/équipement:</label>
+                            <span id="detail-type-installation"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Nom compagnie assistance/organisme/exploitant véhicule:</label>
+                            <span id="detail-compagnie"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Événement implique véhicule/matériel assistance sol:</label>
+                            <span id="detail-implique-vehicule"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Type matériel/véhicule:</label>
+                            <span id="detail-type-materiel"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="description" class="tab-content">
+                    <div class="detail-item full-width">
+                        <label>Description de l'événement:</label>
+                        <div id="detail-description" class="description-box"></div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Nom du rédacteur:</label>
+                        <span id="detail-redacteur"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
+                <button class="btn btn-warning" onclick="modifierFNE(currentFneId)">Modifier</button>
+                <button class="btn btn-danger" onclick="refuserFNE(currentFneId)">Refuser</button>
+                <button class="btn btn-primary" onclick="validerFNE(currentFneId)">Valider</button>
+            </div>
+        </div>
     </div>
 
     <script src="/js/script.js"></script>
+    <script src="/js/fne-table.js"></script>
+    <script>
+        // Mettre à jour la date et l'heure toutes les secondes
+        setInterval(updateDateTime, 1000);
+        // Afficher la date et l'heure immédiatement au chargement de la page
+        updateDateTime();
+        // Afficher Meteo
+        fetchMeteo();
+    </script>
 </body>
 </html>

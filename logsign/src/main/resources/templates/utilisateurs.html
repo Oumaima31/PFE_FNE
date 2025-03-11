@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Utilisateurs | Tableau de bord</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/fne-table.css">
+    <link rel="stylesheet" href="/css/utilisateurs.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <!-- Section météo à gauche -->
+        <div id="meteo">
+            <span id="meteo-icon"></span>
+            <span id="meteo-temp"></span>
+            <span id="meteo-description"></span>
+        </div>
+        <div id="real-time">
+            <span id="current-date"></span>
+            <span id="current-time"></span>
+        </div>
+        <!-- Bouton pour les écrans mobiles -->
+        <button class="navbar-toggle" onclick="toggleNavbar()">
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="navbar-container">
+            <a class="navbar-item" href="/auth/fneAdmin">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            
+            <a class="navbar-item" href="/auth/fneEnAttente">
+                <i class="fas fa-list-alt"></i>
+                <span>FNE En Attente</span>
+            </a>
+            
+            <a class="navbar-item" href="/auth/historique">
+                <i class="fas fa-history"></i>
+                <span>Historique des FNE</span>
+            </a>
+            <a class="navbar-item" href="/auth/statistiques">
+                <i class="fas fa-chart-bar"></i>
+                <span>Statistiques</span>
+            </a>
+            
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-users"></i> Liste des Utilisateurs</h1>
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Rechercher un utilisateur...">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="filter-container">
+                    <select id="filterRole">
+                        <option value="">Tous les rôles</option>
+                        <option value="admin">Admin</option>
+                        <option value="SML">SML</option>
+                       
+                    </select>
+                    <select id="filterAeroport">
+                        <option value=""disabled selected>Tous les aéroports</option>                        
+                            <option value="Tunis-Carthage (TUN)">AITC: Aéroport International Tunis Carthage </option>
+                            <option value="Djerba-Zarzis (DJE)">AIDZ: Aéroport International Djerba Zarzis </option>
+                            <option value="Monastir Habib Bourguiba (MIR)">AIMHB: Aéroport International Monastir Habib Bourguiba </option>
+                            <option value="Sfax-Thyna (SFA)">AIST: Aéroport International Sfax Thyna </option>
+                            <option value="Tozeur-Nefta (TOE)">AITN: Aéroport International Tozeur Nefta </option>
+                            <option value="Tabarka(TBJ)">AITA: Aéroport International Tabarka Aindraham</option>
+                            <option value="Gafsa (GAF)">AIGK: Aéroport International Gafsa Ksar</option>
+                            <option value="Gabès-Matmata (GAE)">AIGM: Aéroport International Gabès Matmata </option>
+                            <option value="Enfidha (NBE)">AIEH: Aéroport International Enfidha Hammamet </option>
+                    </select>
+                </div>
+                <button id="addUserBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Ajouter un utilisateur
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table id="users-table" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Email</th>
+                            <th>Matricule</th>
+                            <th>Aéroport</th>
+                            <th>Rôle</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Les données seront chargées dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                <button id="prevPage" disabled><i class="fas fa-chevron-left"></i> Précédent</button>
+                <span id="pageInfo">Page 1 sur 1</span>
+                <button id="nextPage" disabled>Suivant <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal pour ajouter/modifier un utilisateur -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Ajouter un utilisateur</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId" value="">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom">Nom <span class="required">*</span></label>
+                            <input type="text" id="nom" name="nom" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prenom">Prénom <span class="required">*</span></label>
+                            <input type="text" id="prenom" name="prenom" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="matricule">Matricule <span class="required">*</span></label>
+                            <input type="text" id="matricule" name="matricule" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="aeroport">Aéroport <span class="required">*</span></label>
+                            <select id="aeroport" name="aeroport" required>
+                                <option value="" disabled selected>Sélectionnez un aéroport</option>
+                            <option value="Tunis-Carthage (TUN)">AITC: Aéroport International Tunis Carthage </option>
+                            <option value="Djerba-Zarzis (DJE)">AIDZ: Aéroport International Djerba Zarzis </option>
+                            <option value="Monastir Habib Bourguiba (MIR)">AIMHB: Aéroport International Monastir Habib Bourguiba </option>
+                            <option value="Sfax-Thyna (SFA)">AIST: Aéroport International Sfax Thyna </option>
+                            <option value="Tozeur-Nefta (TOE)">AITN: Aéroport International Tozeur Nefta </option>
+                            <option value="Tabarka(TBJ)">AITA: Aéroport International Tabarka Aindraham</option>
+                            <option value="Gafsa (GAF)">AIGK: Aéroport International Gafsa Ksar</option>
+                            <option value="Gabès-Matmata (GAE)">AIGM: Aéroport International Gabès Matmata </option>
+                            <option value="Enfidha (NBE)">AIEH: Aéroport International Enfidha Hammamet </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="role">Rôle <span class="required">*</span></label>
+                            <select id="role" name="role" required>
+                                <option value="">Sélectionner un rôle</option>
+                                <option value="admin">Admin</option>
+                                <option value="SML">SML</option>
+                               
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row password-row">
+                        <div class="form-group">
+                            <label for="motDePasse" id="passwordLabel">Mot de passe <span class="required">*</span></label>
+                            <div class="password-input-container">
+                                <input type="password" id="motDePasse" name="motDePasse">
+                                <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmMotDePasse" id="confirmPasswordLabel">Confirmer le mot de passe <span class="required">*</span></label>
+                            <div class="password-input-container">
+                                <input type="password" id="confirmMotDePasse" name="confirmMotDePasse">
+                                <button type="button" class="toggle-password" onclick="toggleConfirmPasswordVisibility()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="strength-meter">
+                            <div class="strength-meter-fill" id="strengthMeter"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText">Force du mot de passe</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" id="saveUserBtn">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation pour la suppression -->
+    <div id="confirmDeleteModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h2>Confirmer la suppression</h2>
+                <button class="close-modal" onclick="closeConfirmModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <strong id="deleteUserName"></strong> ?</p>
+                <p class="warning-text"><i class="fas fa-exclamation-triangle"></i> Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">Annuler</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/script.js"></script>
+    <script src="/js/utilisateurs.js"></script>
+    <script>
+        // Mettre à jour la date et l'heure toutes les secondes
+        setInterval(updateDateTime, 1000);
+        // Afficher la date et l'heure immédiatement au chargement de la page
+        updateDateTime();
+        // Afficher Meteo
+        fetchMeteo();
+    </script>
+</body>
+</html>

@@ -5,7 +5,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.logsign.models.FNE;
 import com.example.logsign.models.User;
+import com.example.logsign.services.FNEService;
 import com.example.logsign.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -74,7 +76,22 @@ public class UserController {
     public String fneEnAttente() {
         return "fneEnAttente"; // Cela retournera le fichier fne-en-attente.html situé dans le dossier static
     }
-
+    @GetMapping("/historique")
+    public String historique() {
+        return "historique"; // Cela retournera le fichier historique.html situé dans le dossier static
+    }
+    @GetMapping("/statistiques")
+    public String statistiques() {
+        return "statistiques"; // Cela retournera le fichier statistiques.html situé dans le dossier static
+    }
+    @GetMapping("/utilisateurs")
+    public String utilisateurs() {
+        return "utilisateurs"; // Cela retournera le fichier utilisateurs.html situé dans le dossier static
+    }
+    @GetMapping("/historiqueSML")
+    public String historiqueSML() {
+        return "historiqueSML"; // Cela retournera le fichier historiqueSML.html situé dans le dossier static
+    }
     /**
      * Méthode pour afficher l'historique des FNE
      * @return le nom de la vue "historique.html"
@@ -122,4 +139,46 @@ public class UserController {
         // Retourne la vue de la page de connexion en cas d'erreur
         return "index"; 
     }
+    @Autowired
+private FNEService fneService;
+@PostMapping("/submitFNE")
+public String submitFNE(@ModelAttribute FNE fne, HttpSession session, Model model) {
+    // Récupérer l'utilisateur connecté depuis la session
+    User user = (User) session.getAttribute("user");
+
+    if (user != null) {
+        try {
+            // Handle all potential null values before saving
+            
+            // Numeric fields
+            if (fne.getAutre() == null) fne.setAutre(0);
+            if (fne.getPassagers() == null) fne.setPassagers(0);
+            if (fne.getPersonnel() == null) fne.setPersonnel(0);
+            if (fne.getEquipage() == null) fne.setEquipage(0);
+            if (fne.getVisibilite() == null) fne.setVisibilite(0);
+            
+            // Boolean fields
+            if (fne.getEvt_implique_installation_équipement() == null) 
+                fne.setEvt_implique_installation_équipement(false);
+            if (fne.getEvt_implique_véhicule_materiel_assistance_sol() == null) 
+                fne.setEvt_implique_véhicule_materiel_assistance_sol(false);
+            
+            // Other required fields
+            if (fne.getDestinataire_id() == null) fne.setDestinataire_id(1L);
+            if (fne.getStatut() == null) fne.setStatut("En attente");
+            
+            // Soumettre la FNE
+            fneService.submitFNE(fne, user);
+            model.addAttribute("message", "FNE soumise avec succès !");
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors de la soumission de la FNE : " + e.getMessage());
+        }
+    } else {
+        model.addAttribute("error", "Utilisateur non connecté.");
+    }
+
+    return "fneSML"; // Rediriger vers la page fneSML
+}
+
+
 }
