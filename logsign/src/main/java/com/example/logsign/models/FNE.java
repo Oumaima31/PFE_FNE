@@ -52,8 +52,8 @@ public class FNE {
     private String description_evt;
     private String nom_rédacteur;
     private String statut = "En attente";
-    private Long destinataire_id = 1L;
 
+    
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private User utilisateur;
@@ -356,13 +356,7 @@ public class FNE {
         this.statut = statut;
     }
 
-    public Long getDestinataire_id() {
-        return destinataire_id;
-    }
-
-    public void setDestinataire_id(Long destinataire_id) {
-        this.destinataire_id = destinataire_id != null ? destinataire_id : 1L;
-    }
+    
 
     public User getUtilisateur() {
         return utilisateur;
