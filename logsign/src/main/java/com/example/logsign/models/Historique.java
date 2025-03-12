@@ -9,7 +9,7 @@ public class Historique {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long historique_id;
-
+    
     @ManyToOne
     @JoinColumn(name = "fne_id", nullable = false)
     private FNE fne;

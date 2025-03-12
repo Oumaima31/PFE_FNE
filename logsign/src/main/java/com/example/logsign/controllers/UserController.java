@@ -157,7 +157,7 @@ private FNEService fneService;
                 fneService.submitFNE(fne, user);
                 model.addAttribute("message", "FNE soumise avec succès !");
 
-                return "redirect:/auth/fneSML?success=true";
+                return "fneSML";
             } catch (Exception e) {
                 model.addAttribute("error", "Erreur lors de la soumission de la FNE : " + e.getMessage());
                 e.printStackTrace();

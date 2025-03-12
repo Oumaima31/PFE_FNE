@@ -64,7 +64,7 @@ public class FNEService {
 
         // Enregistrer la FNE dans la base de données
         FNE savedFNE = fneRepository.save(fne);
-
+        
         // Créer une entrée dans l'historique
         Historique historique = new Historique();
         historique.setFne(savedFNE);
