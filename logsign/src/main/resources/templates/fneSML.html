@@ -26,28 +26,13 @@
             <span></span>    
         </button>
         <nav class="navbar-container">
-            <div class="navbar-item" onclick="showHistorique()">
-                <i class="fas fa-history"></i> 
+            <a class="navbar-item" href="/auth/historiqueSML">
+                <i class="fas fa-history"></i>
                 <span>Historique des FNE</span>
-            </div>
-            <div class="navbar-item" onclick="showGuide()">
-                <i class="fas fa-file-pdf"></i>
-                <span>Guide PDF</span>
-            </div>
+            </a>
         </nav>
     </header>
-    <div id="historique" class="navbar-content" style="display: none;">
-        <h3>Historique des FNE</h3>
-        <ul>
-            <li>FNE #001 - 01/01/2023</li>
-            <li>FNE #002 - 15/02/2023</li>
-            <li>FNE #003 - 30/03/2023</li>
-        </ul>
-    </div>
-    <div id="guide" class="navbar-content" style="display: none;">
-        <h3>Guide PDF</h3>
-        <iframe src="guide.pdf" width="100%" height="500px"></iframe>
-    </div>
+    
     
     <div id="notification" class="notification">
         <span th:if="${message}" th:text="${message}" style="color: green;"></span>
@@ -59,34 +44,28 @@
             <h1>Fiche de Notification d'Evénement (FNE)</h1>
         </div>
         <br><br><br>
-        <!-- Notification -->
-        <div id="notification" class="notification">
-            Notification : <span id="notificationText"></span>
-        </div>
+        
 
-        <div class="section">
-            <!-- 4 types d'événements -->
-            <label for="type_evt">Type d'événement :</label>
-            <select id="type_evt" name="type_evt" onchange="updateRefGneNumber()">
-                <option value="">Sélectionnez un type</option>
-                <option value="accident">Accident (ACCID)</option>
-                <option value="incident_grave">Incident grave (ING)</option>
-                <option value="incident">Incident (INC)</option>
-                <option value="evt_technique">Evenement Technique (EVT)</option>
-            </select>
         
-            <label for="REF_GNE">REF GNE :</label>
-            <select id="REF_GNE" name="REF_GNE">
-                <!-- Les options seront générées dynamiquement par JavaScript -->
-            </select>
-        
-            <div id="notification" class="notification" style="display: none;">
-                <span id="notificationText"></span>
-            </div>
-        </div>
         
         <!-- IMPORTANT: Form with method POST and action to submit FNE -->
         <form action="/auth/submitFNE" method="POST">
+            <div class="section">
+                <!-- 4 types d'événements -->
+                <label for="type_evt">Type d'événement :</label>
+                <select id="type_evt" name="type_evt" onchange="updateRefGneNumber()">
+                    <option value="">Sélectionnez un type</option>
+                    <option value="accident">Accident (ACCID)</option>
+                    <option value="incident_grave">Incident grave (ING)</option>
+                    <option value="incident">Incident (INC)</option>
+                    <option value="evt_technique">Evenement Technique (EVT)</option>
+                </select>
+        
+                <label for="REF_GNE">REF GNE :</label>
+                <select id="REF_GNE" name="REF_GNE">
+                    <!-- Les options seront générées dynamiquement par JavaScript -->
+                </select>
+            </div>
             <!-- Section 1: Informations générales -->
             <section>
                 <h2>1. Informations générales / معلومات عامة</h2>
