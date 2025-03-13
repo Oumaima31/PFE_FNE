@@ -1,53 +1,53 @@
 // Variables globales
-let currentPage = 1
-let totalPages = 1
-let usersData = []
-let filteredData = []
-let currentUserId = null
-let isEditMode = false
+let currentPage = 1;
+let totalPages = 1;
+let usersData = [];
+let filteredData = [];
+let currentUserId = null;
+let isEditMode = false;
 
 // Initialisation au chargement de la page
 document.addEventListener("DOMContentLoaded", () => {
-  // Charger les données depuis l'API
-  loadUsersData()
+    // Charger les données depuis l'API
+    loadUsersData();
 
-  // Configurer les écouteurs d'événements
-  setupEventListeners()
-})
+    // Configurer les écouteurs d'événements
+    setupEventListeners();
+});
 
 // Fonction pour charger les données des utilisateurs
 function loadUsersData() {
-  // Afficher un indicateur de chargement
-  const tableBody = document.querySelector("#users-table tbody")
-  tableBody.innerHTML = `
+    // Afficher un indicateur de chargement
+    const tableBody = document.querySelector("#users-table tbody");
+    tableBody.innerHTML = `
         <tr>
             <td colspan="8" style="text-align: center; padding: 30px;">
                 <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #76a4d6; margin-bottom: 10px;"></i>
                 <p>Chargement des utilisateurs...</p>
             </td>
         </tr>
-    `
+    `;
 
-  // Faire une requête AJAX pour récupérer les utilisateurs
-  fetch("/auth/api/users")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des utilisateurs")
-      }
-      return response.json()
-    })
-    .then((data) => {
-      usersData = data
-      filteredData = [...usersData]
-      totalPages = Math.ceil(filteredData.length / 10)
+    // Faire une requête AJAX pour récupérer les utilisateurs
+    fetch("/auth/api/users")
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Erreur lors de la récupération des utilisateurs");
+            }
+            return response.json();
+        })
+        .then((data) => {
+            usersData = data;
+            filteredData = [...usersData];
+            totalPages = Math.ceil(filteredData.length / 10);
 
-      // Afficher les données
-      renderTable()
-      updatePagination()
-    })
-    .catch((error) => {
-      console.error("Erreur:", error)
-      tableBody.innerHTML = `
+            // Afficher les données
+            renderTable();
+            updatePagination();
+        })
+        .catch((error) => {
+            console.error("Erreur:", error);
+            tableBody.innerHTML = `
                 <tr>
                     <td colspan="8" style="text-align: center; padding: 30px;">
                         <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #ef4444; margin-bottom: 10px;"></i>
@@ -55,158 +55,139 @@ function loadUsersData() {
                         <button onclick="loadUsersData()" class="btn btn-primary">Réessayer</button>
                     </td>
                 </tr>
-            `
-    })
+            `;
+        });
 }
 
 // Fonction pour configurer les écouteurs d'événements
 function setupEventListeners() {
-  // Recherche
-  document.getElementById("searchBtn").addEventListener("click", () => {
-    const searchTerm = document.getElementById("searchInput").value.toLowerCase()
-    filterData(searchTerm)
-  })
+    // Recherche
+    document.getElementById("searchBtn").addEventListener("click", () => {
+        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+        filterData(searchTerm);
+    });
 
-  document.getElementById("searchInput").addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-      const searchTerm = e.target.value.toLowerCase()
-      filterData(searchTerm)
-    }
-  })
+    document.getElementById("searchInput").addEventListener("keyup", (e) => {
+        if (e.key === "Enter") {
+            const searchTerm = e.target.value.toLowerCase();
+            filterData(searchTerm);
+        }
+    });
 
-  // Filtres
-  document.getElementById("filterRole").addEventListener("change", applyFilters)
-  document.getElementById("filterAeroport").addEventListener("change", applyFilters)
+    // Pagination
+    document.getElementById("prevPage").addEventListener("click", () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+            updatePagination();
+        }
+    });
 
-  // Pagination
-  document.getElementById("prevPage").addEventListener("click", () => {
-    if (currentPage > 1) {
-      currentPage--
-      renderTable()
-      updatePagination()
-    }
-  })
+    document.getElementById("nextPage").addEventListener("click", () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+            updatePagination();
+        }
+    });
 
-  document.getElementById("nextPage").addEventListener("click", () => {
-    if (currentPage < totalPages) {
-      currentPage++
-      renderTable()
-      updatePagination()
-    }
-  })
+    // Bouton d'ajout d'utilisateur
+    document.getElementById("addUserBtn").addEventListener("click", () => {
+        openAddUserModal();
+    });
 
-  // Bouton d'ajout d'utilisateur
-  document.getElementById("addUserBtn").addEventListener("click", () => {
-    openAddUserModal()
-  })
+    // Bouton de sauvegarde dans le modal
+    document.getElementById("saveUserBtn").addEventListener("click", saveUser);
 
-  // Bouton de sauvegarde dans le modal
-  document.getElementById("saveUserBtn").addEventListener("click", saveUser)
+    // Vérification de la force du mot de passe
+    document.getElementById("motDePasse").addEventListener("input", checkPasswordStrength);
 
-  // Vérification de la force du mot de passe
-  document.getElementById("motDePasse").addEventListener("input", checkPasswordStrength)
-
-  // Bouton de confirmation de suppression
-  document.getElementById("confirmDeleteBtn").addEventListener("click", deleteUser)
+    // Bouton de confirmation de suppression
+    document.getElementById("confirmDeleteBtn").addEventListener("click", deleteUser);
 }
 
 // Fonction pour filtrer les données
 function filterData(searchTerm) {
-  if (!searchTerm) {
-    filteredData = [...usersData]
-  } else {
-    filteredData = usersData.filter((user) => {
-      return (
-        user.id.toString().includes(searchTerm) ||
-        user.nom.toLowerCase().includes(searchTerm) ||
-        user.prenom.toLowerCase().includes(searchTerm) ||
-        user.email.toLowerCase().includes(searchTerm) ||
-        user.matricule.toLowerCase().includes(searchTerm) ||
-        user.aeroport.toLowerCase().includes(searchTerm) ||
-        user.role.toLowerCase().includes(searchTerm)
-      )
-    })
-  }
+    if (!searchTerm) {
+        filteredData = [...usersData];
+    } else {
+        filteredData = usersData.filter((user) => {
+            return (
+                user.id.toString().includes(searchTerm) ||
+                user.nom.toLowerCase().includes(searchTerm) ||
+                user.prenom.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm) ||
+                user.matricule.toLowerCase().includes(searchTerm) ||
+                user.aeroport.toLowerCase().includes(searchTerm) ||
+                user.role.toLowerCase().includes(searchTerm)
+            );
+        });
+    }
 
-  applyFilters()
-}
+    currentPage = 1;
+    totalPages = Math.ceil(filteredData.length / 10);
 
-// Fonction pour appliquer les filtres
-function applyFilters() {
-  const roleFilter = document.getElementById("filterRole").value
-  const aeroportFilter = document.getElementById("filterAeroport").value
-
-  let tempData = [...filteredData]
-
-  if (roleFilter) {
-    tempData = tempData.filter((user) => user.role === roleFilter)
-  }
-
-  if (aeroportFilter) {
-    tempData = tempData.filter((user) => user.aeroport === aeroportFilter)
-  }
-
-  filteredData = tempData
-  currentPage = 1
-  totalPages = Math.ceil(filteredData.length / 10)
-
-  renderTable()
-  updatePagination()
+    renderTable();
+    updatePagination();
 }
 
 // Fonction pour afficher les données dans le tableau
 function renderTable() {
-  const tableBody = document.querySelector("#users-table tbody")
-  tableBody.innerHTML = ""
+    const tableBody = document.querySelector("#users-table tbody");
+    tableBody.innerHTML = "";
 
-  const startIndex = (currentPage - 1) * 10
-  const endIndex = Math.min(startIndex + 10, filteredData.length)
+    const startIndex = (currentPage - 1) * 10;
+    const endIndex = Math.min(startIndex + 10, filteredData.length);
 
-  if (filteredData.length === 0) {
-    tableBody.innerHTML = `
+    if (filteredData.length === 0) {
+        tableBody.innerHTML = `
             <tr>
                 <td colspan="8" style="text-align: center; padding: 30px;">
                     <i class="fas fa-search" style="font-size: 2rem; color: #ccc; margin-bottom: 10px;"></i>
                     <p>Aucun utilisateur trouvé. Veuillez modifier vos critères de recherche.</p>
                 </td>
             </tr>
-        `
-    return
-  }
-
-  for (let i = startIndex; i < endIndex; i++) {
-    const user = filteredData[i]
-
-    // Déterminer la classe du badge en fonction du rôle
-    let roleClass = ""
-    switch (user.role) {
-      case "admin":
-        roleClass = "role-admin"
-        break
-      case "SML":
-        roleClass = "role-utilisateur"
-        break
-      default:
-        roleClass = "role-validateur"
-        break
+        `;
+        return;
     }
 
-    const row = document.createElement("tr")
-    row.innerHTML = `
+    for (let i = startIndex; i < endIndex; i++) {
+        const user = filteredData[i];
+
+        // Déterminer la classe du badge en fonction du rôle
+        let roleClass = "";
+        let roleDisplay = "";
+        switch (user.role.toLowerCase()) {
+            case "admin":
+                roleClass = "role-admin";
+                roleDisplay = "Admin";
+                break;
+            case "sml":
+                roleClass = "role-utilisateur";
+                roleDisplay = "SML";
+                break;
+            default:
+                roleClass = "role-validateur";
+                roleDisplay = user.role;
+                break;
+        }
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
             <td>${user.id}</td>
             <td>${user.nom}</td>
             <td>${user.prenom}</td>
             <td>${user.email}</td>
             <td>${user.matricule}</td>
             <td>${user.aeroport}</td>
-            <td><span class="role-badge ${roleClass}">${user.role}</span></td>
+            <td><span class="role-badge ${roleClass}">${roleDisplay}</span></td>
             <td>
                 <div class="action-buttons">
                     <button class="btn btn-warning" onclick="editUser(${user.id})">
                         <i class="fas fa-edit"></i> Modifier
                     </button>
                     <button class="btn btn-danger" onclick="confirmDeleteUser(${user.id})">
-                        <i class="fas fa-trash"></i> Supprimer
+                        <i class="fas fa-trash"></i> SupprimerSupprimer
                     </button>
                 </div>
             </td>

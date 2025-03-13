@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des Utilisateurs | Tableau de bord</title>
+    <title>Gestion des Utilisateurs | Tableau de bord Admin</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/fne-table.css">
     <link rel="stylesheet" href="/css/utilisateurs.css">
@@ -31,12 +31,10 @@
                 <i class="fas fa-home"></i>
                 <span>Accueil</span>
             </a>
-            
             <a class="navbar-item" href="/auth/fneEnAttente">
                 <i class="fas fa-list-alt"></i>
                 <span>FNE En Attente</span>
             </a>
-            
             <a class="navbar-item" href="/auth/historique">
                 <i class="fas fa-history"></i>
                 <span>Historique des FNE</span>
@@ -45,37 +43,20 @@
                 <i class="fas fa-chart-bar"></i>
                 <span>Statistiques</span>
             </a>
-            
+            <a class="navbar-item" href="/auth/adminutilisateurs">
+                <i class="fas fa-users"></i>
+                <span>Gestion des Utilisateurs</span>
+            </a>
         </nav>
     </header>
 
     <main class="container">
         <div class="page-header">
-            <h1><i class="fas fa-users"></i> Liste des Utilisateurs</h1>
+            <h1><i class="fas fa-users"></i> Gestion des Utilisateurs</h1>
             <div class="header-actions">
                 <div class="search-container">
                     <input type="text" id="searchInput" placeholder="Rechercher un utilisateur...">
                     <button id="searchBtn"><i class="fas fa-search"></i></button>
-                </div>
-                <div class="filter-container">
-                    <select id="filterRole">
-                        <option value="">Tous les rôles</option>
-                        <option value="admin">Admin</option>
-                        <option value="SML">SML</option>
-                       
-                    </select>
-                    <select id="filterAeroport">
-                        <option value=""disabled selected>Tous les aéroports</option>                        
-                            <option value="Tunis-Carthage (TUN)">AITC: Aéroport International Tunis Carthage </option>
-                            <option value="Djerba-Zarzis (DJE)">AIDZ: Aéroport International Djerba Zarzis </option>
-                            <option value="Monastir Habib Bourguiba (MIR)">AIMHB: Aéroport International Monastir Habib Bourguiba </option>
-                            <option value="Sfax-Thyna (SFA)">AIST: Aéroport International Sfax Thyna </option>
-                            <option value="Tozeur-Nefta (TOE)">AITN: Aéroport International Tozeur Nefta </option>
-                            <option value="Tabarka(TBJ)">AITA: Aéroport International Tabarka Aindraham</option>
-                            <option value="Gafsa (GAF)">AIGK: Aéroport International Gafsa Ksar</option>
-                            <option value="Gabès-Matmata (GAE)">AIGM: Aéroport International Gabès Matmata </option>
-                            <option value="Enfidha (NBE)">AIEH: Aéroport International Enfidha Hammamet </option>
-                    </select>
                 </div>
                 <button id="addUserBtn" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Ajouter un utilisateur
@@ -150,15 +131,15 @@
                             <label for="aeroport">Aéroport <span class="required">*</span></label>
                             <select id="aeroport" name="aeroport" required>
                                 <option value="" disabled selected>Sélectionnez un aéroport</option>
-                            <option value="Tunis-Carthage (TUN)">AITC: Aéroport International Tunis Carthage </option>
-                            <option value="Djerba-Zarzis (DJE)">AIDZ: Aéroport International Djerba Zarzis </option>
-                            <option value="Monastir Habib Bourguiba (MIR)">AIMHB: Aéroport International Monastir Habib Bourguiba </option>
-                            <option value="Sfax-Thyna (SFA)">AIST: Aéroport International Sfax Thyna </option>
-                            <option value="Tozeur-Nefta (TOE)">AITN: Aéroport International Tozeur Nefta </option>
-                            <option value="Tabarka(TBJ)">AITA: Aéroport International Tabarka Aindraham</option>
-                            <option value="Gafsa (GAF)">AIGK: Aéroport International Gafsa Ksar</option>
-                            <option value="Gabès-Matmata (GAE)">AIGM: Aéroport International Gabès Matmata </option>
-                            <option value="Enfidha (NBE)">AIEH: Aéroport International Enfidha Hammamet </option>
+                                <option value="Tunis-Carthage (TUN)">AITC: Aéroport International Tunis Carthage</option>
+                                <option value="Djerba-Zarzis (DJE)">AIDZ: Aéroport International Djerba Zarzis</option>
+                                <option value="Monastir Habib Bourguiba (MIR)">AIMHB: Aéroport International Monastir Habib Bourguiba</option>
+                                <option value="Sfax-Thyna (SFA)">AIST: Aéroport International Sfax Thyna</option>
+                                <option value="Tozeur-Nefta (TOE)">AITN: Aéroport International Tozeur Nefta</option>
+                                <option value="Tabarka(TBJ)">AITA: Aéroport International Tabarka Aindraham</option>
+                                <option value="Gafsa (GAF)">AIGK: Aéroport International Gafsa Ksar</option>
+                                <option value="Gabès-Matmata (GAE)">AIGM: Aéroport International Gabès Matmata</option>
+                                <option value="Enfidha (NBE)">AIEH: Aéroport International Enfidha Hammamet</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -167,7 +148,6 @@
                                 <option value="">Sélectionner un rôle</option>
                                 <option value="admin">Admin</option>
                                 <option value="SML">SML</option>
-                               
                             </select>
                         </div>
                     </div>
@@ -227,7 +207,7 @@
     </div>
 
     <script src="/js/script.js"></script>
-    <script src="/js/utilisateurs.js"></script>
+    <script src="/js/adminutilisateurs.js"></script>
     <script>
         // Mettre à jour la date et l'heure toutes les secondes
         setInterval(updateDateTime, 1000);

@@ -94,14 +94,11 @@ public class FNEController {
                     return "fneAdmin";
                 }
         
-                // Afficher les valeurs pour le débogage
-                System.out.println("Type d'événement: " + fne.getType_evt());
-                System.out.println("REF GNE: " + fne.getREF_GNE());
-                System.out.println("Statut: " + fne.getStatut());
-        
+                
                 // Soumettre la FNE
                 fneService.submitFNE(fne, user);
-            
+                System.out.println("FNE soumise avec succès ! ");
+
                 // Ajouter le message directement au modèle
                 model.addAttribute("message", "FNE soumise avec succès !");
             
