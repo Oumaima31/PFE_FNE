@@ -1,20 +1,18 @@
 package com.example.logsign.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.logsign.models.User;
-import com.example.logsign.repositories.UserRepository;
 import com.example.logsign.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
-
-import java.util.Optional;
-
+import java.util.Map;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/auth") // Définit la route de base pour ce contrôleur
@@ -27,10 +25,17 @@ public class UserController {
     public String home() {
         return "index"; // Retourne la vue de la page d'accueil
     }
+
+    @GetMapping("/utilisateurs")
+    public String utilisateurs() {
+        return "utilisateurs";
+    }
+    
     @GetMapping("/adminutilisateurs")
     public String adminutilisateurs() {
         return "adminutilisateurs";
     }
+    
     @PostMapping("/login")
     public String login(@RequestParam String matricule, @RequestParam String motDePasse, 
                         HttpSession session, Model model) {
@@ -80,63 +85,67 @@ public class UserController {
         return "Inscription avec succès"; // Retourne un message de succès
     }
     
-@Autowired
-private UserRepository userRepository;
-
-// Récupérer tous les utilisateurs
-public List<User> getAllUsers() {
-    return userRepository.findAll();
-}
-
-// Récupérer un utilisateur par ID
-public User getUserById(Long id) {
-    return userRepository.findById(id).orElse(null);
-}
-
-// Authentifier un utilisateur
-public User loginUser(String matricule, String motDePasse) {
-    return userRepository.findByMatriculeAndMotDePasse(matricule, motDePasse);
-}
-
-// Enregistrer un nouvel utilisateur
-public User registerUser(User user) {
-    // Vérifier si le matricule existe déjà
-    if (userRepository.existsByMatricule(user.getMatricule())) {
-        throw new RuntimeException("Ce matricule est déjà utilisé");
+    // API pour récupérer tous les utilisateurs
+    @GetMapping("/api/users")
+    @ResponseBody
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
-    
-    // Vérifier si l'email existe déjà
-    if (userRepository.existsByEmail(user.getEmail())) {
-        throw new RuntimeException("Cet email est déjà utilisé");
+
+    // API pour récupérer un utilisateur par ID
+    @GetMapping("/api/users/{id}")
+    @ResponseBody
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.notFound().build();
     }
-    
-    return userRepository.save(user);
+
+    // API pour créer un nouvel utilisateur
+    @PostMapping("/api/users")
+    @ResponseBody
+    public ResponseEntity<?> createUser(@RequestBody User user) {
+        try {
+            User newUser = userService.registerUser(user);
+            return ResponseEntity.ok(newUser);
+        } catch (RuntimeException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // API pour mettre à jour un utilisateur
+    @PutMapping("/api/users/{id}")
+    @ResponseBody
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
+        try {
+            user.setId(id);
+            User updatedUser = userService.updateUser(user);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // API pour supprimer un utilisateur
+    @DeleteMapping("/api/users/{id}")
+    @ResponseBody
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("deleted", true);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }
 
-// Mettre à jour un utilisateur
-public User updateUser(User user) {
-    User existingUser = userRepository.findById(user.getId())
-        .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-        
-    // Vérifier si l'email est déjà utilisé par un autre utilisateur
-    Optional<User> userWithEmail = userRepository.findByEmail(user.getEmail());
-    if (userWithEmail.isPresent() && !userWithEmail.get().getId().equals(user.getId())) {
-        throw new RuntimeException("Cet email est déjà utilisé par un autre utilisateur");
-    }
-    
-    // Si le mot de passe n'est pas modifié, conserver l'ancien
-    if (user.getMotDePasse() == null || user.getMotDePasse().isEmpty()) {
-        user.setMotDePasse(existingUser.getMotDePasse());
-    }
-    
-    return userRepository.save(user);
-}
-
-// Supprimer un utilisateur
-public void deleteUser(Long id) {
-    if (!userRepository.existsById(id)) {
-        throw new RuntimeException("Utilisateur non trouvé");
-    }
-    userRepository.deleteById(id);
-}
-}

@@ -3,11 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historique des FNE | Tableau de bord</title>
+    <title>Historique des FNE | Tableau de bord Admin</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/fne-table.css">
-    <link rel="stylesheet" href="/css/historique.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .action-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .action-creation {
+            background-color: #e3f2fd;
+            color: #3b82f6;
+        }
+        
+        .action-modification {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        
+        .action-validation {
+            background-color: #e8f5e9;
+            color: #10b981;
+        }
+        
+        .action-refus {
+            background-color: #fee2e2;
+            color: #ef4444;
+        }
+        
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-container select,
+        .filter-container input {
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+        
+        .filter-container button {
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .filter-container button:hover {
+            background-color: #2563eb;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-container {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="navbar">
@@ -31,20 +93,17 @@
                 <i class="fas fa-home"></i>
                 <span>Accueil</span>
             </a>
-            
             <a class="navbar-item" href="/auth/fneEnAttente">
                 <i class="fas fa-list-alt"></i>
                 <span>FNE En Attente</span>
             </a>
-            
-            
             <a class="navbar-item" href="/auth/statistiques">
                 <i class="fas fa-chart-bar"></i>
                 <span>Statistiques</span>
             </a>
-            <a class="navbar-item" href="/auth/utilisateur">
+            <a class="navbar-item" href="/auth/adminutilisateurs">
                 <i class="fas fa-users"></i>
-                <span>Liste des Utilisateurs</span>
+                <span>Utilisateurs</span>
             </a>
         </nav>
     </header>
@@ -57,50 +116,35 @@
                     <input type="text" id="searchInput" placeholder="Rechercher...">
                     <button id="searchBtn"><i class="fas fa-search"></i></button>
                 </div>
-                <div class="filter-container">
-                    <select id="filterAction">
-                        <option value="">Toutes les actions</option>
-                        <option value="Création">Création</option>
-                        <option value="Modification">Modification</option>
-                        <option value="Validation">Validation</option>
-                        <option value="Refus">Refus</option>
-                    </select>
-                    <div class="date-time-filter">
-                        <div class="filter-group">
-                            <label for="dateDebut">Date début:</label>
-                            <input type="date" id="dateDebut">
-                        </div>
-                        <div class="filter-group">
-                            <label for="heureDebut">Heure début:</label>
-                            <input type="time" id="heureDebut">
-                        </div>
-                    </div>
-                    <div class="date-time-filter">
-                        <div class="filter-group">
-                            <label for="dateFin">Date fin:</label>
-                            <input type="date" id="dateFin">
-                        </div>
-                        <div class="filter-group">
-                            <label for="heureFin">Heure fin:</label>
-                            <input type="time" id="heureFin">
-                        </div>
-                    </div>
-                    <button id="filterBtn" class="btn btn-primary">Filtrer</button>
-                </div>
             </div>
         </div>
 
         <div class="card">
+            <div class="filter-container">
+                <select id="filterAction">
+                    <option value="">Toutes les actions</option>
+                    <option value="Création">Création</option>
+                    <option value="Modification">Modification</option>
+                    <option value="Validation">Validation</option>
+                    <option value="Refus">Refus</option>
+                </select>
+                <input type="date" id="dateDebut" placeholder="Date début">
+                <input type="date" id="dateFin" placeholder="Date fin">
+                <button id="filterBtn"><i class="fas fa-filter"></i> Filtrer</button>
+            </div>
+
             <div class="table-responsive">
                 <table id="historique-table" class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>FNE ID</th>
+                            <th>Type</th>
+                            <th>REF GNE</th>
                             <th>Action</th>
-                            <th>Date et heure</th>
+                            <th>Date</th>
                             <th>Utilisateur</th>
-                            <th>Détails</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -117,73 +161,57 @@
         </div>
     </main>
 
-    <!-- Modal pour afficher les détails d'une entrée d'historique -->
+    <!-- Modal pour afficher les détails d'un historique -->
     <div id="historiqueDetailsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Détails de l'action <span id="modalHistoriqueId"></span></h2>
+                <h2>Détails de l'historique #<span id="modalHistoriqueId"></span></h2>
                 <button class="close-modal" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>ID de l'historique:</label>
-                        <span id="detail-historique-id"></span>
-                    </div>
-                    <div class="detail-item">
-                        <label>ID de la FNE:</label>
-                        <span id="detail-fne-id"></span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Action effectuée:</label>
-                        <span id="detail-action" class="action-badge"></span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Date et heure:</label>
-                        <span id="detail-date"></span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Utilisateur:</label>
-                        <span id="detail-utilisateur"></span>
-                    </div>
-                </div>
-                
                 <div class="detail-section">
-                    <h3>Informations sur la FNE</h3>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <label>Type d'événement:</label>
-                            <span id="detail-fne-type"></span>
-                        </div>
-                        <div class="detail-item">
-                            <label>REF GNE:</label>
-                            <span id="detail-fne-ref"></span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Date de l'événement:</label>
-                            <span id="detail-fne-date"></span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Lieu:</label>
-                            <span id="detail-fne-lieu"></span>
-                        </div>
-                        <div class="detail-item">
-                            <label>Statut actuel:</label>
-                            <span id="detail-fne-statut" class="status-badge"></span>
+                    <h3>Informations générales</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">ID Historique:</div>
+                        <div class="detail-value" id="detail-historique-id"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">ID FNE:</div>
+                        <div class="detail-value" id="detail-fne-id"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Type d'événement:</div>
+                        <div class="detail-value" id="detail-fne-type"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">REF GNE:</div>
+                        <div class="detail-value" id="detail-fne-ref"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Action:</div>
+                        <div class="detail-value">
+                            <span class="action-badge" id="detail-action"></span>
                         </div>
                     </div>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Modifications apportées</h3>
-                    <div class="changes-container" id="detail-changes">
-                        <!-- Les modifications seront affichées ici -->
+                    <div class="detail-row">
+                        <div class="detail-label">Date:</div>
+                        <div class="detail-value" id="detail-date"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Utilisateur:</div>
+                        <div class="detail-value" id="detail-utilisateur"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Statut:</div>
+                        <div class="detail-value" id="detail-statut"></div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
-                <button class="btn btn-primary" onclick="voirFNE(currentFneId)">Voir la FNE</button>
+                <button class="btn btn-primary" onclick="viewFNE(document.getElementById('detail-fne-id').textContent)">
+                    <i class="fas fa-file-alt"></i> Voir la FNE
+                </button>
             </div>
         </div>
     </div>
@@ -200,3 +228,4 @@
     </script>
 </body>
 </html>
+

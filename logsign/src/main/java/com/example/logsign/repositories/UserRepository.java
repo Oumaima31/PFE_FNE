@@ -18,7 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
         @Param("motDePasse") String motDePasse
     );
     
-    // Ajout de méthodes personnalisées si nécessaire
     boolean existsByMatricule(String matricule);
     boolean existsByEmail(String email);
 }

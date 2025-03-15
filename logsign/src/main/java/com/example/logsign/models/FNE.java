@@ -11,7 +11,9 @@ public class FNE {
     private Long fne_id;
 
     private String type_evt;
+    
     private String REF_GNE;
+
     private String Organisme_concerné;
     private LocalDate Date;
     private LocalTime heure_UTC;

@@ -9,7 +9,6 @@ import com.example.logsign.repositories.HistoriqueRepository;
 
 import java.util.List;
 import java.util.Optional;
-
 @Service
 @Transactional
 public class HistoriqueService {
@@ -19,7 +18,7 @@ public class HistoriqueService {
     
     // Récupérer tout l'historique
     public List<Historique> getAllHistorique() {
-        return historiqueRepository.findAll();
+        return historiqueRepository.findAllOrderByDateDesc();
     }
     
     // Récupérer un historique par son ID
@@ -28,10 +27,23 @@ public class HistoriqueService {
         return historiqueOptional.orElse(null);
     }
     
+    // Récupérer l'historique par utilisateur
+    public List<Historique> getHistoriqueByUserId(Long userId) {
+        return historiqueRepository.findByUtilisateurId(userId);
+    }
+    
+    // Récupérer l'historique par FNE
+    public List<Historique> getHistoriqueByFneId(Long fneId) {
+        return historiqueRepository.findByFneId(fneId);
+    }
+    
+    // Récupérer l'historique par action
+    public List<Historique> getHistoriqueByAction(String action) {
+        return historiqueRepository.findByActionOrderByDateActionDesc(action);  // Correction ici
+    }
     
     // Enregistrer un historique
     public Historique saveHistorique(Historique historique) {
         return historiqueRepository.save(historique);
     }
 }
-

@@ -15,7 +15,8 @@ public class Historique {
     private FNE fne;
 
     private String action; // Par exemple : "Soumission", "Modification", "Validation"
-    private LocalDateTime date_action;
+    @Column(name = "date_action")
+    private LocalDateTime dateAction;
 
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
@@ -46,12 +47,12 @@ public class Historique {
         this.action = action;
     }
 
-    public LocalDateTime getDate_action() {
-        return date_action;
+    public LocalDateTime getdateAction() {
+        return dateAction;
     }
 
-    public void setDate_action(LocalDateTime date_action) {
-        this.date_action = date_action;
+    public void setdateAction(LocalDateTime date_action) {
+        this.dateAction = date_action;
     }
 
     public User getUtilisateur() {

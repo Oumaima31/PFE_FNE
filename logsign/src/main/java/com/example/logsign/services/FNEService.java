@@ -10,10 +10,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class FNEService {
 
     @Autowired
@@ -22,15 +26,38 @@ public class FNEService {
     @Autowired
     private HistoriqueRepository historiqueRepository;
 
-    
     @PersistenceContext
     private EntityManager entityManager;
+
+    // Récupérer toutes les FNE
+    public List<FNE> getAllFNE() {
+        return fneRepository.findAllOrderByDateDesc();
+    }
+    
+    // Récupérer une FNE par son ID
+    public FNE getFNEById(Long id) {
+        Optional<FNE> fneOptional = fneRepository.findById(id);
+        return fneOptional.orElse(null);
+    }
+    
+    // Récupérer les FNE par statut
+    public List<FNE> getFNEByStatut(String statut) {
+        return fneRepository.findByStatut(statut);
+    }
+    
+    // Récupérer les FNE par utilisateur
+    public List<FNE> getFNEByUserId(Long userId) {
+        return fneRepository.findByUtilisateurId(userId);
+    }
+    
+    // Récupérer les FNE par type d'événement
+    public List<FNE> getFNEByType(String typeEvt) {
+        return fneRepository.findByTypeEvt(typeEvt);
+    }
 
     public FNE submitFNE(FNE fne, User user) {
         // Associer l'utilisateur connecté à la FNE
         fne.setUtilisateur(user);
-
-        
         
         // Set default values for numeric fields if they are null
         if (fne.getAutre() == null) {
@@ -69,10 +96,73 @@ public class FNEService {
         Historique historique = new Historique();
         historique.setFne(savedFNE);
         historique.setAction("Création");
-        historique.setDate_action(LocalDateTime.now());
+        historique.setdateAction(LocalDateTime.now());
         historique.setUtilisateur(user);
         historiqueRepository.save(historique);
 
         return savedFNE;
     }
+    
+    // Valider une FNE
+    public FNE validerFNE(Long id, User user) {
+        Optional<FNE> fneOptional = fneRepository.findById(id);
+        if (!fneOptional.isPresent()) {
+            throw new RuntimeException("FNE non trouvée");
+        }
+        
+        FNE fne = fneOptional.get();
+        
+        // Vérifier que la FNE est en attente
+        if (!"En attente".equals(fne.getStatut())) {
+            throw new RuntimeException("Cette FNE n'est pas en attente de validation");
+        }
+        
+        // Mettre à jour le statut
+        fne.setStatut("Validé");
+        
+        // Créer une entrée dans l'historique
+        Historique historique = new Historique();
+        historique.setFne(fne);
+        historique.setUtilisateur(user);
+        historique.setAction("Validation");
+        historique.setdateAction(LocalDateTime.now());
+        
+        // Enregistrer l'historique
+        historiqueRepository.save(historique);
+        
+        // Enregistrer la FNE mise à jour
+        return fneRepository.save(fne);
+    }
+    
+    // Refuser une FNE
+    public FNE refuserFNE(Long id, User user) {
+        Optional<FNE> fneOptional = fneRepository.findById(id);
+        if (!fneOptional.isPresent()) {
+            throw new RuntimeException("FNE non trouvée");
+        }
+        
+        FNE fne = fneOptional.get();
+        
+        // Vérifier que la FNE est en attente
+        if (!"En attente".equals(fne.getStatut())) {
+            throw new RuntimeException("Cette FNE n'est pas en attente de validation");
+        }
+        
+        // Mettre à jour le statut
+        fne.setStatut("Refusé");
+        
+        // Créer une entrée dans l'historique
+        Historique historique = new Historique();
+        historique.setFne(fne);
+        historique.setUtilisateur(user);
+        historique.setAction("Refus");
+        historique.setdateAction(LocalDateTime.now());
+        
+        // Enregistrer l'historique
+        historiqueRepository.save(historique);
+        
+        // Enregistrer la FNE mise à jour
+        return fneRepository.save(fne);
+    }
 }
+
