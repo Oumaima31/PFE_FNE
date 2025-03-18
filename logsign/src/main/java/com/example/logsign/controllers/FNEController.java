@@ -36,7 +36,14 @@ public class FNEController {
     }
     
     @GetMapping("/fneSML")
-    public String fneSML() {
+    public String fneSML(@RequestParam(required = false) Long id, Model model) {
+        if (id != null) {
+            // Si un ID est fourni, récupérer la FNE pour l'affichage
+            FNE fne = fneService.getFNEById(id);
+            if (fne != null) {
+                model.addAttribute("fne", fne);
+            }
+        }
         return "fneSML";
     }
     
@@ -45,11 +52,35 @@ public class FNEController {
         return "fneEnAttente";
     }
     
+    // API pour récupérer l'utilisateur connecté
+    @GetMapping("/api/current-user")
+    @ResponseBody
+    public ResponseEntity<User> getCurrentUser(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.notFound().build();
+    }
+    
     // API pour récupérer toutes les FNE
     @GetMapping("/api/fne")
     @ResponseBody
     public List<FNE> getAllFNE() {
         return fneService.getAllFNE();
+    }
+    
+    // API pour récupérer les FNE d'un utilisateur
+    @GetMapping("/api/fne/user")
+    @ResponseBody
+    public ResponseEntity<List<FNE>> getUserFNE(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        List<FNE> fnes = fneService.getFNEByUserId(user.getId());
+        return ResponseEntity.ok(fnes);
     }
     
     // API pour récupérer toutes les FNE en attente

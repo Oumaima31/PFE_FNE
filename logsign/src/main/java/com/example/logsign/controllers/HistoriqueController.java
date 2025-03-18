@@ -41,43 +41,104 @@ public class HistoriqueController {
         return "historiqueSML";
     }
     
-    // API pour récupérer tout l'historique
+    // API pour récupérer tout l'historique (réservé aux admins)
     @GetMapping("/api/historique")
     @ResponseBody
-    public List<Historique> getAllHistorique() {
-        return historiqueService.getAllHistorique();
+    public ResponseEntity<List<Historique>> getAllHistorique(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"admin".equals(user.getRole())) {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
+        return ResponseEntity.ok(historiqueService.getAllHistorique());
     }
     
-    // API pour récupérer l'historique d'un utilisateur
+    // API pour récupérer l'historique de l'utilisateur connecté
+    @GetMapping("/api/historique/my-history")
+    @ResponseBody
+    public ResponseEntity<List<Historique>> getMyHistorique(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+        
+        List<Historique> historique = historiqueService.getHistoriqueByUserId(user.getId());
+        return ResponseEntity.ok(historique);
+    }
+    
+    // API pour récupérer l'historique d'un utilisateur spécifique
     @GetMapping("/api/historique/user/{userId}")
     @ResponseBody
-    public List<Historique> getHistoriqueByUser(@PathVariable Long userId) {
-        return historiqueService.getHistoriqueByUserId(userId);
+    public ResponseEntity<List<Historique>> getHistoriqueByUser(@PathVariable Long userId, HttpSession session) {
+        User currentUser = (User) session.getAttribute("user");
+        
+        // Vérifier si l'utilisateur est admin ou s'il demande son propre historique
+        if (currentUser == null || 
+            (!"admin".equals(currentUser.getRole()) && !currentUser.getId().equals(userId))) {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
+        
+        return ResponseEntity.ok(historiqueService.getHistoriqueByUserId(userId));
     }
     
     // API pour récupérer l'historique d'une FNE
     @GetMapping("/api/historique/fne/{fneId}")
     @ResponseBody
-    public List<Historique> getHistoriqueByFNE(@PathVariable Long fneId) {
-        return historiqueService.getHistoriqueByFneId(fneId);
+    public ResponseEntity<List<Historique>> getHistoriqueByFNE(@PathVariable Long fneId, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+        
+        // Si l'utilisateur est un SML, vérifier qu'il est l'auteur de la FNE
+        // Cette vérification nécessiterait un service supplémentaire pour vérifier la propriété de la FNE
+        
+        return ResponseEntity.ok(historiqueService.getHistoriqueByFneId(fneId));
     }
     
     // API pour récupérer un historique par son ID
     @GetMapping("/api/historique/{id}")
     @ResponseBody
-    public ResponseEntity<Historique> getHistoriqueById(@PathVariable Long id) {
-        Historique historique = historiqueService.getHistoriqueById(id);
-        if (historique != null) {
-            return ResponseEntity.ok(historique);
+    public ResponseEntity<Historique> getHistoriqueById(@PathVariable Long id, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).build(); // Unauthorized
         }
-        return ResponseEntity.notFound().build();
+        
+        Historique historique = historiqueService.getHistoriqueById(id);
+        if (historique == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        // Si l'utilisateur est un SML, vérifier qu'il est l'auteur de l'historique
+        if ("SML".equals(user.getRole()) && 
+            !user.getId().equals(historique.getUtilisateur().getId())) {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
+        
+        return ResponseEntity.ok(historique);
     }
     
     // API pour récupérer l'historique par action
     @GetMapping("/api/historique/action/{action}")
     @ResponseBody
-    public List<Historique> getHistoriqueByAction(@PathVariable String action) {
-        return historiqueService.getHistoriqueByAction(action);
+    public ResponseEntity<List<Historique>> getHistoriqueByAction(@PathVariable String action, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+        
+        // Si l'utilisateur est un admin, retourner tous les historiques avec cette action
+        if ("admin".equals(user.getRole())) {
+            return ResponseEntity.ok(historiqueService.getHistoriqueByAction(action));
+        }
+        
+        // Sinon, filtrer pour ne retourner que les historiques de l'utilisateur
+        List<Historique> allHistorique = historiqueService.getHistoriqueByAction(action);
+        List<Historique> userHistorique = allHistorique.stream()
+            .filter(h -> user.getId().equals(h.getUtilisateur().getId()))
+            .toList();
+        
+        return ResponseEntity.ok(userHistorique);
     }
 }
 
