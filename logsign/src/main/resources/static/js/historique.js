@@ -21,7 +21,7 @@ function loadHistoriqueData() {
   const tableBody = document.querySelector("#historique-table tbody")
   tableBody.innerHTML = `
         <tr>
-            <td colspan="7" style="text-align: center; padding: 30px;">
+            <td colspan="8" style="text-align: center; padding: 30px;">
                 <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #76a4d6; margin-bottom: 10px;"></i>
                 <p>Chargement de l'historique...</p>
             </td>
@@ -37,7 +37,7 @@ function loadHistoriqueData() {
       return response.json()
     })
     .then((data) => {
-      console.log("Données reçues:", data) // Afficher les données pour déboguer
+      console.log("Données reçues:", data) // Pour le débogage
       historiqueData = data
       filteredData = [...historiqueData]
       totalPages = Math.ceil(filteredData.length / 10)
@@ -50,7 +50,7 @@ function loadHistoriqueData() {
       console.error("Erreur:", error)
       tableBody.innerHTML = `
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 30px;">
+                    <td colspan="8" style="text-align: center; padding: 30px;">
                         <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #ef4444; margin-bottom: 10px;"></i>
                         <p>Erreur lors du chargement de l'historique. Veuillez réessayer.</p>
                         <button onclick="loadHistoriqueData()" class="btn btn-primary">Réessayer</button>
@@ -101,35 +101,24 @@ function filterData(searchTerm) {
   if (!searchTerm) {
     filteredData = [...historiqueData]
   } else {
+    searchTerm = searchTerm.toLowerCase()
     filteredData = historiqueData.filter((historique) => {
-      const historiqueId = historique.historique_id || historique.id || ""
-      const fneId = (historique.fne && (historique.fne.fne_id || historique.fne.id)) || ""
-      const typeEvt = (historique.fne && historique.fne.type_evt) || ""
-      const refGne = (historique.fne && historique.fne.REF_GNE) || ""
-      const action = historique.action || ""
-      const dateAction = formatDateTime(historique.dateAction || historique.date_action || "").toLowerCase()
-      const utilisateurNom =
-        historique.utilisateur && historique.utilisateur.nom ? historique.utilisateur.nom.toLowerCase() : ""
-      const utilisateurPrenom =
-        historique.utilisateur && historique.utilisateur.prenom ? historique.utilisateur.prenom.toLowerCase() : ""
-
-      searchTerm = searchTerm.toLowerCase()
-
+      // Adapter en fonction de la structure réelle de vos données
       return (
-        historiqueId.toString().includes(searchTerm) ||
-        fneId.toString().includes(searchTerm) ||
-        action.toLowerCase().includes(searchTerm) ||
-        utilisateurNom.includes(searchTerm) ||
-        utilisateurPrenom.includes(searchTerm) ||
-        dateAction.includes(searchTerm) ||
-        typeEvt.toLowerCase().includes(searchTerm) ||
-        refGne.toLowerCase().includes(searchTerm)
+        historique.historique_id.toString().includes(searchTerm) ||
+        historique.fne.fne_id.toString().includes(searchTerm) ||
+        historique.action.toLowerCase().includes(searchTerm) ||
+        (historique.utilisateur &&
+          historique.utilisateur.nom &&
+          historique.utilisateur.nom.toLowerCase().includes(searchTerm)) ||
+        (historique.dateAction && formatDateTime(historique.dateAction).toLowerCase().includes(searchTerm))
       )
     })
   }
 
   currentPage = 1
   totalPages = Math.ceil(filteredData.length / 10)
+
   renderTable()
   updatePagination()
 }
@@ -139,8 +128,6 @@ function applyFilters() {
   const actionFilter = document.getElementById("filterAction").value
   const dateDebut = document.getElementById("dateDebut").value
   const dateFin = document.getElementById("dateFin").value
-  const heureDebut = document.getElementById("heureDebut").value
-  const heureFin = document.getElementById("heureFin").value
 
   let tempData = [...historiqueData]
 
@@ -148,10 +135,10 @@ function applyFilters() {
     tempData = tempData.filter((historique) => historique.action === actionFilter)
   }
 
-  // Filtrage par date et heure
-  if (dateDebut || dateFin || heureDebut || heureFin) {
+  // Filtrage par date
+  if (dateDebut || dateFin) {
     tempData = tempData.filter((historique) => {
-      const actionDate = new Date(historique.date_action)
+      const actionDate = new Date(historique.dateAction)
 
       // Vérifier la date de début
       if (dateDebut) {
@@ -169,28 +156,6 @@ function applyFilters() {
         finDate.setHours(23, 59, 59, 999) // Fin de journée
 
         if (actionDate > finDate) {
-          return false
-        }
-      }
-
-      // Vérifier l'heure de début
-      if (heureDebut) {
-        const [heureDebutH, heureDebutM] = heureDebut.split(":").map(Number)
-        const actionHeure = actionDate.getHours()
-        const actionMinute = actionDate.getMinutes()
-
-        if (actionHeure < heureDebutH || (actionHeure === heureDebutH && actionMinute < heureDebutM)) {
-          return false
-        }
-      }
-
-      // Vérifier l'heure de fin
-      if (heureFin) {
-        const [heureFinH, heureFinM] = heureFin.split(":").map(Number)
-        const actionHeure = actionDate.getHours()
-        const actionMinute = actionDate.getMinutes()
-
-        if (actionHeure > heureFinH || (actionHeure === heureFinH && actionMinute > heureFinM)) {
           return false
         }
       }
@@ -218,7 +183,7 @@ function renderTable() {
   if (filteredData.length === 0) {
     tableBody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align: center; padding: 30px;">
+                <td colspan="8" style="text-align: center; padding: 30px;">
                     <i class="fas fa-search" style="font-size: 2rem; color: #ccc; margin-bottom: 10px;"></i>
                     <p>Aucun historique trouvé. Veuillez modifier vos critères de recherche.</p>
                 </td>
@@ -247,42 +212,26 @@ function renderTable() {
         break
     }
 
-    // Extraire les IDs et les valeurs avec sécurité
-    const historiqueId = historique.historique_id || historique.id || ""
+    // Récupérer les informations de l'utilisateur
+    const utilisateurNom = historique.utilisateur
+      ? `${historique.utilisateur.prenom || ""} ${historique.utilisateur.nom || ""}`.trim()
+      : "Inconnu"
 
-    // Vérifier si fne existe et extraire ses propriétés
-    let fneId = ""
-    let typeEvt = ""
-    let refGne = ""
-
-    if (historique.fne) {
-      fneId = historique.fne.fne_id || historique.fne.id || ""
-      typeEvt = historique.fne.type_evt || ""
-      refGne = historique.fne.REF_GNE || ""
-    }
-
-    // Formater la date
-    const dateAction = formatDateTime(historique.dateAction || historique.date_action || "")
-
-    // Formater l'utilisateur
-    let utilisateur = ""
-    if (historique.utilisateur) {
-      const nom = historique.utilisateur.nom || ""
-      const prenom = historique.utilisateur.prenom || ""
-      utilisateur = `${nom} ${prenom}`.trim()
-    }
+    // Récupérer les informations de la FNE
+    const fneType = historique.fne.type_evt || ""
+    const fneRef = historique.fne.REF_GNE || ""
 
     const row = document.createElement("tr")
     row.innerHTML = `
-            <td>${historiqueId}</td>
-            <td>${fneId}</td>
-            <td>${typeEvt}</td>
-            <td>${refGne}</td>
-            <td><span class="action-badge ${actionClass}">${historique.action || ""}</span></td>
-            <td>${dateAction}</td>
-            <td>${utilisateur}</td>
+            <td>${historique.historique_id}</td>
+            <td>${historique.fne.fne_id}</td>
+            <td>${fneType}</td>
+            <td>${fneRef}</td>
+            <td><span class="action-badge ${actionClass}">${historique.action}</span></td>
+            <td>${formatDateTime(historique.dateAction)}</td>
+            <td>${utilisateurNom}</td>
             <td>
-                <button class="btn btn-view" onclick="viewHistoriqueDetails(${historiqueId})">
+                <button class="btn btn-view" onclick="viewHistoriqueDetails(${historique.historique_id})">
                     <i class="fas fa-eye"></i> Voir
                 </button>
             </td>
@@ -316,11 +265,6 @@ function formatDateTime(dateTimeString) {
 
 // Fonction pour afficher les détails d'une entrée d'historique
 function viewHistoriqueDetails(historiqueId) {
-  if (!historiqueId) {
-    console.error("L'ID de l'historique est indéfini.")
-    return
-  }
-
   currentHistoriqueId = historiqueId
 
   // Afficher un indicateur de chargement dans le modal
@@ -336,44 +280,15 @@ function viewHistoriqueDetails(historiqueId) {
       return response.json()
     })
     .then((historique) => {
-      console.log("Détails historique:", historique) // Afficher les détails pour déboguer
-
-      // Extraire les valeurs avec sécurité
-      const historiqueId = historique.historique_id || historique.id || ""
-
-      // Vérifier si fne existe et extraire ses propriétés
-      let fneId = ""
-      let typeEvt = ""
-      let refGne = ""
-      let statut = ""
-
-      if (historique.fne) {
-        fneId = historique.fne.fne_id || historique.fne.id || ""
-        typeEvt = historique.fne.type_evt || ""
-        refGne = historique.fne.REF_GNE || ""
-        statut = historique.fne.statut || ""
-      }
-
-      // Formater la date
-      const dateAction = formatDateTime(historique.dateAction || historique.date_action || "")
-
-      // Formater l'utilisateur
-      let utilisateur = ""
-      if (historique.utilisateur) {
-        const nom = historique.utilisateur.nom || ""
-        const prenom = historique.utilisateur.prenom || ""
-        utilisateur = `${nom} ${prenom}`.trim()
-      }
+      currentFneId = historique.fne.fne_id
 
       // Informations de base
-      document.getElementById("detail-historique-id").textContent = historiqueId
-      document.getElementById("detail-fne-id").textContent = fneId
-      document.getElementById("detail-fne-type").textContent = typeEvt
-      document.getElementById("detail-fne-ref").textContent = refGne
+      document.getElementById("detail-historique-id").textContent = historique.historique_id
+      document.getElementById("detail-fne-id").textContent = historique.fne.fne_id
 
       // Action avec badge
       const detailAction = document.getElementById("detail-action")
-      detailAction.textContent = historique.action || ""
+      detailAction.textContent = historique.action
       detailAction.className = "action-badge" // Réinitialiser les classes
 
       // Ajouter la classe appropriée
@@ -392,9 +307,20 @@ function viewHistoriqueDetails(historiqueId) {
           break
       }
 
-      document.getElementById("detail-date").textContent = dateAction
-      document.getElementById("detail-utilisateur").textContent = utilisateur
-      document.getElementById("detail-statut").textContent = statut
+      document.getElementById("detail-date").textContent = formatDateTime(historique.dateAction)
+
+      // Informations sur l'utilisateur
+      const utilisateurNom = historique.utilisateur
+        ? `${historique.utilisateur.prenom || ""} ${historique.utilisateur.nom || ""}`.trim()
+        : "Inconnu"
+      document.getElementById("detail-utilisateur").textContent = utilisateurNom
+
+      // Informations sur la FNE
+      document.getElementById("detail-fne-type").textContent = historique.fne.type_evt || ""
+      document.getElementById("detail-fne-ref").textContent = historique.fne.REF_GNE || ""
+
+      // Statut
+      document.getElementById("detail-statut").textContent = historique.fne.statut || "En attente"
     })
     .catch((error) => {
       console.error("Erreur:", error)
@@ -415,34 +341,6 @@ function viewHistoriqueDetails(historiqueId) {
     })
 }
 
-// Fonction pour formater le nom des champs
-function formatFieldName(fieldName) {
-  if (!fieldName) return ""
-
-  const fieldMappings = {
-    description_evt: "Description",
-    impacts_operationnels: "Impacts opérationnels",
-    statut: "Statut",
-    Lieu_EVT: "Lieu",
-    commentaire: "Commentaire",
-    type_evt: "Type d'événement",
-    REF_GNE: "Référence GNE",
-    Date: "Date",
-    heure_UTC: "Heure UTC",
-    Organisme_concerné: "Organisme concerné",
-  }
-
-  return fieldMappings[fieldName] || fieldName
-}
-
-// Fonction pour formater la date
-function formatDate(dateString) {
-  if (!dateString) return ""
-
-  const options = { day: "2-digit", month: "2-digit", year: "numeric" }
-  return new Date(dateString).toLocaleDateString("fr-FR", options)
-}
-
 // Fonction pour fermer le modal
 function closeModal() {
   document.getElementById("historiqueDetailsModal").style.display = "none"
@@ -451,7 +349,7 @@ function closeModal() {
 }
 
 // Fonction pour voir la FNE associée
-function voirFNE(fneId) {
+function viewFNE(fneId) {
   if (!fneId) return
 
   window.location.href = `/auth/fneAdmin?id=${fneId}&mode=view`
@@ -463,11 +361,5 @@ window.onclick = (event) => {
   if (event.target === modal) {
     closeModal()
   }
-}
-
-function viewFNE(fneId) {
-  if (!fneId) return
-
-  window.location.href = `/auth/fneAdmin?id=${fneId}&mode=view`
 }
 

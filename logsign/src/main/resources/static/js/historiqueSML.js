@@ -144,12 +144,11 @@ function filterData(searchTerm) {
     filteredData = [...historiqueData]
   } else {
     filteredData = historiqueData.filter((historique) => {
+      // Vérifier si les propriétés existent avant d'y accéder
       const historiqueId = historique.historique_id || ""
-      const fneId = (historique.fne && historique.fne.fne_id) || ""
+      const fneId = historique.fne ? historique.fne.fne_id : ""
       const action = historique.action || ""
       const dateAction = formatDateTime(historique.dateAction || "").toLowerCase()
-      const typeEvt = (historique.fne && historique.fne.type_evt) || ""
-      const refGne = (historique.fne && historique.fne.REF_GNE) || ""
 
       searchTerm = searchTerm.toLowerCase()
 
@@ -157,9 +156,7 @@ function filterData(searchTerm) {
         historiqueId.toString().includes(searchTerm) ||
         fneId.toString().includes(searchTerm) ||
         action.toLowerCase().includes(searchTerm) ||
-        dateAction.includes(searchTerm) ||
-        typeEvt.toLowerCase().includes(searchTerm) ||
-        refGne.toLowerCase().includes(searchTerm)
+        dateAction.includes(searchTerm)
       )
     })
   }
@@ -304,17 +301,15 @@ function renderTable() {
 
     // Extraire les IDs et les valeurs avec sécurité
     const historiqueId = historique.historique_id || ""
-    const fneId = (historique.fne && historique.fne.fne_id) || ""
+    const fneId = historique.fne ? historique.fne.fne_id : ""
 
     // Formater la date
     const dateAction = formatDateTime(historique.dateAction || "")
 
-    // Formater l'utilisateur
+    // Formater l'utilisateur (si disponible)
     let utilisateur = ""
     if (historique.utilisateur) {
-      const nom = historique.utilisateur.nom || ""
-      const prenom = historique.utilisateur.prenom || ""
-      utilisateur = `${nom} ${prenom}`.trim()
+      utilisateur = `${historique.utilisateur.nom || ""} ${historique.utilisateur.prenom || ""}`.trim()
     }
 
     const row = document.createElement("tr")
@@ -347,14 +342,19 @@ function updatePagination() {
 function formatDateTime(dateTimeString) {
   if (!dateTimeString) return ""
 
-  const options = {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  try {
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+    return new Date(dateTimeString).toLocaleDateString("fr-FR", options)
+  } catch (error) {
+    console.error("Erreur lors du formatage de la date:", error)
+    return ""
   }
-  return new Date(dateTimeString).toLocaleDateString("fr-FR", options)
 }
 
 // Fonction pour afficher les détails d'une entrée d'historique
@@ -374,76 +374,42 @@ function viewHistoriqueDetails(historiqueId) {
   fetch(`/auth/api/historique/${historiqueId}`)
     .then((response) => {
       if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des détails de l'historique")
+        throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`)
       }
       return response.json()
     })
     .then((historique) => {
-      console.log("Détails historique:", historique) // Afficher les détails pour déboguer
+      // Ajouter des logs détaillés pour déboguer
+      console.log("Détails historique complet:", JSON.stringify(historique, null, 2))
+      console.log("Structure de l'objet historique:", Object.keys(historique))
+
+      if (historique.fne) {
+        console.log("Structure de l'objet FNE:", Object.keys(historique.fne))
+      } else {
+        console.error("L'objet FNE est null ou undefined")
+      }
 
       // Extraire les valeurs avec sécurité
       const historiqueId = historique.historique_id || ""
 
-      // Vérifier si fne existe et extraire ses propriétés
-      let fneId = ""
-      let typeEvt = ""
-      let refGne = ""
-      let statut = ""
-      let fneDate = ""
-      let fneLieu = ""
-
-      if (historique.fne) {
-        fneId = historique.fne.fne_id || ""
-        typeEvt = historique.fne.type_evt || ""
-        refGne = historique.fne.REF_GNE || ""
-        statut = historique.fne.statut || ""
-        fneDate = historique.fne.Date ? formatDate(historique.fne.Date) : ""
-        fneLieu = historique.fne.lieu_EVT || ""
-      }
-
-      // Stocker l'ID de la FNE pour le bouton "Voir la FNE"
-      currentFneId = fneId
-
-      // Formater la date
-      const dateAction = formatDateTime(historique.dateAction || "")
-
-      // Formater l'utilisateur
-      let utilisateur = ""
-      if (historique.utilisateur) {
-        const nom = historique.utilisateur.nom || ""
-        const prenom = historique.utilisateur.prenom || ""
-        utilisateur = `${nom} ${prenom}`.trim()
+      // Vérifier si fne existe et extraire son ID
+      if (historique.fne && historique.fne.fne_id) {
+        currentFneId = historique.fne.fne_id
+      } else {
+        currentFneId = null
       }
 
       // Informations de base
       document.getElementById("detail-historique-id").textContent = historiqueId
-      document.getElementById("detail-fne-id").textContent = fneId
-      document.getElementById("detail-date").textContent = dateAction
-      document.getElementById("detail-utilisateur").textContent = utilisateur
+      document.getElementById("detail-fne-id").textContent = currentFneId || "N/A"
+      document.getElementById("detail-date").textContent = formatDateTime(historique.dateAction || "")
 
-      // Informations sur la FNE
-      document.getElementById("detail-fne-type").textContent = typeEvt
-      document.getElementById("detail-fne-ref").textContent = refGne
-      document.getElementById("detail-fne-date").textContent = fneDate
-      document.getElementById("detail-fne-lieu").textContent = fneLieu
-
-      // Statut avec badge
-      const detailStatut = document.getElementById("detail-fne-statut")
-      detailStatut.textContent = statut
-      detailStatut.className = "status-badge" // Réinitialiser les classes
-
-      // Ajouter la classe appropriée pour le statut
-      switch (statut) {
-        case "En attente":
-          detailStatut.classList.add("status-pending")
-          break
-        case "Validé":
-          detailStatut.classList.add("status-approved")
-          break
-        case "Refusé":
-          detailStatut.classList.add("status-rejected")
-          break
+      // Formater l'utilisateur
+      let utilisateur = ""
+      if (historique.utilisateur) {
+        utilisateur = `${historique.utilisateur.nom || ""} ${historique.utilisateur.prenom || ""}`.trim()
       }
+      document.getElementById("detail-utilisateur").textContent = utilisateur || "N/A"
 
       // Action avec badge
       const detailAction = document.getElementById("detail-action")
@@ -464,6 +430,82 @@ function viewHistoriqueDetails(historiqueId) {
         case "Refus":
           detailAction.classList.add("action-refus")
           break
+      }
+
+      // Récupérer les détails de la FNE associée
+      if (currentFneId) {
+        fetch(`/auth/api/fne/${currentFneId}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Erreur lors de la récupération des détails de la FNE")
+            }
+            return response.json()
+          })
+          .then((fne) => {
+            console.log("Détails FNE:", fne) // Afficher les détails pour déboguer
+
+            // Adapter en fonction de la structure réelle de vos données
+            let fneType = ""
+            switch (fne.type_evt) {
+              case "accident":
+                fneType = "Accident"
+                break
+              case "incident":
+                fneType = "Incident"
+                break
+              case "incident_grave":
+                fneType = "Incident grave"
+                break
+              case "evt_technique":
+                fneType = "Événement technique"
+                break
+              default:
+                fneType = fne.type_evt || ""
+            }
+
+            // Informations sur la FNE
+            document.getElementById("detail-fne-type").textContent = fneType
+            document.getElementById("detail-fne-ref").textContent = fne.REF_GNE || ""
+            document.getElementById("detail-fne-date").textContent = formatDate(fne.Date)
+            document.getElementById("detail-fne-lieu").textContent = fne.lieu_EVT || ""
+
+            // Statut avec badge
+            const detailStatut = document.getElementById("detail-fne-statut")
+            detailStatut.textContent = fne.statut || "En attente"
+            detailStatut.className = "status-badge" // Réinitialiser les classes
+
+            // Ajouter la classe appropriée
+            switch (fne.statut) {
+              case "En attente":
+                detailStatut.classList.add("status-pending")
+                break
+              case "Validé":
+                detailStatut.classList.add("status-approved")
+                break
+              case "Refusé":
+                detailStatut.classList.add("status-rejected")
+                break
+              case "En cours de traitement":
+                detailStatut.classList.add("status-processing")
+                break
+            }
+          })
+          .catch((error) => {
+            console.error("Erreur lors de la récupération des détails de la FNE:", error)
+            // Afficher un message d'erreur pour les détails de la FNE
+            document.getElementById("detail-fne-type").textContent = "Erreur de chargement"
+            document.getElementById("detail-fne-ref").textContent = "Erreur de chargement"
+            document.getElementById("detail-fne-date").textContent = "Erreur de chargement"
+            document.getElementById("detail-fne-lieu").textContent = "Erreur de chargement"
+            document.getElementById("detail-fne-statut").textContent = "Erreur de chargement"
+          })
+      } else {
+        // Si aucune FNE n'est associée
+        document.getElementById("detail-fne-type").textContent = "Non disponible"
+        document.getElementById("detail-fne-ref").textContent = "Non disponible"
+        document.getElementById("detail-fne-date").textContent = "Non disponible"
+        document.getElementById("detail-fne-lieu").textContent = "Non disponible"
+        document.getElementById("detail-fne-statut").textContent = "Non disponible"
       }
 
       // Afficher les modifications (si disponibles)
@@ -514,6 +556,7 @@ function viewHistoriqueDetails(historiqueId) {
           </div>
           <div class="modal-body">
             <p>Une erreur est survenue lors du chargement des détails de l'historique. Veuillez réessayer.</p>
+            <p>Détail de l'erreur: ${error.message}</p>
           </div>
           <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
@@ -547,8 +590,13 @@ function formatFieldName(fieldName) {
 function formatDate(dateString) {
   if (!dateString) return ""
 
-  const options = { day: "2-digit", month: "2-digit", year: "numeric" }
-  return new Date(dateString).toLocaleDateString("fr-FR", options)
+  try {
+    const options = { day: "2-digit", month: "2-digit", year: "numeric" }
+    return new Date(dateString).toLocaleDateString("fr-FR", options)
+  } catch (error) {
+    console.error("Erreur lors du formatage de la date:", error)
+    return ""
+  }
 }
 
 // Fonction pour fermer le modal
@@ -560,7 +608,10 @@ function closeModal() {
 
 // Fonction pour voir la FNE associée
 function voirFNE(fneId) {
-  if (!fneId) return
+  if (!fneId) {
+    console.error("L'ID de la FNE est indéfini.")
+    return
+  }
 
   window.location.href = `/auth/fneSML?id=${fneId}&mode=view`
 }

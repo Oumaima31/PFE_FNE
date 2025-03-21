@@ -49,38 +49,64 @@
 
     <main class="container">
         <div class="page-header">
-            <h1><i class="fas fa-users"></i> Gestion des Utilisateurs</h1>
-            <div class="header-actions">
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Rechercher un utilisateur...">
-                    <button id="searchBtn"><i class="fas fa-search"></i></button>
-                </div>
-                <button id="addUserBtn" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Ajouter un utilisateur
-                </button>
-            </div>
+    <h1><i class="fas fa-users"></i> Gestion des Utilisateurs</h1>
+    <div class="header-actions">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Rechercher un utilisateur...">
+            <button id="searchBtn" type="button"><i class="fas fa-search"></i></button>
         </div>
+        <button id="addUserBtn" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Ajouter un utilisateur
+        </button>
+    </div>
+</div>
 
-        <div class="card">
-            <div class="table-responsive">
-                <table id="users-table" class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nom</th>
-                            <th>Prénom</th>
-                            <th>Email</th>
-                            <th>Matricule</th>
-                            <th>Aéroport</th>
-                            <th>Rôle</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Les données seront chargées dynamiquement -->
-                    </tbody>
-                </table>
-            </div>
+<div class="card">
+    <div class="filter-container">
+        <div class="filter-group">
+            <label for="filterRole">Filtrer par rôle:</label>
+            <select id="filterRole">
+                <option value="">Tous les rôles</option>
+                <option value="admin">Admin</option>
+                <option value="SML">SML</option>
+                <option value="validateur">Validateur</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filterAeroport">Filtrer par aéroport:</label>
+            <select id="filterAeroport">
+                <option value="">Tous les aéroports</option>
+                <option value="Tunis-Carthage (TUN)">Tunis-Carthage</option>
+                <option value="Djerba-Zarzis (DJE)">Djerba-Zarzis</option>
+                <option value="Monastir Habib Bourguiba (MIR)">Monastir</option>
+                <option value="Sfax-Thyna (SFA)">Sfax-Thyna</option>
+                <option value="Tozeur-Nefta (TOE)">Tozeur-Nefta</option>
+                <option value="Tabarka(TBJ)">Tabarka</option>
+                <option value="Gafsa (GAF)">Gafsa</option>
+                <option value="Gabès-Matmata (GAE)">Gabès-Matmata</option>
+                <option value="Enfidha (NBE)">Enfidha</option>
+            </select>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="users-table" class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Email</th>
+                    <th>Matricule</th>
+                    <th>Aéroport</th>
+                    <th>Rôle</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Les données seront chargées dynamiquement -->
+            </tbody>
+        </table>
+    </div>
             
             <div class="pagination">
                 <button id="prevPage" disabled><i class="fas fa-chevron-left"></i> Précédent</button>
@@ -143,6 +169,8 @@
                             <label for="role">Rôle <span class="required">*</span></label>
                             <select id="role" name="role" required>                                
                                 <option value="SML">SML</option>
+                                <option value="admin">Admin</option>
+                                <option value="validateur">Validateur</option>
                             </select>
                         </div>
                     </div>
@@ -213,3 +241,4 @@
     </script>
 </body>
 </html>
+

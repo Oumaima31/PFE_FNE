@@ -63,13 +63,17 @@ function loadUsersData() {
 function setupEventListeners() {
   // Recherche
   document.getElementById("searchBtn").addEventListener("click", () => {
+    console.log("Bouton de recherche cliqué")
     const searchTerm = document.getElementById("searchInput").value.toLowerCase()
+    console.log("Terme de recherche:", searchTerm)
     filterData(searchTerm)
   })
 
   document.getElementById("searchInput").addEventListener("keyup", (e) => {
     if (e.key === "Enter") {
+      console.log("Touche Entrée pressée dans le champ de recherche")
       const searchTerm = e.target.value.toLowerCase()
+      console.log("Terme de recherche:", searchTerm)
       filterData(searchTerm)
     }
   })
@@ -117,26 +121,34 @@ function filterData(searchTerm) {
   } else {
     filteredData = usersData.filter((user) => {
       return (
-        user.id.toString().includes(searchTerm) ||
-        user.nom.toLowerCase().includes(searchTerm) ||
-        user.prenom.toLowerCase().includes(searchTerm) ||
-        user.email.toLowerCase().includes(searchTerm) ||
-        user.matricule.toLowerCase().includes(searchTerm) ||
-        user.aeroport.toLowerCase().includes(searchTerm) ||
-        user.role.toLowerCase().includes(searchTerm)
+        (user.id && user.id.toString().includes(searchTerm)) ||
+        (user.nom && user.nom.toLowerCase().includes(searchTerm)) ||
+        (user.prenom && user.prenom.toLowerCase().includes(searchTerm)) ||
+        (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+        (user.matricule && user.matricule.toLowerCase().includes(searchTerm)) ||
+        (user.aeroport && user.aeroport.toLowerCase().includes(searchTerm)) ||
+        (user.role && user.role.toLowerCase().includes(searchTerm))
       )
     })
   }
 
+  // Appliquer les filtres après la recherche
   applyFilters()
 }
 
 // Fonction pour appliquer les filtres
 function applyFilters() {
-  const roleFilter = document.getElementById("filterRole").value
-  const aeroportFilter = document.getElementById("filterAeroport").value
+  console.log("Application des filtres")
+  const roleFilter = document.getElementById("filterRole") ? document.getElementById("filterRole").value : ""
+  const aeroportFilter = document.getElementById("filterAeroport")
+    ? document.getElementById("filterAeroport").value
+    : ""
+
+  console.log("Filtre de rôle:", roleFilter)
+  console.log("Filtre d'aéroport:", aeroportFilter)
 
   let tempData = [...filteredData]
+  console.log("Nombre d'utilisateurs avant filtrage:", tempData.length)
 
   if (roleFilter) {
     tempData = tempData.filter((user) => user.role === roleFilter)
@@ -147,6 +159,8 @@ function applyFilters() {
   }
 
   filteredData = tempData
+  console.log("Nombre d'utilisateurs après filtrage:", filteredData.length)
+
   currentPage = 1
   totalPages = Math.ceil(filteredData.length / 10)
 
@@ -266,7 +280,13 @@ function openAddUserModal() {
   document.getElementById("passwordStrength").style.display = "none"
 
   // Afficher le modal
-  document.getElementById("userModal").style.display = "block"
+  const userModal = document.getElementById("userModal")
+  userModal.style.display = "block"
+
+  // Assurez-vous que le bouton de sauvegarde est activé
+  const saveButton = document.getElementById("saveUserBtn")
+  saveButton.disabled = false
+  saveButton.innerHTML = "Enregistrer"
 }
 
 // Fonction pour éditer un utilisateur
@@ -385,6 +405,10 @@ function saveUser() {
   const url = isEditMode ? `/auth/api/users/${userId}` : "/auth/api/users"
   const method = isEditMode ? "PUT" : "POST"
 
+  console.log("Envoi des données:", userData)
+  console.log("URL:", url)
+  console.log("Méthode:", method)
+
   fetch(url, {
     method: method,
     headers: {
@@ -393,19 +417,23 @@ function saveUser() {
     body: JSON.stringify(userData),
   })
     .then((response) => {
+      console.log("Statut de la réponse:", response.status)
       if (!response.ok) {
         return response
           .json()
           .then((data) => {
+            console.error("Erreur détaillée:", data)
             throw new Error(data.error || "Erreur lors de l'enregistrement de l'utilisateur")
           })
-          .catch(() => {
+          .catch((err) => {
+            console.error("Erreur lors du parsing JSON:", err)
             throw new Error("Erreur lors de l'enregistrement de l'utilisateur")
           })
       }
       return response.json()
     })
     .then((data) => {
+      console.log("Données reçues:", data)
       // Mettre à jour les données locales
       if (isEditMode) {
         // Mettre à jour l'utilisateur existant
