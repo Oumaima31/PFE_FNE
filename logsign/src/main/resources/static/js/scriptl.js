@@ -1,4 +1,3 @@
-
 function updateRefGneNumber() {
     const type_evt = document.getElementById('type_evt').value;
     const REF_GNE = document.getElementById('REF_GNE');
@@ -107,6 +106,7 @@ async function fetchMeteo() {
         document.getElementById("meteo").innerHTML = `<span style="color:red;">Météo indisponible(${error.message})</span>`;
     }
 }
+
 // Fonctions pour basculer entre les formulaires
 function showLogin() {
     document.getElementById('login-form-container').classList.add('active');
@@ -121,37 +121,71 @@ function showRegister() {
     document.getElementById('register-tab').classList.add('active');
     document.getElementById('login-tab').classList.remove('active');
 }
-document.getElementById('registrationForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Empêche la soumission par défaut
 
-    const nom = document.getElementById('nom').value;
-    const prenom = document.getElementById('prenom').value;
-    const email = document.getElementById('mail').value;
-    const matricule = document.getElementById('register-matricule').value;
-    const motDePasse = document.getElementById('register-motDePasse').value;
-    const aeroport = document.getElementById('airport').value;
-    const role = document.getElementById('role').value;
+// Gestion du formulaire d'inscription
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('registrationForm')) {
+        document.getElementById('registrationForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Empêche la soumission par défaut
 
-    fetch('/auth/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `nom=${nom}&prenom=${prenom}&email=${email}&role=${role}&matricule=${matricule}&motDePasse=${motDePasse}&aeroport=${aeroport}`,
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.text(); // Lit la réponse textuelle
-        } else {
-            throw new Error("Erreur lors de l'inscription");
-        }
-    })
-    .then(message => {
-        alert(message); // Affiche le message de succès
-        showLogin(); // Redirige vers la partie de connexion
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert(error.message); // Affiche un message d'erreur
+            const nom = document.getElementById('nom').value;
+            const prenom = document.getElementById('prenom').value;
+            const email = document.getElementById('mail').value;
+            const matricule = document.getElementById('register-matricule').value;
+            const motDePasse = document.getElementById('register-motDePasse').value;
+            const aeroport = document.getElementById('airport').value;
+            const role = document.getElementById('role').value;
+
+            fetch('/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `nom=${nom}&prenom=${prenom}&email=${email}&role=${role}&matricule=${matricule}&motDePasse=${motDePasse}&aeroport=${aeroport}`,
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text(); // Lit la réponse textuelle
+                } else {
+                    throw new Error("Erreur lors de l'inscription");
+                }
+            })
+            .then(message => {
+                // Afficher le message de succès
+                const successMessage = document.getElementById('success-message');
+                const successText = document.getElementById('success-text');
+                
+                if (successMessage && successText) {
+                    successText.textContent = message;
+                    successMessage.style.display = 'flex';
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000); // Masquer après 5 secondes
+                } else {
+                    alert(message);
+                }
+                
+                showLogin(); // Redirige vers la partie de connexion
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert(error.message); // Affiche un message d'erreur
+            });
+        });
+    }
+});
+
+// Ajouter des effets visuels
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter des effets de focus sur les champs
+    const inputs = document.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
     });
 });

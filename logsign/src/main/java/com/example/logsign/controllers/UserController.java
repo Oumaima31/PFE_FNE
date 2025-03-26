@@ -35,6 +35,10 @@ public class UserController {
     public String adminutilisateurs() {
         return "adminutilisateurs";
     }
+    @GetMapping("/logout")
+    public String logout() {
+        return "logout";
+    }
     
     @PostMapping("/login")
     public String login(@RequestParam String matricule, @RequestParam String motDePasse, 
