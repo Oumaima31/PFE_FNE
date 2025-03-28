@@ -4,18 +4,30 @@ function toggleNavbar() {
     navbarContainer.classList.toggle("active")
   }
   
+  // Fonction pour basculer l'affichage des sections
+  function toggleSection(headerElement) {
+    // Trouver la section parente
+    const section = headerElement.closest(".collapsible-section")
+    const content = section.querySelector(".section-content")
+    const icon = headerElement.querySelector(".toggle-icon i")
+  
+    // Basculer la classe active
+    headerElement.classList.toggle("active")
+    content.classList.toggle("active")
+  
+    // Changer l'icône
+    if (content.classList.contains("active")) {
+      icon.className = "fas fa-chevron-up"
+    } else {
+      icon.className = "fas fa-chevron-down"
+    }
+  }
+  
   function updateRefGneNumber() {
     const type_evt = document.getElementById("type_evt").value
     const REF_GNE = document.getElementById("REF_GNE")
     const notification = document.getElementById("notification")
-  
-    // Créer un élément span pour le texte de notification si nécessaire
-    let notificationText = notification.querySelector("#notificationText")
-    if (!notificationText) {
-      notificationText = document.createElement("span")
-      notificationText.id = "notificationText"
-      notification.appendChild(notificationText)
-    }
+    const notificationText = document.getElementById("notificationText")
   
     REF_GNE.innerHTML = "" // Efface les options précédentes
     notification.style.display = "none" // Masque la notification par défaut
@@ -63,14 +75,18 @@ function toggleNavbar() {
       REF_GNE.appendChild(option)
     }
   
-    // Afficher la notification
+    // Afficher la notification avec animation
     notificationText.textContent = message
     notification.className = `notification ${colorClass}` // Appliquer la classe de couleur
     notification.style.display = "block"
   
     // Masquer la notification après 3 secondes
     setTimeout(() => {
-      notification.style.display = "none"
+      notification.style.opacity = "0"
+      setTimeout(() => {
+        notification.style.display = "none"
+        notification.style.opacity = "1"
+      }, 300)
     }, 3000)
   }
   
@@ -114,30 +130,30 @@ function toggleNavbar() {
       const temperature = Math.round(data.main.temp) + "°C"
       const description = data.weather[0].description
   
-      // Affichage des valeurs
-      document.getElementById("meteo-icon").innerHTML =
-        `<img src="https://openweathermap.org/img/wn/${iconCode}.png" alt="Météo">`
-      document.getElementById("meteo-temp").textContent = temperature
-      document.getElementById("meteo-description").textContent = description
+      // Affichage des valeurs avec animation
+      const meteoIcon = document.getElementById("meteo-icon")
+      const meteoTemp = document.getElementById("meteo-temp")
+      const meteoDesc = document.getElementById("meteo-description")
+  
+      meteoIcon.innerHTML = `<img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Météo" style="width:40px;height:40px;">`
+  
+      // Animation simple pour les valeurs de température et description
+      meteoTemp.style.opacity = "0"
+      meteoDesc.style.opacity = "0"
+  
+      setTimeout(() => {
+        meteoTemp.textContent = temperature
+        meteoDesc.textContent = description
+        meteoTemp.style.transition = "opacity 0.5s ease"
+        meteoDesc.style.transition = "opacity 0.5s ease"
+        meteoTemp.style.opacity = "1"
+        meteoDesc.style.opacity = "1"
+      }, 300)
     } catch (error) {
       console.error("Erreur : ", error)
-      document.getElementById("meteo").innerHTML = `<span style="color:red;">Météo indisponible(${error.message})</span>`
+      document.getElementById("meteo").innerHTML =
+        `<span style="color:white;">Météo indisponible (${error.message})</span>`
     }
-  }
-  
-  // Fonctions pour basculer entre les formulaires
-  function showLogin() {
-    document.getElementById("login-form-container").classList.add("active")
-    document.getElementById("register-form-container").classList.remove("active")
-    document.getElementById("login-tab").classList.add("active")
-    document.getElementById("register-tab").classList.remove("active")
-  }
-  
-  function showRegister() {
-    document.getElementById("register-form-container").classList.add("active")
-    document.getElementById("login-form-container").classList.remove("active")
-    document.getElementById("register-tab").classList.add("active")
-    document.getElementById("login-tab").classList.remove("active")
   }
   
   // Vérifier si des messages de notification sont présents au chargement de la page
@@ -159,7 +175,11 @@ function toggleNavbar() {
   
         // Masquer la notification après 5 secondes
         setTimeout(() => {
-          notification.style.display = "none"
+          notification.style.opacity = "0"
+          setTimeout(() => {
+            notification.style.display = "none"
+            notification.style.opacity = "1"
+          }, 300)
         }, 5000)
       }
     }
@@ -170,43 +190,5 @@ function toggleNavbar() {
       updateRefGneNumber()
     }
   })
-  
-  // Pour le formulaire d'inscription
-  if (document.getElementById("registrationForm")) {
-    document.getElementById("registrationForm").addEventListener("submit", (event) => {
-      event.preventDefault() // Empêche la soumission par défaut
-  
-      const nom = document.getElementById("nom").value
-      const prenom = document.getElementById("prenom").value
-      const email = document.getElementById("mail").value
-      const matricule = document.getElementById("register-matricule").value
-      const motDePasse = document.getElementById("register-motDePasse").value
-      const aeroport = document.getElementById("airport").value
-      const role = document.getElementById("role").value
-  
-      fetch("/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `nom=${nom}&prenom=${prenom}&email=${email}&role=${role}&matricule=${matricule}&motDePasse=${motDePasse}&aeroport=${aeroport}`,
-      })
-        .then((response) => {
-          if (response.ok) {
-            return response.text() // Lit la réponse textuelle
-          } else {
-            throw new Error("Erreur lors de l'inscription")
-          }
-        })
-        .then((message) => {
-          alert(message) // Affiche le message de succès
-          showLogin() // Redirige vers la partie de connexion
-        })
-        .catch((error) => {
-          console.error("Erreur:", error)
-          alert(error.message) // Affiche un message d'erreur
-        })
-    })
-  }
   
   
