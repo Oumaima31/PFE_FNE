@@ -530,3 +530,24 @@ window.onclick = (event) => {
     closeModal();
   }
 };
+// Fonction pour afficher les détails d'une FNE
+function viewFneDetails(fneId) {
+  currentFneId = fneId;
+
+  // Récupérer les détails de la FNE
+  fetch(`/auth/api/fne/${fneId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des détails de la FNE");
+      }
+      return response.json();
+    })
+    .then((fne) => {
+      // Créer et afficher le modal avec la FNE en format PDF
+      createFNEPdfView(fne);
+    })
+    .catch((error) => {
+      console.error("Erreur:", error);
+      alert("Erreur lors du chargement des détails de la FNE. Veuillez réessayer.");
+    });
+}

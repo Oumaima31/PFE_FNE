@@ -191,4 +191,21 @@ function toggleNavbar() {
     }
   })
   
-  
+// Fonction pour la déconnexion
+function logout() {
+  // Envoyer une requête au serveur pour se déconnecter
+  fetch('/auth/logout', {
+    method: 'POST',  // ou POST selon votre configuration serveur
+    credentials: 'include'
+  })
+  .then(response => {
+    console.log("Déconnexion réussie");
+    // Rediriger vers la page d'accueil après déconnexion
+    window.location.href = '/index.html';
+  })
+  .catch(error => {
+    console.error("Erreur lors de la déconnexion:", error);
+    // En cas d'erreur, rediriger quand même
+    window.location.href = '/index.html';
+  });
+}  
