@@ -397,9 +397,14 @@ function renderTable() {
       <td>${formatDateTime(historique.dateAction)}</td>
       <td><span class="action-badge ${actionClass}">${historique.action}</span></td>
       <td>
-        <button class="btn btn-view" onclick="viewHistoriqueDetails(${historique.historique_id})">
-          <i class="fas fa-eye"></i> Voir
-        </button>
+        <div class="action-buttons">
+          <button class="btn btn-view" onclick="viewHistoriqueDetails(${historique.historique_id})">
+            <i class="fas fa-eye"></i> Voir
+          </button>
+          <button class="btn btn-danger" onclick="deleteFNE(${historique.fne.fne_id})">
+            <i class="fas fa-trash"></i> Supprimer
+          </button>
+        </div>
       </td>
     `;
 
@@ -1098,4 +1103,61 @@ function printFNE() {
     </html>
   `);
   printWindow.document.close();
+}
+
+// Fonction pour supprimer une FNE
+function deleteFNE(fneId) {
+  // Demander confirmation avant de supprimer
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer la FNE #${fneId} ? Cette action est irréversible.`)) {
+    return;
+  }
+
+  // Afficher un indicateur de chargement
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.className = 'loading-overlay';
+  loadingOverlay.innerHTML = `
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Suppression en cours...</p>
+    </div>
+  `;
+  document.body.appendChild(loadingOverlay);
+
+  // Envoyer la requête de suppression au serveur
+  fetch(`/auth/api/fne/${fneId}/delete`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
+  .then(response => {
+    // Supprimer l'indicateur de chargement
+    document.body.removeChild(loadingOverlay);
+    
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      // Afficher un message de succès
+      alert(`La FNE #${fneId} a été supprimée avec succès. Le numéro ${fneId} est maintenant disponible pour une nouvelle FNE.`);
+      
+      // Recharger les données
+      loadHistoriqueData();
+    } else {
+      alert(`Erreur: ${data.message || 'Une erreur est survenue lors de la suppression.'}`);
+    }
+  })
+  .catch(error => {
+    // Supprimer l'indicateur de chargement s'il est encore présent
+    if (document.body.contains(loadingOverlay)) {
+      document.body.removeChild(loadingOverlay);
+    }
+    
+    console.error('Erreur:', error);
+    alert(`Erreur lors de la suppression: ${error.message}`);
+  });
 }
