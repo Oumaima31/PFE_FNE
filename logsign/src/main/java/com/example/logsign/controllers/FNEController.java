@@ -230,5 +230,37 @@ public class FNEController {
 
         return "fneAdmin";
     }
+    // API pour supprimer une FNE
+@DeleteMapping("/api/fne/{id}/delete")
+@ResponseBody
+public ResponseEntity<Map<String, Object>> deleteFNE(@PathVariable Long id, HttpSession session) {
+    User user = (User) session.getAttribute("user");
+    Map<String, Object> response = new HashMap<>();
+    
+    if (user == null || !"admin".equals(user.getRole())) {
+        response.put("success", false);
+        response.put("message", "Vous n'avez pas les droits pour effectuer cette action");
+        return ResponseEntity.status(403).body(response);
+    }
+    
+    try {
+        // Appeler le service pour supprimer la FNE et réorganiser les IDs
+        boolean deleted = fneService.deleteFNE(id, user);
+        
+        if (deleted) {
+            response.put("success", true);
+            response.put("message", "FNE supprimée avec succès");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("success", false);
+            response.put("message", "FNE non trouvée");
+            return ResponseEntity.status(404).body(response);
+        }
+    } catch (Exception e) {
+        response.put("success", false);
+        response.put("message", e.getMessage());
+        return ResponseEntity.status(500).body(response);
+    }
+}
 }
 

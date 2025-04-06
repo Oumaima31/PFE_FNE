@@ -5,7 +5,7 @@ let currentPage = 1;
 let totalPages = 1;
 let historiqueData = [];
 let filteredData = [];
-let currentHistoriqueId = null;
+let groupedData = []; // Nouvelle variable pour stocker les données groupées
 let currentFneId = null;
 let usersCache = {}; // Cache pour stocker les informations des utilisateurs
 
@@ -30,9 +30,10 @@ function updateTableHeaders() {
   tableHead.innerHTML = `
     <th>FNE ID</th>
     <th>Type</th>
+    <th>REF GNE</th>
     <th>Utilisateur</th>
-    <th>Date Action</th>
-    <th>Action</th>
+    <th>Date de création</th>
+    <th>Statut</th>
     <th>Actions</th>
   `;
 }
@@ -43,7 +44,7 @@ function loadHistoriqueData() {
   const tableBody = document.querySelector("#historique-table tbody");
   tableBody.innerHTML = `
     <tr>
-      <td colspan="6" style="text-align: center; padding: 30px;">
+      <td colspan="7" style="text-align: center; padding: 30px;">
         <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #76a4d6; margin-bottom: 10px;"></i>
         <p>Chargement de l'historique...</p>
       </td>
@@ -61,7 +62,12 @@ function loadHistoriqueData() {
     .then((data) => {
       console.log("Données reçues:", data); // Pour le débogage
       historiqueData = data;
-      filteredData = [...historiqueData];
+      
+      // Grouper les données par FNE ID
+      groupHistoriqueData();
+      
+      // Filtrer les données (utilise maintenant groupedData)
+      filteredData = [...groupedData];
       totalPages = Math.ceil(filteredData.length / 10);
 
       // Précharger les informations des utilisateurs
@@ -75,7 +81,7 @@ function loadHistoriqueData() {
       console.error("Erreur:", error);
       tableBody.innerHTML = `
         <tr>
-          <td colspan="6" style="text-align: center; padding: 30px;">
+          <td colspan="7" style="text-align: center; padding: 30px;">
             <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #ef4444; margin-bottom: 10px;"></i>
             <p>Erreur lors du chargement de l'historique. Veuillez réessayer.</p>
             <button onclick="loadHistoriqueData()" class="btn btn-primary">Réessayer</button>
@@ -85,15 +91,68 @@ function loadHistoriqueData() {
     });
 }
 
+// Fonction pour grouper les données d'historique par FNE ID
+function groupHistoriqueData() {
+  // Créer un objet pour stocker les données groupées temporairement
+  const groupedObj = {};
+  
+  // Parcourir toutes les entrées d'historique
+  historiqueData.forEach(historique => {
+    if (!historique.fne || !historique.fne.fne_id) return;
+    
+    const fneId = historique.fne.fne_id;
+    
+    // Si cette FNE n'existe pas encore dans notre objet groupé, l'initialiser
+    if (!groupedObj[fneId]) {
+      groupedObj[fneId] = {
+        fne: historique.fne,
+        historiques: [],
+        // Trouver la date de création (la plus ancienne action "Création")
+        dateCreation: null,
+        // Statut actuel (le plus récent)
+        lastHistorique: null
+      };
+    }
+    
+    // Ajouter cet historique au tableau des historiques pour cette FNE
+    groupedObj[fneId].historiques.push(historique);
+    
+    // Mettre à jour la date de création si c'est une action de création
+    if (historique.action === "Création") {
+      if (!groupedObj[fneId].dateCreation || new Date(historique.dateAction) < new Date(groupedObj[fneId].dateCreation)) {
+        groupedObj[fneId].dateCreation = historique.dateAction;
+      }
+    }
+    
+    // Mettre à jour le dernier historique (pour déterminer le statut actuel)
+    if (!groupedObj[fneId].lastHistorique || new Date(historique.dateAction) > new Date(groupedObj[fneId].lastHistorique.dateAction)) {
+      groupedObj[fneId].lastHistorique = historique;
+    }
+  });
+  
+  // Convertir l'objet en tableau pour faciliter le tri et l'affichage
+  groupedData = Object.values(groupedObj);
+  
+  // Trier par ID de FNE (décroissant pour avoir les plus récents en premier)
+  groupedData.sort((a, b) => b.fne.fne_id - a.fne.fne_id);
+}
+
 // Fonction pour précharger les informations des utilisateurs
 function preloadUserInfo() {
   // Collecter tous les IDs d'utilisateurs uniques des FNEs
   const fneUserIds = new Set();
   
-  historiqueData.forEach(historique => {
-    if (historique.fne && historique.fne.utilisateur && historique.fne.utilisateur.id) {
-      fneUserIds.add(historique.fne.utilisateur.id);
+  groupedData.forEach(group => {
+    if (group.fne && group.fne.utilisateur && group.fne.utilisateur.id) {
+      fneUserIds.add(group.fne.utilisateur.id);
     }
+    
+    // Ajouter également les utilisateurs des historiques
+    group.historiques.forEach(historique => {
+      if (historique.utilisateur && historique.utilisateur.id) {
+        fneUserIds.add(historique.utilisateur.id);
+      }
+    });
   });
   
   // Si aucun utilisateur à charger, sortir
@@ -122,20 +181,20 @@ function preloadUserInfo() {
   });
 }
 
-// Fonction pour obtenir le nom complet d'un utilisateur FNE (créateur)
-function getFneUserFullName(fne) {
-  if (!fne || !fne.utilisateur) return "Utilisateur inconnu";
+// Fonction pour obtenir le nom complet d'un utilisateur
+function getUserFullName(user) {
+  if (!user) return "Utilisateur inconnu";
   
-  const userId = fne.utilisateur.id;
+  const userId = user.id;
   
   // Si l'utilisateur est dans le cache, utiliser ces informations
   if (usersCache[userId]) {
-    const user = usersCache[userId];
-    return `${user.prenom || ""} ${user.nom || ""}`.trim() || "Utilisateur inconnu";
+    const cachedUser = usersCache[userId];
+    return `${cachedUser.prenom || ""} ${cachedUser.nom || ""}`.trim() || "Utilisateur inconnu";
   }
   
   // Sinon, utiliser les informations disponibles dans l'objet utilisateur
-  return `${fne.utilisateur.prenom || ""} ${fne.utilisateur.nom || ""}`.trim() || "Utilisateur inconnu";
+  return `${user.prenom || ""} ${user.nom || ""}`.trim() || "Utilisateur inconnu";
 }
 
 // Fonction pour configurer les écouteurs d'événements
@@ -195,19 +254,26 @@ function setupTabButtons() {
 // Fonction pour filtrer les données
 function filterData(searchTerm) {
   if (!searchTerm) {
-    filteredData = [...historiqueData];
+    filteredData = [...groupedData];
   } else {
     searchTerm = searchTerm.toLowerCase();
-    filteredData = historiqueData.filter((historique) => {
+    filteredData = groupedData.filter((group) => {
+      const fne = group.fne;
       // Obtenir le nom de l'utilisateur FNE (créateur)
-      const fneUserName = getFneUserFullName(historique.fne).toLowerCase();
+      const fneUserName = getUserFullName(fne.utilisateur).toLowerCase();
+      
+      // Rechercher dans les historiques également
+      const historiqueMatch = group.historiques.some(historique => 
+        historique.action.toLowerCase().includes(searchTerm) ||
+        (historique.dateAction && formatDateTime(historique.dateAction).toLowerCase().includes(searchTerm))
+      );
       
       return (
-        (historique.fne && historique.fne.fne_id && historique.fne.fne_id.toString().includes(searchTerm)) ||
-        (historique.fne && historique.fne.type_evt && historique.fne.type_evt.toLowerCase().includes(searchTerm)) ||
+        (fne.fne_id && fne.fne_id.toString().includes(searchTerm)) ||
+        (fne.type_evt && fne.type_evt.toLowerCase().includes(searchTerm)) ||
+        (fne.REF_GNE && fne.REF_GNE.toLowerCase().includes(searchTerm)) ||
         fneUserName.includes(searchTerm) ||
-        (historique.action && historique.action.toLowerCase().includes(searchTerm)) ||
-        (historique.dateAction && formatDateTime(historique.dateAction).toLowerCase().includes(searchTerm))
+        historiqueMatch
       );
     });
   }
@@ -225,38 +291,44 @@ function applyFilters() {
   const dateDebut = document.getElementById("dateDebut").value;
   const dateFin = document.getElementById("dateFin").value;
 
-  let tempData = [...historiqueData];
+  let tempData = [...groupedData];
 
   if (actionFilter) {
-    tempData = tempData.filter((historique) => historique.action === actionFilter);
+    tempData = tempData.filter((group) => {
+      // Vérifier si au moins un historique correspond à l'action filtrée
+      return group.historiques.some(historique => historique.action === actionFilter);
+    });
   }
 
   // Filtrage par date
   if (dateDebut || dateFin) {
-    tempData = tempData.filter((historique) => {
-      const actionDate = new Date(historique.dateAction);
+    tempData = tempData.filter((group) => {
+      // Vérifier si au moins un historique est dans la plage de dates
+      return group.historiques.some(historique => {
+        const actionDate = new Date(historique.dateAction);
 
-      // Vérifier la date de début
-      if (dateDebut) {
-        const debutDate = new Date(dateDebut);
-        debutDate.setHours(0, 0, 0, 0); // Début de journée
+        // Vérifier la date de début
+        if (dateDebut) {
+          const debutDate = new Date(dateDebut);
+          debutDate.setHours(0, 0, 0, 0); // Début de journée
 
-        if (actionDate < debutDate) {
-          return false;
+          if (actionDate < debutDate) {
+            return false;
+          }
         }
-      }
 
-      // Vérifier la date de fin
-      if (dateFin) {
-        const finDate = new Date(dateFin);
-        finDate.setHours(23, 59, 59, 999); // Fin de journée
+        // Vérifier la date de fin
+        if (dateFin) {
+          const finDate = new Date(dateFin);
+          finDate.setHours(23, 59, 59, 999); // Fin de journée
 
-        if (actionDate > finDate) {
-          return false;
+          if (actionDate > finDate) {
+            return false;
+          }
         }
-      }
 
-      return true;
+        return true;
+      });
     });
   }
 
@@ -340,6 +412,34 @@ function formatDateTime(dateTimeString) {
   }
 }
 
+// Fonction pour déterminer le statut actuel d'une FNE en fonction de son dernier historique
+function getStatusFromLastAction(group) {
+  if (!group.lastHistorique) return "En attente";
+  
+  switch (group.lastHistorique.action) {
+    case "Validation":
+      return "Validé";
+    case "Refus":
+      return "Refusé";
+    default:
+      return group.fne.statut || "En attente";
+  }
+}
+
+// Fonction pour obtenir la classe CSS du statut
+function getStatusClass(status) {
+  switch (status) {
+    case "Validé":
+      return "action-validation";
+    case "Refusé":
+      return "action-refus";
+    case "En attente":
+      return "action-creation";
+    default:
+      return "";
+  }
+}
+
 // Fonction pour afficher les données dans le tableau
 function renderTable() {
   const tableBody = document.querySelector("#historique-table tbody");
@@ -351,7 +451,7 @@ function renderTable() {
   if (filteredData.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="6" style="text-align: center; padding: 30px;">
+        <td colspan="7" style="text-align: center; padding: 30px;">
           <i class="fas fa-search" style="font-size: 2rem; color: #ccc; margin-bottom: 10px;"></i>
           <p>Aucun historique trouvé. Veuillez modifier vos critères de recherche.</p>
         </td>
@@ -361,47 +461,36 @@ function renderTable() {
   }
 
   for (let i = startIndex; i < endIndex; i++) {
-    const historique = filteredData[i];
+    const group = filteredData[i];
+    const fne = group.fne;
 
     // Vérifier si les données nécessaires sont disponibles
-    if (!historique.fne) {
-      console.error("Données FNE manquantes pour l'historique:", historique);
+    if (!fne) {
+      console.error("Données FNE manquantes pour le groupe:", group);
       continue;
     }
 
-    // Déterminer la classe du badge en fonction de l'action
-    let actionClass = "";
-    switch (historique.action) {
-      case "Création":
-        actionClass = "action-creation";
-        break;
-      case "Modification":
-        actionClass = "action-modification";
-        break;
-      case "Validation":
-        actionClass = "action-validation";
-        break;
-      case "Refus":
-        actionClass = "action-refus";
-        break;
-    }
+    // Déterminer le statut actuel
+    const currentStatus = getStatusFromLastAction(group);
+    const statusClass = getStatusClass(currentStatus);
 
     // Récupérer le nom de l'utilisateur FNE (créateur)
-    const fneUserName = getFneUserFullName(historique.fne);
+    const fneUserName = getUserFullName(fne.utilisateur);
 
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${historique.fne.fne_id}</td>
-      <td>${historique.fne.type_evt || ""}</td>
+      <td>${fne.fne_id}</td>
+      <td>${fne.type_evt || ""}</td>
+      <td>${formatValue(fne.REF_GNE)}</td>
       <td>${fneUserName}</td>
-      <td>${formatDateTime(historique.dateAction)}</td>
-      <td><span class="action-badge ${actionClass}">${historique.action}</span></td>
+      <td>${formatDateTime(group.dateCreation)}</td>
+      <td><span class="action-badge ${statusClass}">${currentStatus}</span></td>
       <td>
         <div class="action-buttons">
-          <button class="btn btn-view" onclick="viewHistoriqueDetails(${historique.historique_id})">
+          <button class="btn btn-view" onclick="viewFNEHistory(${fne.fne_id})">
             <i class="fas fa-eye"></i> Voir
           </button>
-          <button class="btn btn-danger" onclick="deleteFNE(${historique.fne.fne_id})">
+          <button class="btn btn-danger" onclick="deleteFNE(${fne.fne_id})">
             <i class="fas fa-trash"></i> Supprimer
           </button>
         </div>
@@ -420,24 +509,20 @@ function updatePagination() {
   document.getElementById("nextPage").disabled = currentPage >= totalPages;
 }
 
-// Fonction pour afficher les détails d'une entrée d'historique
-function viewHistoriqueDetails(historiqueId) {
-  currentHistoriqueId = historiqueId;
-
-  // Récupérer les détails de l'historique
-  fetch(`/auth/api/historique/${historiqueId}`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des détails de l'historique");
-      }
-      return response.json();
-    })
-    .then((historique) => {
-      currentFneId = historique.fne.fne_id;
-      
-      // Récupérer les détails complets de la FNE
-      return fetch(`/auth/api/fne/${historique.fne.fne_id}`);
-    })
+// Fonction pour afficher l'historique complet d'une FNE
+function viewFNEHistory(fneId) {
+  currentFneId = fneId;
+  
+  // Trouver le groupe correspondant à cette FNE
+  const group = groupedData.find(g => g.fne.fne_id === fneId);
+  if (!group) {
+    console.error("FNE non trouvée:", fneId);
+    alert("Erreur: FNE non trouvée");
+    return;
+  }
+  
+  // Récupérer les détails complets de la FNE
+  fetch(`/auth/api/fne/${fneId}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Erreur lors de la récupération des détails de la FNE");
@@ -445,8 +530,8 @@ function viewHistoriqueDetails(historiqueId) {
       return response.json();
     })
     .then((fne) => {
-      // Créer et afficher le modal avec les détails complets
-      createDetailModal(fne, currentHistoriqueId);
+      // Créer et afficher le modal avec les détails complets et l'historique
+      createHistoryModal(fne, group.historiques);
     })
     .catch((error) => {
       console.error("Erreur:", error);
@@ -454,67 +539,46 @@ function viewHistoriqueDetails(historiqueId) {
     });
 }
 
-// Fonction pour créer et afficher le modal avec les détails
-function createDetailModal(fne, historiqueId) {
-  // Récupérer l'historique correspondant
-  const historique = historiqueData.find(h => h.historique_id === historiqueId);
-  if (!historique) {
-    console.error("Historique non trouvé:", historiqueId);
-    return;
-  }
-
-  // Déterminer la classe du badge en fonction de l'action
-  let actionClass = "";
-  switch (historique.action) {
-    case "Création":
-      actionClass = "action-creation";
-      break;
-    case "Modification":
-      actionClass = "action-modification";
-      break;
-    case "Validation":
-      actionClass = "action-validation";
-      break;
-    case "Refus":
-      actionClass = "action-refus";
-      break;
-  }
-
+// Fonction pour créer et afficher le modal avec l'historique complet
+function createHistoryModal(fne, historiques) {
+  // Trier les historiques par date (du plus récent au plus ancien)
+  const sortedHistoriques = [...historiques].sort((a, b) => 
+    new Date(b.dateAction) - new Date(a.dateAction)
+  );
+  
   // Récupérer le nom de l'utilisateur FNE (créateur)
-  const fneUserName = getFneUserFullName(fne);
+  const fneUserName = getUserFullName(fne.utilisateur);
+
+  // Créer le contenu de l'historique
+  let historiqueHTML = '';
+  sortedHistoriques.forEach(historique => {
+    const actionClass = getActionClass(historique.action);
+    const userName = getUserFullName(historique.utilisateur);
+    
+    historiqueHTML += `
+      <div class="history-item">
+        <div class="history-header">
+          <span class="action-badge ${actionClass}">${historique.action}</span>
+          <span class="history-date">${formatDateTime(historique.dateAction)}</span>
+        </div>
+        <div class="history-content">
+          <p><strong>Utilisateur:</strong> ${userName}</p>
+        </div>
+      </div>
+    `;
+  });
 
   // Créer le contenu du modal
   const modalHTML = `
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Détails de l'historique #${historiqueId} - FNE #${fne.fne_id}</h2>
+        <h2>Historique de la FNE #${fne.fne_id}</h2>
         <button class="close-modal" onclick="closeModal()">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="historique-info">
-          <h3>Informations de l'historique</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>Action:</label>
-              <span><span class="action-badge ${actionClass}">${historique.action}</span></span>
-            </div>
-            <div class="detail-item">
-              <label>Date de l'action:</label>
-              <span>${formatDateTime(historique.dateAction)}</span>
-            </div>
-            <div class="detail-item">
-              <label>Utilisateur:</label>
-              <span>${fneUserName}</span>
-            </div>
-            <div class="detail-item">
-              <label>Statut actuel:</label>
-              <span>${formatValue(fne.statut)}</span>
-            </div>
-          </div>
-        </div>
-        
         <div class="tabs">
-          <button class="tab-btn active" data-tab="general">Informations générales</button>
+          <button class="tab-btn active" data-tab="history">Historique</button>
+          <button class="tab-btn" data-tab="general">Informations générales</button>
           <button class="tab-btn" data-tab="aeronef">Aéronef</button>
           <button class="tab-btn" data-tab="victimes">Victimes</button>
           <button class="tab-btn" data-tab="meteo">Météo</button>
@@ -522,7 +586,14 @@ function createDetailModal(fne, historiqueId) {
           <button class="tab-btn" data-tab="description">Description</button>
         </div>
         
-        <div id="general" class="tab-content active">
+        <div id="history" class="tab-content active">
+          <h3>Chronologie des actions</h3>
+          <div class="history-timeline">
+            ${historiqueHTML}
+          </div>
+        </div>
+        
+        <div id="general" class="tab-content">
           <div class="detail-grid">
             <div class="detail-item">
               <label>Type d'événement:</label>
@@ -538,7 +609,7 @@ function createDetailModal(fne, historiqueId) {
             </div>
             <div class="detail-item">
               <label>Date:</label>
-              <span>${formatDate(fne.Date)}</span>
+              <span>${formatDate(fne.date)}</span>
             </div>
             <div class="detail-item">
               <label>Heure UTC:</label>
@@ -682,7 +753,7 @@ function createDetailModal(fne, historiqueId) {
         <div id="description" class="tab-content">
           <div class="detail-item full-width">
             <label>Description de l'événement:</label>
-            <div class="description-box">${formatValue(fne.description_evt)}</div>
+            <div class="description-box">${formatValue(fne.description_evt).replace(/\n/g, '<br>')}</div>
           </div>
           <div class="detail-item">
             <label>Nom du rédacteur:</label>
@@ -692,8 +763,8 @@ function createDetailModal(fne, historiqueId) {
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
-        <button class="btn btn-primary" onclick="viewFNE(${fne.fne_id})">
-          <i class="fas fa-file-alt"></i> Voir la FNE
+        <button class="btn btn-primary" onclick="viewFNEPdf(${fne.fne_id})">
+          <i class="fas fa-file-pdf"></i> Voir en PDF
         </button>
       </div>
     </div>
@@ -704,37 +775,78 @@ function createDetailModal(fne, historiqueId) {
   modalElement.innerHTML = modalHTML;
   modalElement.style.display = "block";
   
+  // Ajouter du style pour la chronologie
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
+    .history-timeline {
+      margin: 20px 0;
+    }
+    .history-item {
+      border-left: 3px solid #ddd;
+      padding: 10px 20px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    .history-item:before {
+      content: '';
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border: 3px solid #3b82f6;
+      border-radius: 50%;
+      position: absolute;
+      left: -8px;
+      top: 15px;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .history-date {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .history-content {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 4px;
+    }
+  `;
+  document.head.appendChild(styleElement);
+  
   // Activer le premier onglet
-  const firstTab = modalElement.querySelector('.tab-btn[data-tab="general"]');
+  const firstTab = modalElement.querySelector('.tab-btn[data-tab="history"]');
   if (firstTab) {
     firstTab.click();
+  }
+}
+
+// Fonction pour obtenir la classe CSS en fonction de l'action
+function getActionClass(action) {
+  switch (action) {
+    case "Création":
+      return "action-creation";
+    case "Modification":
+      return "action-modification";
+    case "Validation":
+      return "action-validation";
+    case "Refus":
+      return "action-refus";
+    default:
+      return "";
   }
 }
 
 // Fonction pour fermer le modal
 function closeModal() {
   document.getElementById("historiqueDetailsModal").style.display = "none";
-  currentHistoriqueId = null;
   currentFneId = null;
 }
 
-// Fonction pour voir la FNE associée
-function viewFNE(fneId) {
-  if (!fneId) return;
-
-  window.location.href = `/auth/fneAdmin?id=${fneId}&mode=view`;
-}
-
-// Fermer le modal si l'utilisateur clique en dehors
-window.onclick = (event) => {
-  const modal = document.getElementById("historiqueDetailsModal");
-  if (event.target === modal) {
-    closeModal();
-  }
-};
-//
-// Fonction pour voir la FNE associée en format PDF non modifiable
-function viewFNE(fneId) {
+// Fonction pour voir la FNE en format PDF
+function viewFNEPdf(fneId) {
   if (!fneId) return;
 
   // Récupérer les détails complets de la FNE
@@ -758,7 +870,7 @@ function viewFNE(fneId) {
 // Fonction pour créer et afficher la vue PDF de la FNE
 function createFNEPdfView(fne) {
   // Récupérer le nom de l'utilisateur FNE (créateur)
-  const fneUserName = getFneUserFullName(fne);
+  const fneUserName = getUserFullName(fne.utilisateur);
 
   // Déterminer la classe de couleur en fonction du type d'événement
   let typeClass = "";
@@ -823,7 +935,7 @@ function createFNEPdfView(fne) {
               </div>
               <div class="pdf-field">
                 <label>Date:</label>
-                <div class="pdf-value">${formatDate(fne.Date)}</div>
+                <div class="pdf-value">${formatDate(fne.date)}</div>
               </div>
             </div>
             <div class="pdf-row">
@@ -1135,15 +1247,17 @@ function deleteFNE(fneId) {
     // Supprimer l'indicateur de chargement
     document.body.removeChild(loadingOverlay);
     
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
-    }
-    return response.json();
+    return response.json().then(data => {
+      if (!response.ok) {
+        throw new Error(data.message || `Erreur HTTP: ${response.status}`);
+      }
+      return data;
+    });
   })
   .then(data => {
     if (data.success) {
       // Afficher un message de succès
-      alert(`La FNE #${fneId} a été supprimée avec succès. Le numéro ${fneId} est maintenant disponible pour une nouvelle FNE.`);
+      alert(`La FNE #${fneId} a été supprimée avec succès. Les numéros des FNE suivantes ont été réorganisés.`);
       
       // Recharger les données
       loadHistoriqueData();

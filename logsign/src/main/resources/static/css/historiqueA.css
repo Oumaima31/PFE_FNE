@@ -595,7 +595,7 @@
       margin-bottom: 10px;
     }
   }
-  /* Style pour l'overlay de chargement */
+ /* Style pour l'overlay de chargement */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -611,10 +611,10 @@
 
 .loading-spinner {
   background-color: white;
-  padding: 20px 30px;
+  padding: 20px;
   border-radius: 8px;
   text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .loading-spinner i {
@@ -625,6 +625,5 @@
 
 .loading-spinner p {
   margin: 0;
-  color: #4b5563;
+  color: #333;
 }
-

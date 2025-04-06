@@ -2,6 +2,7 @@ package com.example.logsign.repositories;
 
 import com.example.logsign.models.Historique;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -21,4 +22,8 @@ public interface HistoriqueRepository extends JpaRepository<Historique, Long> {
     // Récupérer tout l'historique trié par date d'action (le plus récent en premier)
     @Query("SELECT h FROM Historique h ORDER BY h.dateAction DESC")
     List<Historique> findAllOrderByDateDesc();
+    // Supprimer les historiques par FNE ID
+@Modifying
+@Query("DELETE FROM Historique h WHERE h.fne.fne_id = :fneId")
+void deleteByFneId(@Param("fneId") Long fneId);
 }

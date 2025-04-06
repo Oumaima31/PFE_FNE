@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.Query;
 
 @Service
 @Transactional
@@ -164,5 +165,59 @@ public class FNEService {
         // Enregistrer la FNE mise à jour
         return fneRepository.save(fne);
     }
+   // Supprimer une FNE et réorganiser les IDs
+@Transactional
+public boolean deleteFNE(Long id, User user) {
+    Optional<FNE> fneOptional = fneRepository.findById(id);
+    if (!fneOptional.isPresent()) {
+        return false;
+    }
+    
+    FNE fne = fneOptional.get();
+    
+    try {
+        // Supprimer d'abord les entrées d'historique associées à cette FNE
+        historiqueRepository.deleteByFneId(id);
+        
+        // Supprimer la FNE
+        fneRepository.delete(fne);
+        
+        // Réorganiser les IDs des FNE supérieures à l'ID supprimé
+        // Cette opération doit être effectuée directement avec SQL natif
+        Query query = entityManager.createNativeQuery(
+            "UPDATE fne SET fne_id = fne_id - 1 WHERE fne_id > :deletedId"
+        );
+        query.setParameter("deletedId", id);
+        query.executeUpdate();
+        
+        // Mettre à jour également les références dans la table historique
+        Query historyQuery = entityManager.createNativeQuery(
+            "UPDATE historique SET fne_id = fne_id - 1 WHERE fne_id > :deletedId"
+        );
+        historyQuery.setParameter("deletedId", id);
+        historyQuery.executeUpdate();
+        
+        // Réinitialiser la séquence d'auto-incrémentation
+        // Correction de la syntaxe pour MySQL
+        Long maxId = (Long) entityManager.createNativeQuery(
+            "SELECT COALESCE(MAX(fne_id), 0) FROM fne"
+        ).getSingleResult();
+        
+        // Incrémenter de 1 pour la prochaine insertion
+        maxId = maxId + 1;
+        
+        Query resetSequenceQuery = entityManager.createNativeQuery(
+            "ALTER TABLE fne AUTO_INCREMENT = :newId"
+        );
+        resetSequenceQuery.setParameter("newId", maxId);
+        resetSequenceQuery.executeUpdate();
+        
+        return true;
+    } catch (Exception e) {
+        // Log l'erreur pour le débogage
+        e.printStackTrace();
+        throw e;
+    }
+}
 }
 
