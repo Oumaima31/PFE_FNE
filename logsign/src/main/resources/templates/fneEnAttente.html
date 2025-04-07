@@ -59,15 +59,18 @@
                     <input type="text" id="searchInput" placeholder="Rechercher...">
                     <button id="searchBtn"><i class="fas fa-search"></i></button>
                 </div>
-                <div class="filter-container">
-                    <select id="filterType">
-                        <option value="">Tous les types</option>
-                        <option value="Accident">Accident</option>
-                        <option value="Incident">Incident</option>
-                        <option value="Incident grave">Incident grave</option>
-                        <option value="Événement technique">Événement technique</option>
-                    </select>
+                <div class="date-time-filter">
+                    <div class="filter-group">
+                        <label for="dateFilter">Date:</label>
+                        <input type="date" id="dateFilter">
+                    </div>
+                    <div class="filter-group">
+                        <label for="timeFilter">Heure:</label>
+                        <input type="time" id="timeFilter">
+                    </div>
                 </div>
+                <button id="filterBtn" class="btn btn-primary">Filtrer</button>
+                <button id="resetBtn" onclick="resetFilters()" class="btn btn-secondary">Réinitialiser</button>
             </div>
         </div>
 

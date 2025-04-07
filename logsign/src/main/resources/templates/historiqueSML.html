@@ -50,33 +50,24 @@
                 </div>
                 <div class="filter-container">
                     <select id="filterAction">
-                        <option value="">Toutes les actions</option>
-                        <option value="Création">Création</option>
+                        <option value="">Tous les statuts</option>
+                        <option value="En attente">En attente</option>
+                        <option value="Validé">Validé</option>
+                        <option value="Refusé">Refusé</option>
                         <option value="Modification">Modification</option>
-                        <option value="Validation">Validation</option>
-                        <option value="Refus">Refus</option>
                     </select>
                     <div class="date-time-filter">
                         <div class="filter-group">
-                            <label for="dateDebut">Date début:</label>
-                            <input type="date" id="dateDebut">
+                            <label for="dateFilter">Date:</label>
+                            <input type="date" id="dateFilter">
                         </div>
                         <div class="filter-group">
-                            <label for="heureDebut">Heure début:</label>
-                            <input type="time" id="heureDebut">
-                        </div>
-                    </div>
-                    <div class="date-time-filter">
-                        <div class="filter-group">
-                            <label for="dateFin">Date fin:</label>
-                            <input type="date" id="dateFin">
-                        </div>
-                        <div class="filter-group">
-                            <label for="heureFin">Heure fin:</label>
-                            <input type="time" id="heureFin">
+                            <label for="timeFilter">Heure:</label>
+                            <input type="time" id="timeFilter">
                         </div>
                     </div>
                     <button id="filterBtn" class="btn btn-primary">Filtrer</button>
+                    <button id="resetBtn" onclick="resetFilters()" class="btn btn-secondary">Réinitialiser</button>
                 </div>
             </div>
         </div>
@@ -86,11 +77,11 @@
                 <table id="historique-table" class="data-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>FNE ID</th>
-                            <th>Action</th>
-                            <th>Date et heure</th>
-                            <th>Utilisateur</th>
+                            <th>Statut</th>
+                            <th>Heure</th>
+                            <th>Date</th>
+                            <th>Type d'événement</th>
                             <th>Détails</th>
                         </tr>
                     </thead>
@@ -179,6 +170,13 @@
         </div>
     </div>
 
+    <!-- Modal pour afficher la FNE en format PDF -->
+    <div id="fnePdfModal" class="modal">
+        <div class="modal-content pdf-view">
+            <!-- Le contenu sera généré dynamiquement -->
+        </div>
+    </div>
+
     <script src="/js/scriptsml.js"></script>
     <script src="/js/historiqueSML.js"></script>
     <script>
@@ -191,3 +189,4 @@
     </script>
 </body>
 </html>
+
