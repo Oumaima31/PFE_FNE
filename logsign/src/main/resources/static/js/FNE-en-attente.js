@@ -114,45 +114,130 @@ function getUserFullName(utilisateur) {
   return `${utilisateur.prenom || ""} ${utilisateur.nom || ""}`.trim() || "Utilisateur inconnu";
 }
 
-// Fonction pour configurer les écouteurs d'événements
-function setupEventListeners() {
-  // Recherche
-  document.getElementById("searchBtn").addEventListener("click", () => {
+
+// Fonction pour appliquer les filtres
+function applyFilters() {
     const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-    filterData(searchTerm);
-  });
-
-  document.getElementById("searchInput").addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-      const searchTerm = e.target.value.toLowerCase();
-      filterData(searchTerm);
+    const dateFilter = document.getElementById("dateFilter").value;
+    const timeFilter = document.getElementById("timeFilter").value;
+    
+    console.log("Filtres appliqués:", {
+      search: searchTerm,
+      date: dateFilter,
+      time: timeFilter
+    });
+    
+    // Commencer avec toutes les données
+    let result = [...fneData];
+    
+    // Filtre par terme de recherche
+    if (searchTerm) {
+      result = result.filter((fne) => {
+        const userName = getUserFullName(fne.utilisateur).toLowerCase();
+        return (
+          (fne.fne_id && fne.fne_id.toString().includes(searchTerm)) ||
+          (fne.type_evt && fne.type_evt.toLowerCase().includes(searchTerm)) ||
+          (fne.lieu_EVT && fne.lieu_EVT.toLowerCase().includes(searchTerm)) ||
+          userName.includes(searchTerm)
+        );
+      });
     }
-  });
-
-  // Filtre par type
-  document.getElementById("filterType").addEventListener("change", () => {
-    const filterType = document.getElementById("filterType").value;
-    filterByType(filterType);
-  });
-
-  // Pagination
-  document.getElementById("prevPage").addEventListener("click", () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderTable();
-      updatePagination();
+    
+    // Filtrage par date
+    if (dateFilter) {
+      result = result.filter((fne) => {
+        if (!fne.date) return false;
+        
+        const fneDate = new Date(fne.date);
+        const filterDate = new Date(dateFilter);
+        
+        return (
+          fneDate.getFullYear() === filterDate.getFullYear() &&
+          fneDate.getMonth() === filterDate.getMonth() &&
+          fneDate.getDate() === filterDate.getDate()
+        );
+      });
     }
-  });
-
-  document.getElementById("nextPage").addEventListener("click", () => {
-    if (currentPage < totalPages) {
-      currentPage++;
-      renderTable();
-      updatePagination();
+    
+    // Filtrage par heure
+    if (timeFilter) {
+      const [filterHour, filterMinute] = timeFilter.split(":").map(Number);
+      
+      result = result.filter((fne) => {
+        if (!fne.heure_UTC) return false;
+        
+        // Si c'est déjà au format heure (HH:MM ou HH:MM:SS)
+        if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(fne.heure_UTC)) {
+          const [hour, minute] = fne.heure_UTC.split(":").map(Number);
+          return hour === filterHour && minute === filterMinute;
+        }
+        
+        // Si c'est une date complète
+        const fneTime = new Date(fne.heure_UTC);
+        return fneTime.getHours() === filterHour && fneTime.getMinutes() === filterMinute;
+      });
     }
-  });
-}
-
+    
+    console.log("Résultats filtrés:", result.length);
+    
+    filteredData = result;
+    currentPage = 1;
+    totalPages = Math.ceil(filteredData.length / 10) || 1;
+    
+    renderTable();
+    updatePagination();
+  }
+  
+  // Fonction pour réinitialiser les filtres
+  function resetFilters() {
+    // Réinitialiser les valeurs des filtres
+    document.getElementById("searchInput").value = "";
+    document.getElementById("dateFilter").value = "";
+    document.getElementById("timeFilter").value = "";
+    
+    // Réinitialiser les données filtrées
+    filteredData = [...fneData];
+    currentPage = 1;
+    totalPages = Math.ceil(filteredData.length / 10) || 1;
+    
+    // Mettre à jour l'affichage
+    renderTable();
+    updatePagination();
+    
+    console.log("Filtres réinitialisés");
+  }
+  
+  // Configuration des écouteurs d'événements
+  function setupEventListeners() {
+    // Recherche
+    document.getElementById("searchBtn").addEventListener("click", applyFilters);
+    document.getElementById("searchInput").addEventListener("keyup", (e) => {
+      if (e.key === "Enter") {
+        applyFilters();
+      }
+    });
+  
+    // Filtres
+    document.getElementById("filterBtn").addEventListener("click", applyFilters);
+    document.getElementById("resetBtn").addEventListener("click", resetFilters);
+    
+    // Pagination
+    document.getElementById("prevPage").addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+        updatePagination();
+      }
+    });
+  
+    document.getElementById("nextPage").addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+        updatePagination();
+      }
+    });
+  }
 // Fonction pour configurer les onglets du modal
 function setupTabButtons() {
   document.addEventListener('click', function(e) {
@@ -345,8 +430,109 @@ function renderTable() {
 function updatePagination() {
   document.getElementById("pageInfo").textContent = `Page ${currentPage} sur ${totalPages || 1}`;
 
+  // Correction: Vérifier si currentPage est strictement inférieur à totalPages
   document.getElementById("prevPage").disabled = currentPage <= 1;
-  document.getElementById("nextPage").disabled = currentPage >= totalPages;
+  document.getElementById("nextPage").disabled = currentPage >= totalPages || totalPages === 0;
+  
+  // Ajouter des logs pour déboguer
+  console.log("Pagination mise à jour:", {
+    currentPage: currentPage,
+    totalPages: totalPages,
+    prevDisabled: currentPage <= 1,
+    nextDisabled: currentPage >= totalPages || totalPages === 0
+  });
+}
+
+// Fonction pour réinitialiser les filtres
+function resetFilters() {
+  // Réinitialiser les valeurs des filtres
+  document.getElementById("searchInput").value = "";
+  document.getElementById("dateFilter").value = "";
+  document.getElementById("timeFilter").value = "";
+  
+  // Réinitialiser les données filtrées
+  filteredData = [...fneData];
+  currentPage = 1;
+  totalPages = Math.ceil(filteredData.length / 10) || 1;
+  
+  // Mettre à jour l'affichage
+  renderTable();
+  updatePagination();
+  
+  console.log("Filtres réinitialisés");
+}
+
+// Fonction pour appliquer les filtres
+function applyFilters() {
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  const dateFilter = document.getElementById("dateFilter").value;
+  const timeFilter = document.getElementById("timeFilter").value;
+  
+  console.log("Filtres appliqués:", {
+    search: searchTerm,
+    date: dateFilter,
+    time: timeFilter
+  });
+  
+  // Commencer avec toutes les données
+  let result = [...fneData];
+  
+  // Filtre par terme de recherche
+  if (searchTerm) {
+    result = result.filter((fne) => {
+      const userName = getUserFullName(fne.utilisateur).toLowerCase();
+      return (
+        (fne.fne_id && fne.fne_id.toString().includes(searchTerm)) ||
+        (fne.type_evt && fne.type_evt.toLowerCase().includes(searchTerm)) ||
+        (fne.lieu_EVT && fne.lieu_EVT.toLowerCase().includes(searchTerm)) ||
+        userName.includes(searchTerm)
+      );
+    });
+  }
+  
+  // Filtrage par date
+  if (dateFilter) {
+    result = result.filter((fne) => {
+      if (!fne.date) return false;
+      
+      const fneDate = new Date(fne.date);
+      const filterDate = new Date(dateFilter);
+      
+      return (
+        fneDate.getFullYear() === filterDate.getFullYear() &&
+        fneDate.getMonth() === filterDate.getMonth() &&
+        fneDate.getDate() === filterDate.getDate()
+      );
+    });
+  }
+  
+  // Filtrage par heure
+  if (timeFilter) {
+    const [filterHour, filterMinute] = timeFilter.split(":").map(Number);
+    
+    result = result.filter((fne) => {
+      if (!fne.heure_UTC) return false;
+      
+      // Si c'est déjà au format heure (HH:MM ou HH:MM:SS)
+      if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(fne.heure_UTC)) {
+        const [hour, minute] = fne.heure_UTC.split(":").map(Number);
+        return hour === filterHour && minute === filterMinute;
+      }
+      
+      // Si c'est une date complète
+      const fneTime = new Date(fne.heure_UTC);
+      return fneTime.getHours() === filterHour && fneTime.getMinutes() === filterMinute;
+    });
+  }
+  
+  console.log("Résultats filtrés:", result.length);
+  
+  filteredData = result;
+  currentPage = 1;
+  totalPages = Math.ceil(filteredData.length / 10) || 1;
+  
+  renderTable();
+  updatePagination();
 }
 
 // Fonction pour afficher les détails d'une FNE
@@ -666,9 +852,7 @@ function createFNEPdfView(fne) {
         <button class="btn btn-success" onclick="validerFNE(currentFneId)">
           <i class="fas fa-check"></i> Valider
         </button>
-        <button class="btn btn-primary" onclick="printFNE()">
-          <i class="fas fa-print"></i> Imprimer
-        </button>
+        
       </div>
     </div>
   `;
@@ -680,74 +864,7 @@ function createFNEPdfView(fne) {
   modalElement.classList.add("pdf-modal");
 }
 
-// Fonction pour imprimer la FNE
-function printFNE() {
-  const modalContent = document.querySelector(".pdf-view").cloneNode(true);
-  
-  // Supprimer les boutons et éléments non nécessaires pour l'impression
-  const closeButton = modalContent.querySelector(".close-modal");
-  const footer = modalContent.querySelector(".modal-footer");
-  if (closeButton) closeButton.remove();
-  if (footer) footer.remove();
-  
-  // Créer une fenêtre d'impression
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>FNE - Impression</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-        <link rel="stylesheet" href="/css/styleadmin.css">
-        <link rel="stylesheet" href="/css/fne-table.css">
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: white;
-          }
-          .pdf-view {
-            width: 100%;
-            margin: 0;
-            box-shadow: none;
-          }
-          .pdf-section {
-            page-break-inside: avoid;
-            margin-bottom: 20px;
-          }
-          .pdf-description {
-            white-space: pre-wrap;
-          }
-          @media print {
-            .modal-header {
-              background-color: #f0f0f0 !important;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .pdf-section-header {
-              background-color: #f9f9f9 !important;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        ${modalContent.outerHTML}
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-              setTimeout(function() {
-                window.close();
-              }, 500);
-            }, 500);
-          };
-        </script>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-}
+
 
 // Fonction pour fermer le modal
 function closeModal() {

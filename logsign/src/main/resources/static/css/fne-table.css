@@ -1,5 +1,3 @@
-/* Styles pour la page FNE En Attente */
-
 /* Variables de couleurs */
 :root {
   --primary: #3b82f6;
@@ -41,39 +39,343 @@
   color: var(--primary);
 }
 
-/* Section de recherche */
-.search-section {
-  margin-bottom: 20px;
+/* Styles améliorés pour la section de filtrage */
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
+/* Conteneur de recherche amélioré */
 .search-container {
   position: relative;
-  width: 100%;
-  max-width: 600px;
+  flex: 1;
+  min-width: 250px;
 }
 
 .search-container input {
   width: 100%;
-  padding: 10px 40px 10px 15px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  padding: 12px 40px 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.search-container input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  outline: none;
 }
 
 .search-container button {
   position: absolute;
-  right: 5px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: var(--secondary);
+  color: #64748b;
   cursor: pointer;
-  font-size: 1rem;
-  padding: 8px;
+  transition: color 0.2s ease;
 }
 
-/* Section des filtres */
+.search-container button:hover {
+  color: #3b82f6;
+}
+
+/* Filtres de date et heure */
+.date-time-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  flex: 2;
+  min-width: 300px;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 140px;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.filter-group input[type="date"],
+.filter-group input[type="time"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.filter-group input[type="date"]:focus,
+.filter-group input[type="time"]:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  outline: none;
+}
+
+/* Boutons de filtrage */
+#filterBtn, #resetBtn {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+#filterBtn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+#filterBtn:hover {
+  background-color: #2563eb;
+}
+
+#resetBtn {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+#resetBtn:hover {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+
+/* Boutons */
+.btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+  background-color: var(--secondary);
+  color: var(--white);
+}
+
+.btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+/* Tableau */
+.card {
+  background-color: var(--white);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* Tableau responsive */
+.table-responsive {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.data-table th {
+  background-color: var(--light);
+  color: var(--dark);
+  font-weight: 600;
+  text-align: left;
+  padding: 15px;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+}
+
+.data-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border);
+  color: var(--secondary);
+}
+
+.data-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.data-table tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.pagination button {
+  padding: 8px 15px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--white);
+  color: var(--dark);
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: var(--light);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  color: var(--secondary);
+  font-size: 0.9rem;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.modal-content {
+  background-color: var(--white);
+  margin: 30px auto;
+  width: 90%;
+  max-width: 900px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  color: white; /* Texte blanc pour le header */
+  background-color: #3b82f6; /* Couleur de fond pour le header */
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: white; /* Texte blanc pour le titre */
+  font-size: 1.5rem;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: white; /* Bouton de fermeture blanc */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    padding: 16px;
+    width: 100%;
+  }
+  
+  .search-container {
+    width: 100%;
+  }
+  
+  .date-time-filter {
+    width: 100%;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  #filterBtn, #resetBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+#filterBtn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+#filterBtn:hover {
+  background-color: #2563eb;
+}
+
+#resetBtn {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+#resetBtn:hover {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+
+/* Section de recherche (ancienne version - conservée pour compatibilité) */
+.search-section {
+  margin-bottom: 20px;
+}
+
+/* Section des filtres (ancienne version - conservée pour compatibilité) */
 .filters-section {
   margin-bottom: 20px;
 }
@@ -107,7 +409,115 @@
   gap: 10px;
   margin-top: 15px;
 }
+/* Conteneur de filtrage minimaliste */
+.filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
 
+/* Boîte de recherche */
+.search-box {
+  position: relative;
+  width: 100%;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 40px 10px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.search-box button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+}
+
+/* Contrôles de filtrage */
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.date-input, .time-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-input label, .time-input label {
+  font-size: 0.9rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.date-input input, .time-input input {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* Boutons de filtrage */
+.btn-filter, .btn-reset {
+  padding: 8px 15px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-filter {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-reset {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filter-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .date-input, .time-input {
+    width: 100%;
+  }
+  
+  .date-input input, .time-input input {
+    flex: 1;
+  }
+  
+  .btn-filter, .btn-reset {
+    width: 100%;
+    justify-content: center;
+  }
+}
 /* Boutons */
 .btn {
   padding: 8px 15px;
@@ -248,45 +658,6 @@
   font-size: 0.9rem;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .filter-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .filter-label {
-    width: 100%;
-    margin-bottom: 5px;
-  }
-
-  .filter-input {
-    width: 100%;
-  }
-
-  .filter-input input {
-    max-width: 100%;
-  }
-
-  .filter-buttons {
-    width: 100%;
-  }
-
-  .filter-buttons .btn {
-    flex: 1;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .action-buttons .btn {
-    width: 100%;
-    margin-bottom: 5px;
-  }
-}
-
-
 /* Carte contenant le tableau */
 .card {
   background-color: var(--white);
@@ -357,109 +728,6 @@
   color: #ef4444;
 }
 
-/* Boutons d'action */
-.action-buttons {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-
-.btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-
-.btn-view {
-  background-color: var(--light);
-  color: var(--dark);
-}
-
-.btn-view:hover {
-  background-color: #e5e7eb;
-}
-
-.btn-primary {
-  background-color: var(--primary);
-  color: var(--white);
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-dark);
-}
-
-.btn-danger {
-  background-color: var(--danger);
-  color: var(--white);
-}
-
-.btn-danger:hover {
-  background-color: #dc2626;
-}
-
-.btn-secondary {
-  background-color: var(--secondary);
-  color: var(--white);
-}
-
-.btn-secondary:hover {
-  background-color: #4b5563;
-}
-
-.btn-warning {
-  background-color: var(--warning);
-  color: var(--white);
-}
-
-.btn-warning:hover {
-  background-color: #d97706;
-}
-
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  border-top: 1px solid var(--border);
-}
-
-.pagination button {
-  padding: 8px 15px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background-color: var(--white);
-  color: var(--dark);
-  cursor: pointer;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: all 0.2s;
-}
-
-.pagination button:hover:not(:disabled) {
-  background-color: var(--light);
-}
-
-.pagination button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  color: var(--secondary);
-  font-size: 0.9rem;
-}
-
 /* Modal */
 .modal {
   display: none;
@@ -494,11 +762,13 @@
   align-items: center;
   padding: 20px;
   border-bottom: 1px solid var(--border);
+  color: white; /* Ajout pour assurer que le texte est blanc */
+  background-color: #3b82f6; /* Couleur de fond pour le header */
 }
 
 .modal-header h2 {
   margin: 0;
-  color: var(--dark);
+  color: white; /* Assurer que le texte est blanc */
   font-size: 1.5rem;
 }
 
@@ -507,7 +777,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: var(--secondary);
+  color: white; /* Assurer que le bouton de fermeture est blanc */
 }
 
 .modal-body {
@@ -599,50 +869,6 @@
   color: var(--dark);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .page-header {
-      flex-direction: column;
-      align-items: flex-start;
-  }
-  
-  .header-actions {
-      width: 100%;
-  }
-  
-  .search-container {
-      width: 100%;
-  }
-  
-  .filter-container {
-      flex-direction: column;
-      align-items: stretch;
-  }
-  
-  .date-time-filter {
-      flex-direction: column;
-  }
-  
-  .tabs {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-  }
-  
-  .detail-grid {
-      grid-template-columns: 1fr;
-  }
-  
-  .action-buttons {
-      flex-direction: column;
-      width: 100%;
-  }
-  
-  .action-buttons .btn {
-      width: 100%;
-      margin-bottom: 5px;
-  }
-}
-
 /* Styles pour la vue PDF */
 .pdf-modal .modal-content {
   width: 90%;
@@ -659,6 +885,7 @@
   background-color: #f0f0f0;
   border-bottom: 2px solid #ddd;
   padding: 15px 20px;
+  color: #333; /* Couleur de texte pour le header PDF */
 }
 
 .pdf-view .modal-header.red {
@@ -849,6 +1076,62 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    padding: 16px;
+    width: 100%;
+  }
+  
+  .search-container {
+    width: 100%;
+  }
+  
+  .date-time-filter {
+    width: 100%;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  #filterBtn, #resetBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .date-time-filter {
+    flex-direction: column;
+  }
+  
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  
   .pdf-row {
     flex-direction: column;
     gap: 10px;

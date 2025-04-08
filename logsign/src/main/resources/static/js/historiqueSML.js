@@ -1077,4 +1077,68 @@ function resetFilters() {
   renderTable()
   updatePagination()
 }
+// Ajouter cette fonction pour améliorer l'animation des modals
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  
+  // Ajouter une classe pour l'animation d'entrée
+  modal.classList.add('modal-opening');
+  modal.style.display = 'block';
+  
+  // Forcer un reflow pour que l'animation se déclenche
+  void modal.offsetWidth;
+  
+  // Ajouter la classe pour l'animation complète
+  modal.classList.add('modal-open');
+}
 
+// Remplacer les appels directs style.display = "block" par cette fonction
+// Par exemple, remplacer :
+// document.getElementById("historiqueDetailsModal").style.display = "block";
+// par :
+// openModal("historiqueDetailsModal");
+
+// Améliorer l'affichage des changements dans les détails
+function renderChanges(modifications) {
+  const changesContainer = document.getElementById("detail-changes");
+  changesContainer.innerHTML = "";
+
+  if (!modifications || modifications.length === 0) {
+    changesContainer.innerHTML = "<p class='no-changes'>Aucune modification détaillée disponible.</p>";
+    return;
+  }
+
+  const changesList = document.createElement("ul");
+  changesList.className = "changes-list";
+
+  modifications.forEach((modification) => {
+    const changeItem = document.createElement("li");
+    changeItem.className = "change-item";
+
+    const fieldName = formatFieldName(modification.champ);
+    const oldValue = modification.ancienne_valeur || "Non défini";
+    const newValue = modification.nouvelle_valeur || "Non défini";
+
+    // Mettre en évidence les différences
+    const isDifferent = oldValue !== newValue;
+    
+    changeItem.innerHTML = `
+      <div class="change-field">${fieldName}</div>
+      <div class="change-values">
+        <div class="old-value">
+          <span class="label">Avant:</span> 
+          <span class="value ${isDifferent ? 'changed' : ''}">${oldValue}</span>
+        </div>
+        <div class="new-value">
+          <span class="label">Après:</span> 
+          <span class="value ${isDifferent ? 'changed' : ''}">${newValue}</span>
+        </div>
+      </div>
+    `;
+
+    changesList.appendChild(changeItem);
+  });
+
+  changesContainer.appendChild(changesList);
+}

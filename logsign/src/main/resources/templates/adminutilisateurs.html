@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Utilisateurs | Tableau de bord Admin</title>
     <link rel="stylesheet" href="/css/styleadmin.css">
-    <link rel="stylesheet" href="/css/fne-table.css">
     <link rel="stylesheet" href="/css/utilisateurs.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -73,22 +72,24 @@
                 <option value="">Tous les rôles</option>
                 <option value="admin">Admin</option>
                 <option value="SML">SML</option>
-                <option value="validateur">Validateur</option>
+                
             </select>
         </div>
         <div class="filter-group">
             <label for="filterAeroport">Filtrer par aéroport:</label>
             <select id="filterAeroport">
-                <option value="">Tous les aéroports</option>
-                <option value="Tunis-Carthage (TUN)">Tunis-Carthage</option>
-                <option value="Djerba-Zarzis (DJE)">Djerba-Zarzis</option>
-                <option value="Monastir Habib Bourguiba (MIR)">Monastir</option>
-                <option value="Sfax-Thyna (SFA)">Sfax-Thyna</option>
-                <option value="Tozeur-Nefta (TOE)">Tozeur-Nefta</option>
-                <option value="Tabarka(TBJ)">Tabarka</option>
-                <option value="Gafsa (GAF)">Gafsa</option>
-                <option value="Gabès-Matmata (GAE)">Gabès-Matmata</option>
-                <option value="Enfidha (NBE)">Enfidha</option>
+                <option value=""disabled selected>Tous les aéroports</option>
+                
+                    <option value="Tunis-Carthage (TUN)">AITC: Aéroport International Tunis Carthage</option>
+                    <option value="Djerba-Zarzis (DJE)">AIDZ: Aéroport International Djerba Zarzis</option>
+                    <option value="Monastir Habib Bourguiba (MIR)">AIMHB: Aéroport International Monastir Habib Bourguiba</option>
+                    <option value="Sfax-Thyna (SFA)">AIST: Aéroport International Sfax Thyna</option>
+                    <option value="Tozeur-Nefta (TOE)">AITN: Aéroport International Tozeur Nefta</option>
+                    <option value="Tabarka(TBJ)">AITA: Aéroport International Tabarka Aindraham</option>
+                    <option value="Gafsa (GAF)">AIGK: Aéroport International Gafsa Ksar</option>
+                    <option value="Gabès-Matmata (GAE)">AIGM: Aéroport International Gabès Matmata</option>
+                    <option value="Enfidha (NBE)">AIEH: Aéroport International Enfidha Hammamet</option>
+               
             </select>
         </div>
     </div>
