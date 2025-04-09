@@ -30,6 +30,8 @@ public class FNEService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+private NotificationService notificationService;
     // Récupérer toutes les FNE
     public List<FNE> getAllFNE() {
         return fneRepository.findAllOrderByDateDesc();
@@ -56,53 +58,57 @@ public class FNEService {
         return fneRepository.findByTypeEvt(typeEvt);
     }
 
-    public FNE submitFNE(FNE fne, User user) {
-        // Associer l'utilisateur connecté à la FNE
-        fne.setUtilisateur(user);
-        
-        // Set default values for numeric fields if they are null
-        if (fne.getAutre() == null) {
-            fne.setAutre(0);
-        }
-        if (fne.getPassagers() == null) {
-            fne.setPassagers(0);
-        }
-        if (fne.getPersonnel() == null) {
-            fne.setPersonnel(0);
-        }
-        if (fne.getEquipage() == null) {
-            fne.setEquipage(0);
-        }
-        if (fne.getVisibilite() == null) {
-            fne.setVisibilite(0);
-        }
-
-        // Set default values for boolean fields if they are null
-        if (fne.getEvt_implique_installation_équipement() == null) {
-            fne.setEvt_implique_installation_équipement(false);
-        }
-        if (fne.getEvt_implique_véhicule_materiel_assistance_sol() == null) {
-            fne.setEvt_implique_véhicule_materiel_assistance_sol(false);
-        }
-
-        // Set default status if null
-        if (fne.getStatut() == null) {
-            fne.setStatut("En attente");
-        }
-
-        // Enregistrer la FNE dans la base de données
-        FNE savedFNE = fneRepository.save(fne);
-        
-        // Créer une entrée dans l'historique
-        Historique historique = new Historique();
-        historique.setFne(savedFNE);
-        historique.setAction("Création");
-        historique.setdateAction(LocalDateTime.now());
-        historique.setUtilisateur(user);
-        historiqueRepository.save(historique);
-
-        return savedFNE;
+    // Modifiez la méthode submitFNE comme suit:
+public FNE submitFNE(FNE fne, User user) {
+    // Associer l'utilisateur connecté à la FNE
+    fne.setUtilisateur(user);
+    
+    // Set default values for numeric fields if they are null
+    if (fne.getAutre() == null) {
+        fne.setAutre(0);
     }
+    if (fne.getPassagers() == null) {
+        fne.setPassagers(0);
+    }
+    if (fne.getPersonnel() == null) {
+        fne.setPersonnel(0);
+    }
+    if (fne.getEquipage() == null) {
+        fne.setEquipage(0);
+    }
+    if (fne.getVisibilite() == null) {
+        fne.setVisibilite(0);
+    }
+
+    // Set default values for boolean fields if they are null
+    if (fne.getEvt_implique_installation_équipement() == null) {
+        fne.setEvt_implique_installation_équipement(false);
+    }
+    if (fne.getEvt_implique_véhicule_materiel_assistance_sol() == null) {
+        fne.setEvt_implique_véhicule_materiel_assistance_sol(false);
+    }
+
+    // Set default status if null
+    if (fne.getStatut() == null) {
+        fne.setStatut("En attente");
+    }
+
+    // Enregistrer la FNE dans la base de données
+    FNE savedFNE = fneRepository.save(fne);
+    
+    // Créer une entrée dans l'historique
+    Historique historique = new Historique();
+    historique.setFne(savedFNE);
+    historique.setAction("Création");
+    historique.setdateAction(LocalDateTime.now());
+    historique.setUtilisateur(user);
+    historiqueRepository.save(historique);
+    
+    // Créer une notification pour les administrateurs
+    notificationService.createFneNotification(savedFNE, user);
+
+    return savedFNE;
+}
     
     // Valider une FNE
     public FNE validerFNE(Long id, User user) {

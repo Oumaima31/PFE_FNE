@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.logsign.models.User;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -20,5 +21,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     boolean existsByMatricule(String matricule);
     boolean existsByEmail(String email);
+    // Nouvelle méthode pour trouver les utilisateurs par rôle
+    @Query("SELECT u FROM User u WHERE u.role = :role")
+    List<User> findByRole(@Param("role") String role);
+    
 }
 

@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import com.example.logsign.models.FNE;
 import com.example.logsign.models.User;
 import com.example.logsign.services.FNEService;
+import com.example.logsign.services.NotificationService;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
 import java.util.HashMap;
 
 @Controller
@@ -260,6 +262,34 @@ public ResponseEntity<Map<String, Object>> deleteFNE(@PathVariable Long id, Http
         response.put("success", false);
         response.put("message", e.getMessage());
         return ResponseEntity.status(500).body(response);
+    }
+}
+// 
+@Autowired
+private NotificationService notificationService;
+@GetMapping("/test-notification")
+@ResponseBody
+public ResponseEntity<String> testNotification(HttpSession session) {
+    User user = (User) session.getAttribute("user");
+    if (user == null) {
+        return ResponseEntity.badRequest().body("Utilisateur non connecté");
+    }
+    
+    try {
+        // Créer une FNE de test
+        FNE testFne = new FNE();
+        testFne.setFne_id(999L); // ID fictif pour le test
+        testFne.setType_evt("Test");
+        testFne.setDate(LocalDate.now());
+        testFne.setLieu_EVT("Test Location");
+        
+        // Tester la création de notification
+        notificationService.createFneNotification(testFne, user);
+        
+        return ResponseEntity.ok("Test de notification envoyé avec succès. Vérifiez les logs pour plus de détails.");
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).body("Erreur lors du test de notification: " + e.getMessage());
     }
 }
 }
