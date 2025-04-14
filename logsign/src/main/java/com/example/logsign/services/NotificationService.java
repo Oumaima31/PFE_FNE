@@ -118,4 +118,7 @@ public class NotificationService {
     public List<Notification> getNotificationsForUser(Long userId) {
         return notificationRepository.findByUtilisateurId(userId);
     }
+    public Notification getNotificationById(Long id) {
+        return notificationRepository.findById(id).orElse(null);
+    }
 }

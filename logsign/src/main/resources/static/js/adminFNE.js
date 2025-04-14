@@ -191,21 +191,22 @@ function toggleNavbar() {
     }
   })
   
-// Fonction pour la déconnexion
-function logout() {
-  // Envoyer une requête au serveur pour se déconnecter
-  fetch('/auth/logout', {
-    method: 'POST',  // ou POST selon votre configuration serveur
-    credentials: 'include'
-  })
-  .then(response => {
-    console.log("Déconnexion réussie");
-    // Rediriger vers la page d'accueil après déconnexion
-    window.location.href = '/index.html';
-  })
-  .catch(error => {
-    console.error("Erreur lors de la déconnexion:", error);
-    // En cas d'erreur, rediriger quand même
-    window.location.href = '/index.html';
-  });
-}  
+  function logout() {
+    fetch('/logout', {
+      method: 'POST',
+      credentials: '/include'
+    })
+    .then(response => {
+      if (response.ok) {
+        // Rediriger vers la page de login
+        window.location.href = '/'; // ou '/login' selon votre configuration
+      } else {
+        console.error("Échec de la déconnexion");
+        window.location.href = '/'; // Redirection même en cas d'erreur
+      }
+    })
+    .catch(error => {
+      console.error("Erreur lors de la déconnexion:", error);
+      window.location.href = '/';
+    });
+  }

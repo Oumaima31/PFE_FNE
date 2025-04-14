@@ -110,68 +110,65 @@ public FNE submitFNE(FNE fne, User user) {
     return savedFNE;
 }
     
-    // Valider une FNE
-    public FNE validerFNE(Long id, User user) {
-        Optional<FNE> fneOptional = fneRepository.findById(id);
-        if (!fneOptional.isPresent()) {
-            throw new RuntimeException("FNE non trouvée");
-        }
-        
-        FNE fne = fneOptional.get();
-        
-        // Vérifier que la FNE est en attente
-        if (!"En attente".equals(fne.getStatut())) {
-            throw new RuntimeException("Cette FNE n'est pas en attente de validation");
-        }
-        
-        // Mettre à jour le statut
-        fne.setStatut("Validé");
-        
-        // Créer une entrée dans l'historique
-        Historique historique = new Historique();
-        historique.setFne(fne);
-        historique.setUtilisateur(user);
-        historique.setAction("Validation");
-        historique.setdateAction(LocalDateTime.now());
-        
-        // Enregistrer l'historique
-        historiqueRepository.save(historique);
-        
-        // Enregistrer la FNE mise à jour
-        return fneRepository.save(fne);
+// Valider une FNE
+public FNE validerFNE(Long id, User user) {
+    Optional<FNE> fneOptional = fneRepository.findById(id);
+    if (!fneOptional.isPresent()) {
+        throw new RuntimeException("FNE non trouvée");
     }
+    FNE fne = fneOptional.get();       
+    // Vérifier que la FNE est en attente
+    if (!"En attente".equals(fne.getStatut())) {
+        throw new RuntimeException("Cette FNE n'est pas en attente de validation");
+    }
+        
+    // Mettre à jour le statut
+    fne.setStatut("Validé");
+        
+    // Créer une entrée dans l'historique
+    Historique historique = new Historique();
+    historique.setFne(fne);
+    historique.setUtilisateur(user);
+    historique.setAction("Validation");
+    historique.setdateAction(LocalDateTime.now());
+        
+    // Enregistrer l'historique
+    historiqueRepository.save(historique);
+        
+    // Enregistrer la FNE mise à jour
+    return fneRepository.save(fne);
+}
     
-    // Refuser une FNE
-    public FNE refuserFNE(Long id, User user) {
-        Optional<FNE> fneOptional = fneRepository.findById(id);
-        if (!fneOptional.isPresent()) {
-            throw new RuntimeException("FNE non trouvée");
-        }
-        
-        FNE fne = fneOptional.get();
-        
-        // Vérifier que la FNE est en attente
-        if (!"En attente".equals(fne.getStatut())) {
-            throw new RuntimeException("Cette FNE n'est pas en attente de validation");
-        }
-        
-        // Mettre à jour le statut
-        fne.setStatut("Refusé");
-        
-        // Créer une entrée dans l'historique
-        Historique historique = new Historique();
-        historique.setFne(fne);
-        historique.setUtilisateur(user);
-        historique.setAction("Refus");
-        historique.setdateAction(LocalDateTime.now());
-        
-        // Enregistrer l'historique
-        historiqueRepository.save(historique);
-        
-        // Enregistrer la FNE mise à jour
-        return fneRepository.save(fne);
+// Refuser une FNE
+public FNE refuserFNE(Long id, User user) {
+    Optional<FNE> fneOptional = fneRepository.findById(id);
+    if (!fneOptional.isPresent()) {
+        throw new RuntimeException("FNE non trouvée");
+    }        
+   FNE fne = fneOptional.get();        
+    // Vérifier que la FNE est en attente
+    if (!"En attente".equals(fne.getStatut())) {
+        throw new RuntimeException("Cette FNE n'est pas en attente de validation");
     }
-   // Supprimer une FNE et réorganiser les IDs
+        
+    // Mettre à jour le statut
+    fne.setStatut("Refusé");
+        
+    // Créer une entrée dans l'historique
+    Historique historique = new Historique();
+    historique.setFne(fne);
+    historique.setUtilisateur(user);
+    historique.setAction("Refus");
+    historique.setdateAction(LocalDateTime.now());
+        
+    // Enregistrer l'historique
+    historiqueRepository.save(historique);
+        
+    // Enregistrer la FNE mise à jour
+    return fneRepository.save(fne);
+    }
+ 
+// Supprimer une FNE et réorganiser les IDs
 @Transactional
 public boolean deleteFNE(Long id, User user) {
     Optional<FNE> fneOptional = fneRepository.findById(id);

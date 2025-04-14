@@ -197,3 +197,22 @@ document.addEventListener("DOMContentLoaded", () => {
     updateRefGneNumber()
   }
 })
+function logout() {
+  fetch('/logout', {
+    method: 'POST',
+    credentials: '/include'
+  })
+  .then(response => {
+    if (response.ok) {
+      // Rediriger vers la page de login
+      window.location.href = '/'; 
+    } else {
+      console.error("Échec de la déconnexion");
+      window.location.href = '/'; // Redirection même en cas d'erreur
+    }
+  })
+  .catch(error => {
+    console.error("Erreur lors de la déconnexion:", error);
+    window.location.href = '/';
+  });
+}

@@ -1,6 +1,7 @@
 package com.example.logsign.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,17 +21,24 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
     
-    /**
-     * Affiche la page des notifications de l'utilisateur connecté
-     */
-     @GetMapping("/notificationsSML")
-    public String showNotificationsSMLPage(HttpSession session) {
+    @GetMapping("/notificationSML")
+    public String notificationSML(HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/login";
         }
-        return "notificationsSML";
+        return "notificationSML"; // Ensure this matches the template name
     }
+
+    @GetMapping("/notificationsAdmin")
+    public String notificationsAdmin(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        return "notificationsAdmin"; // Ensure this matches the template name
+    }
+
     @GetMapping("/notifications")
     public String showNotifications(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
@@ -58,4 +66,19 @@ public class NotificationController {
         List<Notification> notifications = notificationService.getNotificationsForUser(user.getId());
         return ResponseEntity.ok(notifications);
     }
+    @GetMapping("/api/notifications/{id}")
+@ResponseBody
+public ResponseEntity<Notification> getNotificationDetails(@PathVariable Long id, HttpSession session) {
+    User user = (User) session.getAttribute("user");
+    if (user == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    
+    Notification notification = notificationService.getNotificationById(id);
+    if (notification == null) {
+        return ResponseEntity.notFound().build();
+    }
+    
+    return ResponseEntity.ok(notification);
+}
 }

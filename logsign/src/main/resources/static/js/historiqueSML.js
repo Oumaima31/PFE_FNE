@@ -1029,7 +1029,7 @@ function modifierFNE(fneId) {
   }
 
   // Rediriger vers la page de modification de la FNE
-  window.location.href = `/auth/fneAdmin?id=${fneId}`
+  window.location.href = `/auth/fneSML?id=${fneId}`
 }
 
 // Fonction pour formater les valeurs pour l'affichage
@@ -1092,12 +1092,6 @@ function openModal(modalId) {
   // Ajouter la classe pour l'animation complète
   modal.classList.add('modal-open');
 }
-
-// Remplacer les appels directs style.display = "block" par cette fonction
-// Par exemple, remplacer :
-// document.getElementById("historiqueDetailsModal").style.display = "block";
-// par :
-// openModal("historiqueDetailsModal");
 
 // Améliorer l'affichage des changements dans les détails
 function renderChanges(modifications) {

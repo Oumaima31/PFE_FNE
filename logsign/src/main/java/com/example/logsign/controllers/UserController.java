@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.logsign.models.User;
 import com.example.logsign.services.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +36,17 @@ public class UserController {
     public String adminutilisateurs() {
         return "adminutilisateurs";
     }
-    @GetMapping("/logout")
-    public String logout() {
-        return "logout";
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        // Invalider la session
+        request.getSession().invalidate();
+        return "index"; // ou "/login"
     }
+    @GetMapping("/index")
+    public String loginPage() {
+        return "index"; // Nom de votre template de login
+    }
+
     
     @PostMapping("/login")
     public String login(@RequestParam String matricule, @RequestParam String motDePasse, 

@@ -53,7 +53,7 @@
                 <span>Liste des Utilisateurs</span>
             </a>
             <!-- Bouton de déconnexion -->
-            <a class="navbar-item" href="#" onclick="logout(); return false;">
+            <a class="navbar-item" href="/auth/index" onclick="logout(); return false;">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Déconnexion</span>
             </a>
@@ -311,7 +311,6 @@
                             <option value="En attente">En attente</option>
                             <option value="Validé">Validé</option>
                             <option value="Rejeté">Rejeté</option>
-                            <option value="En cours de traitement">En cours de traitement</option>
                         </select>
                     </div>
                 </div>
@@ -346,7 +345,7 @@
         </div>
     </footer>
 
-    <script src="/js/scriptadmin.js"></script>
+    <script src="/js/adminFNE.js"></script>
     <script>
         // Mettre à jour la date et l'heure toutes les secondes
         setInterval(updateDateTime, 1000);

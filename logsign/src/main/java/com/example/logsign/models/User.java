@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "utilisateur_id") // Nom exact de la colonne dans la base de données
+    @Column(name = "utilisateur_id") 
     private Long id;
 
     @Column(name = "nom")
@@ -25,7 +25,7 @@ public class User {
     @Column(name = "matricule")
     private String matricule;
 
-    @Column(name = "mot_de_passe") // Nom exact de la colonne dans la base de données
+    @Column(name = "mot_de_passe") 
     private String motDePasse;
 
     @Column(name = "aeroport")
