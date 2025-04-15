@@ -271,7 +271,7 @@ function filterData(searchTerm) {
       return (
         (fne.fne_id && fne.fne_id.toString().includes(searchTerm)) ||
         (fne.type_evt && fne.type_evt.toLowerCase().includes(searchTerm)) ||
-        (fne.REF_GNE && fne.REF_GNE.toLowerCase().includes(searchTerm)) ||
+        (fne.ref_gne && fne.ref_gne.toLowerCase().includes(searchTerm)) ||
         fneUserName.includes(searchTerm) ||
         historiqueMatch
       );
@@ -481,7 +481,7 @@ function renderTable() {
     row.innerHTML = `
       <td>${fne.fne_id}</td>
       <td>${fne.type_evt || ""}</td>
-      <td>${formatValue(fne.REF_GNE)}</td>
+      <td>${formatValue(fne.ref_gne)}</td>
       <td>${fneUserName}</td>
       <td>${formatDateTime(group.dateCreation)}</td>
       <td><span class="action-badge ${statusClass}">${currentStatus}</span></td>
@@ -601,7 +601,7 @@ function createHistoryModal(fne, historiques) {
             </div>
             <div class="detail-item">
               <label>REF GNE:</label>
-              <span>${formatValue(fne.REF_GNE)}</span>
+              <span>${formatValue(fne.ref_gne)}</span>
             </div>
             <div class="detail-item">
               <label>Organisme concerné:</label>
@@ -917,7 +917,7 @@ function createFNEPdfView(fne) {
               </div>
               <div class="pdf-field">
                 <label>REF GNE:</label>
-                <div class="pdf-value">${formatValue(fne.REF_GNE)}</div>
+                <div class="pdf-value">${formatValue(fne.ref_gne)}</div>
               </div>
             </div>
           </div>
@@ -1134,9 +1134,7 @@ function createFNEPdfView(fne) {
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
-        <button class="btn btn-primary" onclick="printFNE()">
-          <i class="fas fa-print"></i> Imprimer
-        </button>
+        
       </div>
     </div>
   `;
@@ -1146,75 +1144,6 @@ function createFNEPdfView(fne) {
   modalElement.innerHTML = modalHTML;
   modalElement.style.display = "block";
   modalElement.classList.add("pdf-modal");
-}
-
-// Fonction pour imprimer la FNE
-function printFNE() {
-  const modalContent = document.querySelector(".pdf-view").cloneNode(true);
-  
-  // Supprimer les boutons et éléments non nécessaires pour l'impression
-  const closeButton = modalContent.querySelector(".close-modal");
-  const footer = modalContent.querySelector(".modal-footer");
-  if (closeButton) closeButton.remove();
-  if (footer) footer.remove();
-  
-  // Créer une fenêtre d'impression
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>FNE - Impression</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-        <link rel="stylesheet" href="/css/styleadmin.css">
-        <link rel="stylesheet" href="/css/historiqueA.css">
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: white;
-          }
-          .pdf-view {
-            width: 100%;
-            margin: 0;
-            box-shadow: none;
-          }
-          .pdf-section {
-            page-break-inside: avoid;
-            margin-bottom: 20px;
-          }
-          .pdf-description {
-            white-space: pre-wrap;
-          }
-          @media print {
-            .modal-header {
-              background-color: #f0f0f0 !important;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .pdf-section-header {
-              background-color: #f9f9f9 !important;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        ${modalContent.outerHTML}
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-              setTimeout(function() {
-                window.close();
-              }, 500);
-            }, 500);
-          };
-        </script>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
 }
 
 // Fonction pour supprimer une FNE

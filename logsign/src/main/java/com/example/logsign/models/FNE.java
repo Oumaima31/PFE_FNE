@@ -12,7 +12,7 @@ public class FNE {
 
     private String type_evt;
     
-    private String REF_GNE;
+    private String ref_gne;
 
     private String Organisme_concerné;
     private LocalDate Date;
@@ -77,12 +77,12 @@ public class FNE {
         this.type_evt = type_evt;
     }
 
-    public String getREF_GNE() {
-        return REF_GNE;
+    public String getRef_gne() {
+        return ref_gne;
     }
 
-    public void setREF_GNE(String rEF_GNE) {
-        REF_GNE = rEF_GNE;
+    public void setRef_gne(String rEF_GNE) {
+        ref_gne = rEF_GNE;
     }
 
     public String getOrganisme_concerné() {

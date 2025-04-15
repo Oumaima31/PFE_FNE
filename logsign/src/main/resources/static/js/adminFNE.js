@@ -25,7 +25,7 @@ function toggleNavbar() {
   
   function updateRefGneNumber() {
     const type_evt = document.getElementById("type_evt").value
-    const REF_GNE = document.getElementById("REF_GNE")
+    const REF_GNE = document.getElementById("ref_gne")
     const notification = document.getElementById("notification")
     const notificationText = document.getElementById("notificationText")
   

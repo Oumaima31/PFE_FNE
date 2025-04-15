@@ -519,7 +519,7 @@ function viewHistoriqueDetails(historiqueId) {
 
             // Informations sur la FNE
             document.getElementById("detail-fne-type").textContent = fneType
-            document.getElementById("detail-fne-ref").textContent = fne.REF_GNE || ""
+            document.getElementById("detail-fne-ref").textContent = fne.ref_gne || ""
             document.getElementById("detail-fne-date").textContent = formatDate(fne.date)
             document.getElementById("detail-fne-lieu").textContent = fne.lieu_EVT || ""
 
@@ -786,7 +786,7 @@ function createFNEPdfView(fne) {
               </div>
               <div class="pdf-field">
                 <label>REF GNE:</label>
-                <div class="pdf-value">${formatValue(fne.REF_GNE)}</div>
+                <div class="pdf-value">${formatValue(fne.ref_gne)}</div>
               </div>
             </div>
           </div>

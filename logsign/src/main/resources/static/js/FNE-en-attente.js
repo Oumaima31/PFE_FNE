@@ -626,7 +626,7 @@ function createFNEPdfView(fne) {
               </div>
               <div class="pdf-field">
                 <label>REF GNE:</label>
-                <div class="pdf-value">${formatValue(fne.REF_GNE)}</div>
+                <div class="pdf-value">${formatValue(fne.ref_gne)}</div>
               </div>
             </div>
           </div>

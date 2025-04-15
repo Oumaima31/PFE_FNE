@@ -164,14 +164,14 @@ public class FNEController {
                     return "fneSML";
                 }
         
-                if (fne.getREF_GNE() == null || fne.getREF_GNE().isEmpty()) {
+                if (fne.getRef_gne() == null || fne.getRef_gne().isEmpty()) {
                     model.addAttribute("error", "La référence GNE est obligatoire.");
                     return "fneSML";
                 }
         
                 // Afficher les valeurs pour le débogage
                 System.out.println("Type d'événement: " + fne.getType_evt());
-                System.out.println("REF GNE: " + fne.getREF_GNE());
+                System.out.println("REF GNE: " + fne.getRef_gne());
         
                 // Soumettre la FNE
                 fneService.submitFNE(fne, user);
@@ -206,7 +206,7 @@ public class FNEController {
                     return "fneAdmin";
                 }
         
-                if (fne.getREF_GNE() == null || fne.getREF_GNE().isEmpty()) {
+                if (fne.getRef_gne() == null || fne.getRef_gne().isEmpty()) {
                     model.addAttribute("error", "La référence GNE est obligatoire.");
                     return "fneAdmin";
                 }
