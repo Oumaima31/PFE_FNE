@@ -800,7 +800,7 @@ function createFNEPdfView(fne) {
             <div class="pdf-row">
               <div class="pdf-field">
                 <label>Organisme concerné:</label>
-                <div class="pdf-value">${formatValue(fne.Organisme_concerné)}</div>
+                <div class="pdf-value">${formatValue(fne.organisme_concerné)}</div>
               </div>
               <div class="pdf-field">
                 <label>Date:</label>
@@ -830,88 +830,49 @@ function createFNEPdfView(fne) {
           </div>
         </div>
         
-<div class="pdf-section">
-    <div class="pdf-section-header">
-        <h3><i class="fas fa-plane"></i> 2. Aéronef(s) concerné(s)</h3>
-    </div>
-    <div class="pdf-section-content">
-        <h4>Aéronef A:</h4>
-        <div class="pdf-table">
-            <table>
+        <div class="pdf-section">
+          <div class="pdf-section-header">
+            <h3><i class="fas fa-plane"></i> 2. Aéronef(s) concerné(s)</h3>
+          </div>
+          <div class="pdf-section-content">
+            <div class="pdf-table">
+              <table>
                 <tr>
-                    <th>Indicatif/Immatriculation</th>
-                    <th>Code SSR</th>
-                    <th>Type appareil</th>
-                    <th>Règles de vol</th>
+                  <th>Indicatif/Immatriculation</th>
+                  <th>Code SSR</th>
+                  <th>Type appareil</th>
+                  <th>Règles de vol</th>
                 </tr>
                 <tr>
-                    <td>${formatValue(fne.indicatif_immatricultion_A)}</td>
-                    <td>${formatValue(fne.code_ssr_A)}</td>
-                    <td>${formatValue(fne.type_appareil_A)}</td>
-                    <td>${formatValue(fne.regles_vol_A)}</td>
+                  <td>${formatValue(fne.indicatif_immatricultion)}</td>
+                  <td>${formatValue(fne.code_ssr)}</td>
+                  <td>${formatValue(fne.type_appareil)}</td>
+                  <td>${formatValue(fne.regles_vol)}</td>
                 </tr>
-            </table>
+              </table>
+            </div>
+            <div class="pdf-table">
+              <table>
+                <tr>
+                  <th>Terrain départ</th>
+                  <th>Terrain arrivée</th>
+                  <th>Cap</th>
+                  <th>Altitude réelle</th>
+                  <th>Altitude autorisée</th>
+                  <th>Vitesse</th>
+                </tr>
+                <tr>
+                  <td>${formatValue(fne.terrain_depart)}</td>
+                  <td>${formatValue(fne.terrain_arrivée)}</td>
+                  <td>${formatValue(fne.cap)}</td>
+                  <td>${formatValue(fne.altitude_reel)}</td>
+                  <td>${formatValue(fne.altitude_autorise)}</td>
+                  <td>${formatValue(fne.vitesse)}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="pdf-table">
-            <table>
-                <tr>
-                    <th>Terrain départ</th>
-                    <th>Terrain arrivée</th>
-                    <th>Cap</th>
-                    <th>Altitude réelle</th>
-                    <th>Altitude autorisée</th>
-                    <th>Vitesse</th>
-                </tr>
-                <tr>
-                    <td>${formatValue(fne.terrain_depart_A)}</td>
-                    <td>${formatValue(fne.terrain_arrivée_A)}</td>
-                    <td>${formatValue(fne.cap_A)}</td>
-                    <td>${formatValue(fne.altitude_reel_A)}</td>
-                    <td>${formatValue(fne.altitude_autorise_A)}</td>
-                    <td>${formatValue(fne.vitesse_A)}</td>
-                </tr>
-            </table>
-        </div>
-        
-        <h4>Aéronef B:</h4>
-        <div class="pdf-table">
-            <table>
-                <tr>
-                    <th>Indicatif/Immatriculation</th>
-                    <th>Code SSR</th>
-                    <th>Type appareil</th>
-                    <th>Règles de vol</th>
-                </tr>
-                <tr>
-                    <td>${formatValue(fne.indicatif_immatricultion_B)}</td>
-                    <td>${formatValue(fne.code_ssr_B)}</td>
-                    <td>${formatValue(fne.type_appareil_B)}</td>
-                    <td>${formatValue(fne.regles_vol_B)}</td>
-                </tr>
-            </table>
-        </div>
-        <div class="pdf-table">
-            <table>
-                <tr>
-                    <th>Terrain départ</th>
-                    <th>Terrain arrivée</th>
-                    <th>Cap</th>
-                    <th>Altitude réelle</th>
-                    <th>Altitude autorisée</th>
-                    <th>Vitesse</th>
-                </tr>
-                <tr>
-                    <td>${formatValue(fne.terrain_depart_B)}</td>
-                    <td>${formatValue(fne.terrain_arrivée_B)}</td>
-                    <td>${formatValue(fne.cap_B)}</td>
-                    <td>${formatValue(fne.altitude_reel_B)}</td>
-                    <td>${formatValue(fne.altitude_autorise_B)}</td>
-                    <td>${formatValue(fne.vitesse_B)}</td>
-                </tr>
-            </table>
-        </div>
-    </div>
-</div>
         
         <div class="pdf-section">
           <div class="pdf-section-header">
