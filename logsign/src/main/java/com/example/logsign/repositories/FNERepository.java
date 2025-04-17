@@ -20,8 +20,8 @@ public interface FNERepository extends JpaRepository<FNE, Long> {
     List<FNE> findByTypeEvt(@Param("typeEvt") String typeEvt);
     
     // Trouver les FNE par référence GNE
-    @Query("SELECT f FROM FNE f WHERE f.REF_GNE = :REF_GNE")
-    List<FNE> findByrefGne(String REF_GNE);  // Changed from findByREFGNE to findByREF_GNE
+    @Query("SELECT f FROM FNE f WHERE f.ref_gne = :ref_gne")
+    List<FNE> findByrefGne(String ref_gne);  // Changed from findByREFGNE to findByREF_GNE
     
     // Trouver toutes les FNE triées par date (le plus récent en premier)
     @Query("SELECT f FROM FNE f ORDER BY f.Date DESC")

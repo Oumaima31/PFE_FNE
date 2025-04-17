@@ -52,7 +52,6 @@ public class FNE {
     private Boolean evt_implique_véhicule_materiel_assistance_sol = false;
     private String type_materiel_véhicule;
     private String description_evt;
-    private String nom_rédacteur;
     private String statut = "En attente";
 
     
@@ -342,13 +341,7 @@ public class FNE {
         this.description_evt = description_evt;
     }
 
-    public String getNom_rédacteur() {
-        return nom_rédacteur;
-    }
-
-    public void setNom_rédacteur(String nom_rédacteur) {
-        this.nom_rédacteur = nom_rédacteur;
-    }
+    
 
     public String getStatut() {
         return statut;

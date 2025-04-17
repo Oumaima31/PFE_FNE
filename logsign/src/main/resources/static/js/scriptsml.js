@@ -1,31 +1,140 @@
+// Fonction pour combiner les données des aéronefs A et B en un seul objet JSON
+function combineAircraftData() {
+  const aircraftA = {
+      indicatif: document.getElementById('indicatif_immatricultion_A').value,
+      code_ssr: document.getElementById('code_ssr_A').value,
+      type_appareil: document.getElementById('type_appareil_A').value,
+      regles_vol: document.getElementById('regles_vol_A').value,
+      terrain_depart: document.getElementById('terrain_depart_A').value,
+      terrain_arrivee: document.getElementById('terrain_arrivée_A').value,
+      cap: document.getElementById('cap_A').value,
+      altitude_reel: document.getElementById('altitude_reel_A').value,
+      altitude_autorise: document.getElementById('altitude_autorise_A').value,
+      vitesse: document.getElementById('vitesse_A').value
+  };
+
+  const aircraftB = {
+      indicatif: document.getElementById('indicatif_immatricultion_B').value,
+      code_ssr: document.getElementById('code_ssr_B').value,
+      type_appareil: document.getElementById('type_appareil_B').value,
+      regles_vol: document.getElementById('regles_vol_B').value,
+      terrain_depart: document.getElementById('terrain_depart_B').value,
+      terrain_arrivee: document.getElementById('terrain_arrivée_B').value,
+      cap: document.getElementById('cap_B').value,
+      altitude_reel: document.getElementById('altitude_reel_B').value,
+      altitude_autorise: document.getElementById('altitude_autorise_B').value,
+      vitesse: document.getElementById('vitesse_B').value
+  };
+
+  return JSON.stringify({
+      aircraftA: aircraftA,
+      aircraftB: aircraftB
+  });
+}
+
+// Fonction de validation pour l'indicatif
+function validateIndicatif(input, suffix) {
+  const value = input.value.trim();
+  const errorElement = document.getElementById(`indicatif-error-${suffix}`);
+  
+  // Expression régulière: exactement 4 caractères alphanumériques
+  const regex = /^[A-Za-z0-9]{4}$/;
+  
+  if (value && !regex.test(value)) {
+      errorElement.style.display = 'block';
+      return false;
+  } else {
+      errorElement.style.display = 'none';
+      return true;
+  }
+}
+
+// Fonction de validation pour le code SSR
+function validateSSR(input, suffix) {
+  const value = input.value.trim();
+  const errorElement = document.getElementById(`ssr-error-${suffix}`);
+  
+  // Expression régulière: exactement 4 chiffres
+  const regex = /^[A-Za-z0-9]{4}$/;
+  
+  if (value && !regex.test(value)) {
+      errorElement.style.display = 'block';
+      return false;
+  } else {
+      errorElement.style.display = 'none';
+      return true;
+  }
+}
+
+// Validation lors de la perte de focus
+document.getElementById('indicatif_immatricultion_A').addEventListener('blur', function() {
+  validateIndicatif(this, 'A');
+});
+
+document.getElementById('code_ssr_A').addEventListener('blur', function() {
+  validateSSR(this, 'A');
+});
+
+document.getElementById('indicatif_immatricultion_B').addEventListener('blur', function() {
+  validateIndicatif(this, 'B');
+});
+
+document.getElementById('code_ssr_B').addEventListener('blur', function() {
+  validateSSR(this, 'B');
+});
+
+// Validation avant soumission du formulaire
+document.querySelector('form').addEventListener('submit', function(e) {
+  // Valider tous les champs
+  const indicatifAValid = validateIndicatif(document.getElementById('indicatif_immatricultion_A'), 'A');
+  const ssrAValid = validateSSR(document.getElementById('code_ssr_A'), 'A');
+  const indicatifBValid = validateIndicatif(document.getElementById('indicatif_immatricultion_B'), 'B');
+  const ssrBValid = validateSSR(document.getElementById('code_ssr_B'), 'B');
+  
+  // Combiner les données des aéronefs
+  const combinedAircraftData = combineAircraftData();
+  
+  // Créer un champ caché pour envoyer les données combinées
+  const hiddenField = document.createElement('input');
+  hiddenField.type = 'hidden';
+  hiddenField.name = 'aircraft_data';
+  hiddenField.value = combinedAircraftData;
+  this.appendChild(hiddenField);
+  
+  // Vérifier les validations
+  if (!indicatifAValid || !ssrAValid || !indicatifBValid || !ssrBValid) {
+      e.preventDefault(); // Empêche la soumission du formulaire
+      alert('Veuillez corriger les erreurs avant de soumettre le formulaire.');
+  }
+});
+
 // Fonction pour basculer l'affichage de la navbar sur mobile
 function toggleNavbar() {
-  const navbarContainer = document.querySelector(".navbar-container")
-  navbarContainer.classList.toggle("active")
+  const navbarContainer = document.querySelector(".navbar-container");
+  navbarContainer.classList.toggle("active");
 }
 
 // Fonction pour basculer l'affichage des sections
 function toggleSection(headerElement) {
   // Trouver la section parente
-  const section = headerElement.closest('.collapsible-section');
-  const content = section.querySelector('.section-content');
-  const icon = headerElement.querySelector('.toggle-icon i');
-  
+  const section = headerElement.closest(".collapsible-section");
+  const content = section.querySelector(".section-content");
+  const icon = headerElement.querySelector(".toggle-icon i");
+
   // Basculer la classe active
-  headerElement.classList.toggle('active');
-  content.classList.toggle('active');
-  
+  headerElement.classList.toggle("active");
+  content.classList.toggle("active");
+
   // Changer l'icône
-  if (content.classList.contains('active')) {
-    icon.className = 'fas fa-chevron-up';
+  if (content.classList.contains("active")) {
+      icon.className = "fas fa-chevron-up";
   } else {
-    icon.className = 'fas fa-chevron-down';
+      icon.className = "fas fa-chevron-down";
   }
 }
-
 function updateRefGneNumber() {
   const type_evt = document.getElementById("type_evt").value
-  const REF_GNE = document.getElementById("ref_gne")
+  const ref_gne = document.getElementById("ref_gne")
   const notification = document.getElementById("notification")
 
   // Créer un élément span pour le texte de notification si nécessaire
@@ -36,7 +145,7 @@ function updateRefGneNumber() {
     notification.appendChild(notificationText)
   }
 
-  REF_GNE.innerHTML = "" // Efface les options précédentes
+  ref_gne.innerHTML = "" // Efface les options précédentes
   notification.style.display = "none" // Masque la notification par défaut
 
   let start, end, prefix, message, colorClass
@@ -79,7 +188,7 @@ function updateRefGneNumber() {
     const option = document.createElement("option")
     option.value = `${prefix}/${i}`
     option.textContent = `${prefix}/${i}`
-    REF_GNE.appendChild(option)
+    ref_gne.appendChild(option)
   }
 
   // Afficher la notification avec animation
