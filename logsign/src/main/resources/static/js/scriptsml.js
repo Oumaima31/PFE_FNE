@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const indicatifError = document.getElementById('indicatif-error');
   
   indicatifInput.addEventListener('blur', function() {
-      if (!/^[A-Za-z0-9]{4}$/.test(this.value)) {
+      if (!/^[A-Za-z]{4}$/.test(this.value)) {
           indicatifError.style.display = 'block';
       } else {
           indicatifError.style.display = 'none';
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const ssrError = document.getElementById('ssr-error');
   
   ssrInput.addEventListener('blur', function() {
-      if (!/^[A-Za-z0-9]{4}$/.test(this.value)) {
+      if (!/^[A-Za-z]{4}$/.test(this.value)) {
           ssrError.style.display = 'block';
       } else {
           ssrError.style.display = 'none';
@@ -28,12 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('form').addEventListener('submit', function(e) {
       let isValid = true;
       
-      if (!/^[A-Za-z0-9]{4}$/.test(indicatifInput.value)) {
+      if (!/^[A-Za-z]{4}$/.test(indicatifInput.value)) {
           indicatifError.style.display = 'block';
           isValid = false;
       }
       
-      if (!/^[A-Za-z0-9]{4}$/.test(ssrInput.value)) {
+      if (!/^[A-Za-z]{4}$/.test(ssrInput.value)) {
           ssrError.style.display = 'block';
           isValid = false;
       }

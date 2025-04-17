@@ -1,3 +1,49 @@
+// Validation des champs Indicatif et Code SSR
+document.addEventListener('DOMContentLoaded', function() {
+  // Validation Indicatif
+  const indicatifInput = document.getElementById('indicatif_immatricultion');
+  const indicatifError = document.getElementById('indicatif-error');
+  
+  indicatifInput.addEventListener('blur', function() {
+      if (!/^[A-Za-z]{4}$/.test(this.value)) {
+          indicatifError.style.display = 'block';
+      } else {
+          indicatifError.style.display = 'none';
+      }
+  });
+
+  // Validation Code SSR
+  const ssrInput = document.getElementById('code_ssr');
+  const ssrError = document.getElementById('ssr-error');
+  
+  ssrInput.addEventListener('blur', function() {
+      if (!/^[A-Za-z]{4}$/.test(this.value)) {
+          ssrError.style.display = 'block';
+      } else {
+          ssrError.style.display = 'none';
+      }
+  });
+
+  // Validation avant soumission
+  document.querySelector('form').addEventListener('submit', function(e) {
+      let isValid = true;
+      
+      if (!/^[A-Za-z]{4}$/.test(indicatifInput.value)) {
+          indicatifError.style.display = 'block';
+          isValid = false;
+      }
+      
+      if (!/^[A-Za-z]{4}$/.test(ssrInput.value)) {
+          ssrError.style.display = 'block';
+          isValid = false;
+      }
+      
+      if (!isValid) {
+          e.preventDefault();
+          alert('Veuillez corriger les erreurs dans les champs avant de soumettre.');
+      }
+  });
+});
 // Fonction pour basculer l'affichage de la navbar sur mobile
 function toggleNavbar() {
   const navbarContainer = document.querySelector(".navbar-container")
