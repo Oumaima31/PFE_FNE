@@ -3,8 +3,6 @@ package com.example.logsign.models;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 public class FNE {
@@ -22,6 +20,16 @@ public class FNE {
     private String lieu_EVT;
     private String moyen_detection;
     private String impacts_operationnels;
+    private String Indicatif_immatricultion;
+    private String code_ssr;
+    private String type_appareil;
+    private String regles_vol;
+    private String terrain_depart;
+    private String terrain_arrivée;
+    private String cap;
+    private String altitude_reel;
+    private String altitude_autorise;
+    private String vitesse;
     
     // Initialize numeric fields with default values to avoid null constraint violations
     private Integer passagers = 0;
@@ -50,25 +58,7 @@ public class FNE {
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private User utilisateur;
-    
-    @OneToMany(mappedBy = "fne", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Aircraft> aircrafts = new ArrayList<>();
-    
-    // Méthode utilitaire pour ajouter un aéronef
-    public void addAircraft(Aircraft aircraft) {
-        aircrafts.add(aircraft);
-        aircraft.setFne(this);
-    }
 
-    // ... autres getters et setters
-    
-    public List<Aircraft> getAircrafts() {
-        return aircrafts;
-    }
-
-    public void setAircrafts(List<Aircraft> aircrafts) {
-        this.aircrafts = aircrafts;
-    }
     // Getters and Setters
     public Long getFne_id() {
         return fne_id;
@@ -140,6 +130,86 @@ public class FNE {
 
     public void setImpacts_operationnels(String impacts_operationnels) {
         this.impacts_operationnels = impacts_operationnels;
+    }
+
+    public String getIndicatif_immatricultion() {
+        return Indicatif_immatricultion;
+    }
+
+    public void setIndicatif_immatricultion(String indicatif_immatricultion) {
+        Indicatif_immatricultion = indicatif_immatricultion;
+    }
+
+    public String getCode_ssr() {
+        return code_ssr;
+    }
+
+    public void setCode_ssr(String code_ssr) {
+        this.code_ssr = code_ssr;
+    }
+
+    public String getType_appareil() {
+        return type_appareil;
+    }
+
+    public void setType_appareil(String type_appareil) {
+        this.type_appareil = type_appareil;
+    }
+
+    public String getRegles_vol() {
+        return regles_vol;
+    }
+
+    public void setRegles_vol(String regles_vol) {
+        this.regles_vol = regles_vol;
+    }
+
+    public String getTerrain_depart() {
+        return terrain_depart;
+    }
+
+    public void setTerrain_depart(String terrain_depart) {
+        this.terrain_depart = terrain_depart;
+    }
+
+    public String getTerrain_arrivée() {
+        return terrain_arrivée;
+    }
+
+    public void setTerrain_arrivée(String terrain_arrivée) {
+        this.terrain_arrivée = terrain_arrivée;
+    }
+
+    public String getCap() {
+        return cap;
+    }
+
+    public void setCap(String cap) {
+        this.cap = cap;
+    }
+
+    public String getAltitude_reel() {
+        return altitude_reel;
+    }
+
+    public void setAltitude_reel(String altitude_reel) {
+        this.altitude_reel = altitude_reel;
+    }
+
+    public String getAltitude_autorise() {
+        return altitude_autorise;
+    }
+
+    public void setAltitude_autorise(String altitude_autorise) {
+        this.altitude_autorise = altitude_autorise;
+    }
+
+    public String getVitesse() {
+        return vitesse;
+    }
+
+    public void setVitesse(String vitesse) {
+        this.vitesse = vitesse;
     }
 
     public Integer getPassagers() {

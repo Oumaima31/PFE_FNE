@@ -1,74 +1,40 @@
-// Validation pour les champs A et B
+// Validation des champs Indicatif et Code SSR
 document.addEventListener('DOMContentLoaded', function() {
-  // Validation Indicatif A
-  const indicatifInputA = document.getElementById('indicatif_immatricultion_A');
-  const indicatifErrorA = document.getElementById('indicatif_error_A');
+  // Validation Indicatif
+  const indicatifInput = document.getElementById('indicatif_immatricultion');
+  const indicatifError = document.getElementById('indicatif_error');
   
-  indicatifInputA?.addEventListener('blur', function() {
+  indicatifInput.addEventListener('blur', function() {
       if (!/^[A-Za-z]{4}$/.test(this.value)) {
-          indicatifErrorA.style.display = 'block';
+          indicatifError.style.display = 'block';
       } else {
-          indicatifErrorA.style.display = 'none';
+          indicatifError.style.display = 'none';
       }
   });
 
-  // Validation Code SSR A
-  const ssrInputA = document.getElementById('code_ssr_A');
-  const ssrErrorA = document.getElementById('ssr_error_A');
+  // Validation Code SSR
+  const ssrInput = document.getElementById('code_ssr');
+  const ssrError = document.getElementById('ssr_error');
   
-  ssrInputA?.addEventListener('blur', function() {
+  ssrInput.addEventListener('blur', function() {
       if (!/^[A-Za-z]{4}$/.test(this.value)) {
-          ssrErrorA.style.display = 'block';
+          ssrError.style.display = 'block';
       } else {
-          ssrErrorA.style.display = 'none';
-      }
-  });
-
-  // Validation Indicatif B
-  const indicatifInputB = document.getElementById('indicatif_immatricultion_B');
-  const indicatifErrorB = document.getElementById('indicatif_error_B');
-  
-  indicatifInputB?.addEventListener('blur', function() {
-      if (!/^[A-Za-z]{4}$/.test(this.value)) {
-          indicatifErrorB.style.display = 'block';
-      } else {
-          indicatifErrorB.style.display = 'none';
-      }
-  });
-
-  // Validation Code SSR B
-  const ssrInputB = document.getElementById('code_ssr_B');
-  const ssrErrorB = document.getElementById('ssr_error_B');
-  
-  ssrInputB?.addEventListener('blur', function() {
-      if (!/^[A-Za-z]{4}$/.test(this.value)) {
-          ssrErrorB.style.display = 'block';
-      } else {
-          ssrErrorB.style.display = 'none';
+          ssrError.style.display = 'none';
       }
   });
 
   // Validation avant soumission
-  document.querySelector('form')?.addEventListener('submit', function(e) {
+  document.querySelector('form').addEventListener('submit', function(e) {
       let isValid = true;
       
-      if (indicatifInputA && !/^[A-Za-z]{4}$/.test(indicatifInputA.value)) {
-          indicatifErrorA.style.display = 'block';
+      if (!/^[A-Za-z]{4}$/.test(indicatifInput.value)) {
+          indicatifError.style.display = 'block';
           isValid = false;
       }
       
-      if (ssrInputA && !/^[A-Za-z]{4}$/.test(ssrInputA.value)) {
-          ssrErrorA.style.display = 'block';
-          isValid = false;
-      }
-      
-      if (indicatifInputB && indicatifInputB.value && !/^[A-Za-z]{4}$/.test(indicatifInputB.value)) {
-          indicatifErrorB.style.display = 'block';
-          isValid = false;
-      }
-      
-      if (ssrInputB && ssrInputB.value && !/^[A-Za-z]{4}$/.test(ssrInputB.value)) {
-          ssrErrorB.style.display = 'block';
+      if (!/^[A-Za-z]{4}$/.test(ssrInput.value)) {
+          ssrError.style.display = 'block';
           isValid = false;
       }
       

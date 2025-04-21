@@ -1,10 +1,9 @@
 package com.example.logsign.services;
 
-import com.example.logsign.models.Aircraft;
 import com.example.logsign.models.FNE;
 import com.example.logsign.models.Historique;
 import com.example.logsign.models.User;
-import com.example.logsign.repositories.AircraftRepository;
+
 import com.example.logsign.repositories.FNERepository;
 import com.example.logsign.repositories.HistoriqueRepository;
 import jakarta.persistence.EntityManager;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import jakarta.persistence.Query;
@@ -59,8 +57,6 @@ private NotificationService notificationService;
     public List<FNE> getFNEByType(String typeEvt) {
         return fneRepository.findByTypeEvt(typeEvt);
     }
-@Autowired
-    private AircraftRepository aircraftRepository;
 
     // Modifiez la méthode submitFNE comme suit:
 public FNE submitFNE(FNE fne, User user) {
@@ -99,15 +95,7 @@ public FNE submitFNE(FNE fne, User user) {
 
     // Enregistrer la FNE dans la base de données
     FNE savedFNE = fneRepository.save(fne);
-    // Sauvegarder les aéronefs
-    if (fne.getAircrafts() != null && !fne.getAircrafts().isEmpty()) {
-        List<Aircraft> savedAircrafts = new ArrayList<>();
-        for (Aircraft aircraft : fne.getAircrafts()) {
-            aircraft.setFne(savedFNE); // Set the persisted FNE
-            savedAircrafts.add(aircraftRepository.save(aircraft));
-        }
-        savedFNE.setAircrafts(savedAircrafts);
-    }
+    
     // Créer une entrée dans l'historique
     Historique historique = new Historique();
     historique.setFne(savedFNE);
@@ -118,7 +106,6 @@ public FNE submitFNE(FNE fne, User user) {
     
     // Créer une notification pour les administrateurs
     notificationService.createFneNotification(savedFNE, user);
-
 
     return savedFNE;
 }

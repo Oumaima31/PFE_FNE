@@ -844,7 +844,7 @@ function createFNEPdfView(fne) {
                   <th>Règles de vol</th>
                 </tr>
                 <tr>
-                  <td>${formatValue(aircrafts.indicatif_immatricultion)}</td>
+                  <td>${formatValue(fne.indicatif_immatricultion)}</td>
                   <td>${formatValue(fne.code_ssr)}</td>
                   <td>${formatValue(fne.type_appareil)}</td>
                   <td>${formatValue(fne.regles_vol)}</td>
