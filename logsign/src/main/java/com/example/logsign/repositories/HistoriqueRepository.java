@@ -26,4 +26,7 @@ public interface HistoriqueRepository extends JpaRepository<Historique, Long> {
 @Modifying
 @Query("DELETE FROM Historique h WHERE h.fne.fne_id = :fneId")
 void deleteByFneId(@Param("fneId") Long fneId);
+// Dans HistoriqueRepository.java
+
 }
+

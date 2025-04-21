@@ -46,4 +46,10 @@ public class HistoriqueService {
     public Historique saveHistorique(Historique historique) {
         return historiqueRepository.save(historique);
     }
+    // Dans HistoriqueService.java
+
+// Ajoutez cette méthode
+public void deleteByFneId(Long fneId) {
+    historiqueRepository.deleteByFneId(fneId);
+}
 }

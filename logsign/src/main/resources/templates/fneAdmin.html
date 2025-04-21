@@ -139,6 +139,7 @@
                     <div class="table-responsive">
                         <table>
                             <tr>
+                                <th></th>
                                 <th>Indicatif et immatriculation</th>
                                 <th>Code SSR</th>
                                 <th>Type appareil</th>
@@ -151,21 +152,22 @@
                                 <th>Vitesse</th>
                             </tr>
                             <tr>
+                                <td><strong>A:</strong></td>
                                 <td>
-                                    <input type="text" name="indicatif_immatricultion" id="indicatif_immatricultion" class="enhanced-input">
-                                    <div id="indicatif-error" class="error-message" style="display: none; color: red; font-size: 0.8em;">
+                                    <input type="text" name="indicatif_immatricultion_A" id="indicatif_immatricultion_A" class="enhanced-input">
+                                    <div id="indicatif_error_A" class="error-message" style="display: none; color: red; font-size: 0.8em;">
                                         Veuillez entrer un indicateur valide (4 caractères)
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="text" name="code_ssr" id="code_ssr" class="enhanced-input">
-                                    <div id="ssr-error" class="error-message" style="display: none; color: red; font-size: 0.8em;">
+                                    <input type="text" name="code_ssr_A" id="code_ssr_A" class="enhanced-input">
+                                    <div id="ssr_error_A" class="error-message" style="display: none; color: red; font-size: 0.8em;">
                                         Veuillez entrer un code SSR valide (4 chiffres)
                                     </div>
                                 </td>
-                                <td><input type="text" name="type_appareil" id="type_appareil" class="enhanced-input"></td>
+                                <td><input type="text" name="type_appareil_A" id="type_appareil_A" class="enhanced-input"></td>
                                 <td>
-                                    <select name="regles_vol" id="regles_vol" class="enhanced-select">
+                                    <select name="regles_vol_A" id="regles_vol_A" class="enhanced-select">
                                         <option value=""></option>
                                         <option value="IFR">IFR</option>
                                         <option value="VFR">VFR</option>
@@ -173,11 +175,11 @@
                                         <option value="VFR/IFR">VFR/IFR</option>   
                                     </select>
                                 </td>
-                                <td><input type="text" name="terrain_depart" id="terrain_depart" class="enhanced-input"></td>
-                                <td><input type="text" name="terrain_arrivée" id="terrain_arrivée" class="enhanced-input"></td>
-                                <td><input type="text" name="cap" id="cap" class="enhanced-input"></td>
+                                <td><input type="text" name="terrain_depart_A" id="terrain_depart_A" class="enhanced-input"></td>
+                                <td><input type="text" name="terrain_arrivée_A" id="terrain_arrivée_A" class="enhanced-input"></td>
+                                <td><input type="text" name="cap_A" id="cap_A" class="enhanced-input"></td>
                                 <td>
-                                    <select name="altitude_reel" id="altitude_reel" class="enhanced-select">
+                                    <select name="altitude_reel_A" id="altitude_reel_A" class="enhanced-select">
                                         <option value=""></option>
                                         <option value="pied">pied</option>
                                         <option value="FL">FL</option>
@@ -185,14 +187,57 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <select name="altitude_autorise" id="altitude_autorise" class="enhanced-select">
+                                    <select name="altitude_autorise_A" id="altitude_autorise_A" class="enhanced-select">
                                         <option value=""></option>
                                         <option value="pied">pied</option>
                                         <option value="FL">FL</option>
                                         <option value="métre">métre</option>  
                                     </select>
                                 </td>
-                                <td><input type="text" name="vitesse" id="vitesse" class="enhanced-input"></td>
+                                <td><input type="text" name="vitesse_A" id="vitesse_A" class="enhanced-input"></td>
+                            </tr>                           
+                            <tr>
+                                <td><strong>B:</strong></td>
+                                <td>
+                                    <input type="text" name="indicatif_immatricultion_B" id="indicatif_immatricultion_B" class="enhanced-input">
+                                    <div id="indicatif_error_B" class="error-message" style="display: none;">
+                                        Veuillez entrer un indicateur valide (4 caractères)</div>
+                                </td>
+                                <td>
+                                    <input type="text" name="code_ssr_B" id="code_ssr_B" class="enhanced-input">
+                                    <div id="ssr_error_B" class="error-message" style="display: none;">
+                                    Veuillez entrer un code SSR valide (4 chiffres)</div>
+                                </td>
+                                <td><input type="text" name="type_appareil_B" id="type_appareil_B" class="enhanced-input"></td>
+                                <td>
+                                    <select name="regles_vol_B" id="regles_vol_B" class="enhanced-select">
+                                    <option value=""></option>
+                                    <option value="IFR">IFR</option>
+                                    <option value="VFR">VFR</option>
+                                    <option value="IFR/VFR">IFR/VFR</option>
+                                    <option value="VFR/IFR">VFR/IFR</option>   
+                                    </select>
+                                </td>
+                                <td><input type="text" name="terrain_depart_B" id="terrain_depart_B" class="enhanced-input"></td>
+                                <td><input type="text" name="terrain_arrivée_B" id="terrain_arrivée_B" class="enhanced-input"></td>
+                                <td><input type="text" name="cap_B" id="cap_B" class="enhanced-input"></td>
+                                <td>
+                                    <select name="altitude_reel_B" id="altitude_reel_B" class="enhanced-select">
+                                        <option value=""></option>
+                                        <option value="pied">pied</option>
+                                        <option value="FL">FL</option>
+                                        <option value="métre">métre</option>  
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="altitude_autorise_B" id="altitude_autorise_B" class="enhanced-select">
+                                    <option value=""></option>
+                                    <option value="pied">pied</option>
+                                    <option value="FL">FL</option>
+                                    <option value="métre">métre</option>  
+                                    </select>
+                                </td>
+                                <td><input type="text" name="vitesse_B" id="vitesse_B" class="enhanced-input"></td>
                             </tr>
                         </table>
                     </div>
