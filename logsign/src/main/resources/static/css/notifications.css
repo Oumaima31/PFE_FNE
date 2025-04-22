@@ -167,7 +167,60 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
     outline: none;
   }
-  
+  /* Styles pour les badges d'urgence */
+.urgence-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.urgence-haute {
+  background-color: #ef4444;
+  color: white;
+}
+
+.urgence-moyenne {
+  background-color: #f97316;
+  color: white;
+}
+
+.urgence-basse {
+  background-color: #22c55e;
+  color: white;
+}
+
+.urgence-technique {
+  background-color: #9ca3af;
+  color: white;
+}
+
+/* Styles pour les badges de moyen */
+.moyen-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.moyen-email {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.moyen-sms {
+  background-color: #8b5cf6;
+  color: white;
+}
+
+.moyen-systeme {
+  background-color: #6b7280;
+  color: white;
+}
   /* Boutons */
   .btn {
     padding: 0.6rem 1.25rem;

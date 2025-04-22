@@ -3,21 +3,23 @@ package com.example.logsign.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.example.logsign.models.Notification;
 
 import java.util.List;
 
+@Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     
-    // Trouver les notifications par utilisateur
-    @Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :userId ORDER BY n.date_envoi DESC")
-    List<Notification> findByUtilisateurId(@Param("userId") Long userId);
+    /**
+     * Trouve les notifications destinées à un utilisateur spécifique
+     */
+    List<Notification> findByUtilisateurId(Long utilisateurId);
     
-    // Trouver les notifications par FNE
-    @Query("SELECT n FROM Notification n WHERE n.fne.fne_id = :fneId ORDER BY n.date_envoi DESC")
-    List<Notification> findByFneId(@Param("fneId") Long fneId);
-    
-    
+    /**
+     * Trouve les notifications liées à une liste d'IDs de FNE
+     */
+    @Query("SELECT n FROM Notification n WHERE n.fne.fne_id IN :fneIds")
+    List<Notification> findByFneIdIn(@Param("fneIds") List<Long> fneIds);
 }
-

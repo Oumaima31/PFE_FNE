@@ -59,48 +59,55 @@ function showError(message) {
 
 // Fonction pour charger les notifications de l'utilisateur connecté
 function loadNotificationsData() {
-  // Afficher un indicateur de chargement
-  const tableBody = document.querySelector("#notifications-table tbody");
-  tableBody.innerHTML = `
-    <tr>
-      <td colspan="7" style="text-align: center; padding: 30px;">
-        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #76a4d6; margin-bottom: 10px;"></i>
-        <p>Chargement des notifications...</p>
-      </td>
-    </tr>
-  `;
-
-  // Faire une requête AJAX pour récupérer les notifications de l'utilisateur connecté
-  fetch(`/auth/api/notifications`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des notifications");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log("Données reçues:", data); // Afficher les données pour déboguer
-      notificationsData = data;
-      filteredData = [...notificationsData];
-      totalPages = Math.ceil(filteredData.length / 10);
-
-      // Afficher les données
-      renderTable();
-      updatePagination();
-    })
-    .catch((error) => {
-      console.error("Erreur:", error);
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="7" style="text-align: center; padding: 30px;">
-            <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #ef4444; margin-bottom: 10px;"></i>
-            <p>Erreur lors du chargement des notifications. Veuillez réessayer.</p>
-            <button onclick="loadNotificationsData()" class="btn btn-primary">Réessayer</button>
-          </td>
-        </tr>
-      `;
-    });
-}
+    // Afficher un indicateur de chargement
+    const tableBody = document.querySelector("#notifications-table tbody");
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 30px;">
+          <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #76a4d6; margin-bottom: 10px;"></i>
+          <p>Chargement des notifications...</p>
+        </td>
+      </tr>
+    `;
+  
+    // Faire une requête AJAX pour récupérer les notifications de l'utilisateur connecté
+    fetch(`/auth/api/notifications`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erreur lors de la récupération des notifications");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Données reçues:", data); // Afficher les données pour déboguer
+        
+        // Trier les notifications par date d'envoi (de la plus récente à la plus ancienne)
+        notificationsData = data.sort((a, b) => {
+          const dateA = new Date(a.date_envoi || 0);
+          const dateB = new Date(b.date_envoi || 0);
+          return dateB - dateA; // Ordre décroissant (plus récent en premier)
+        });
+        
+        filteredData = [...notificationsData];
+        totalPages = Math.ceil(filteredData.length / 10) || 1;
+  
+        // Afficher les données
+        renderTable();
+        updatePagination();
+      })
+      .catch((error) => {
+        console.error("Erreur:", error);
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 30px;">
+              <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #ef4444; margin-bottom: 10px;"></i>
+              <p>Erreur lors du chargement des notifications. Veuillez réessayer.</p>
+              <button onclick="loadNotificationsData()" class="btn btn-primary">Réessayer</button>
+            </td>
+          </tr>
+        `;
+      });
+  }
 
 // Fonction pour configurer les écouteurs d'événements
 function setupEventListeners() {
@@ -119,6 +126,9 @@ function setupEventListeners() {
 
   // Filtres
   document.getElementById("filterBtn").addEventListener("click", applyFilters);
+  
+  // Réinitialiser les filtres
+  document.getElementById("resetBtn").addEventListener("click", resetFilters);
 
   // Pagination
   document.getElementById("prevPage").addEventListener("click", () => {
@@ -166,7 +176,7 @@ function filterData(searchTerm) {
   }
 
   currentPage = 1;
-  totalPages = Math.ceil(filteredData.length / 10);
+  totalPages = Math.ceil(filteredData.length / 10) || 1;
   renderTable();
   updatePagination();
 }
@@ -229,6 +239,25 @@ function applyFilters() {
   updatePagination();
 }
 
+// Fonction pour déterminer la classe d'urgence en fonction du type d'événement
+function getUrgenceClassByEventType(typeEvt) {
+  if (!typeEvt) return "urgence-moyenne";
+  
+  const typeEvtLower = typeEvt.toLowerCase();
+  
+  if (typeEvtLower.includes("accident")) {
+    return "urgence-haute"; // Rouge
+  } else if (typeEvtLower.includes("incident_grave") || typeEvtLower.includes("incident grave")) {
+    return "urgence-moyenne"; // Orange
+  } else if (typeEvtLower.includes("incident")) {
+    return "urgence-basse"; // Vert
+  } else if (typeEvtLower.includes("evt_technique") || typeEvtLower.includes("evt technique")) {
+    return "urgence-technique"; // Gris
+  }
+  
+  return "urgence-moyenne"; // Par défaut
+}
+
 // Fonction pour afficher les données dans le tableau
 function renderTable() {
   const tableBody = document.querySelector("#notifications-table tbody");
@@ -265,24 +294,31 @@ function renderTable() {
         moyenClass = "moyen-système";
     }
 
-    // Déterminer la classe du badge en fonction de l'urgence
-    let urgenceClass = "";
-    switch (notification.urgence) {
-      case "haute":
-        urgenceClass = "urgence-haute";
-        break;
-      case "moyenne":
-        urgenceClass = "urgence-moyenne";
-        break;
-      case "basse":
-        urgenceClass = "urgence-basse";
-        break;
+    // Déterminer la classe du badge en fonction du type d'événement de la FNE
+    let urgenceClass = "urgence-moyenne"; // Valeur par défaut
+    
+    if (notification.fne && notification.fne.type_evt) {
+      urgenceClass = getUrgenceClassByEventType(notification.fne.type_evt);
+    } else {
+      // Fallback sur l'urgence de la notification si le type d'événement n'est pas disponible
+      switch (notification.urgence) {
+        case "haute":
+          urgenceClass = "urgence-haute";
+          break;
+        case "moyenne":
+          urgenceClass = "urgence-moyenne";
+          break;
+        case "basse":
+          urgenceClass = "urgence-basse";
+          break;
+      }
     }
 
     // Extraire les IDs et les valeurs avec sécurité
     const notificationId = notification.notification_id || "";
     const fneId = notification.fne ? notification.fne.fne_id : "";
     const utilisateurId = notification.utilisateur ? notification.utilisateur.id : "";
+    const typeEvt = notification.fne ? notification.fne.type_evt : "";
 
     // Formater la date d'envoi
     const dateEnvoi = formatDateTime(notification.date_envoi || "");
@@ -298,6 +334,7 @@ function renderTable() {
       <td><span class="moyen-badge ${moyenClass}">${notification.moyen || ""}</span></td>
       <td><span class="urgence-badge ${urgenceClass}">${notification.urgence || ""}</span></td>
       <td>${fneId}</td>
+      <td>${typeEvt || ""}</td>
       <td class="truncate">${truncatedContenu}</td>
       <td>
         <button class="btn btn-view" onclick="viewNotificationDetails(${notificationId})">
@@ -337,115 +374,145 @@ function formatDateTime(dateTimeString) {
   }
 }
 
-// Fonction pour afficher les détails d'une notification
+// Fonction améliorée pour afficher les détails d'une notification
 function viewNotificationDetails(notificationId) {
   if (!notificationId) {
-    console.error("L'ID de la notification est indéfini.");
+    console.error("ID de notification invalide");
     return;
   }
 
+  // Mettre à jour les variables globales
   currentNotificationId = notificationId;
-
-  // Afficher un indicateur de chargement dans le modal
-  document.getElementById("modalNotificationId").textContent = notificationId;
-  document.getElementById("notificationDetailsModal").style.display = "block";
+  
+  // Afficher le modal avec un indicateur de chargement
+  const modal = document.getElementById("notificationDetailsModal");
+  modal.style.display = "block";
+  document.getElementById("modalNotificationId").textContent = `#${notificationId}`;
+  
+  // Afficher un loader pendant le chargement
+  const modalBody = document.querySelector(".modal-body");
+  modalBody.innerHTML = `
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Chargement des détails...</p>
+    </div>
+  `;
 
   // Récupérer les détails de la notification
   fetch(`/auth/api/notifications/${notificationId}`)
-    .then((response) => {
+    .then(response => {
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
+        throw new Error(`Erreur HTTP: ${response.status}`);
       }
       return response.json();
     })
-    .then((notification) => {
-      // Ajouter des logs détaillés pour déboguer
-      console.log("Détails notification:", notification);
-
-      // Extraire les valeurs avec sécurité
-      const notificationId = notification.notification_id || "";
-      const dateEnvoi = formatDateTime(notification.date_envoi || "");
-      const moyen = notification.moyen || "";
-      const urgence = notification.urgence || "";
-      const utilisateurId = notification.utilisateur ? notification.utilisateur.id : "";
-      const contenu = notification.contenu || "";
-
-      // Vérifier si fne existe et extraire son ID
+    .then(notification => {
+      // Formater la date
+      const formattedDate = formatDateTime(notification.date_envoi) || "Date non disponible";
+      
+      // Déterminer les classes CSS pour les badges
+      const moyenClass = getMoyenClass(notification.moyen);
+      
+      // Déterminer la classe d'urgence en fonction du type d'événement de la FNE
+      let urgenceClass = "urgence-moyenne"; // Valeur par défaut
+      let typeEvt = "";
+      
+      if (notification.fne && notification.fne.type_evt) {
+        typeEvt = notification.fne.type_evt;
+        urgenceClass = getUrgenceClassByEventType(typeEvt);
+      } else {
+        // Fallback sur l'urgence de la notification
+        urgenceClass = getUrgenceClass(notification.urgence);
+      }
+      
+      // Mettre à jour currentFneId si une FNE est associée
       if (notification.fne && notification.fne.fne_id) {
         currentFneId = notification.fne.fne_id;
-        document.getElementById("viewFneBtn").style.display = "inline-flex";
-      } else {
-        currentFneId = null;
-        document.getElementById("viewFneBtn").style.display = "none";
       }
-
-      // Informations de base
-      document.getElementById("detail-notification-id").textContent = notificationId;
-      document.getElementById("detail-date-envoi").textContent = dateEnvoi;
-      document.getElementById("detail-utilisateur-id").textContent = utilisateurId;
-      document.getElementById("detail-fne-id").textContent = currentFneId || "N/A";
-      document.getElementById("detail-contenu").textContent = contenu;
-
-      // Moyen avec badge
-      const detailMoyen = document.getElementById("detail-moyen");
-      detailMoyen.textContent = moyen;
-      detailMoyen.className = "moyen-badge"; // Réinitialiser les classes
-
-      // Ajouter la classe appropriée pour le moyen
-      switch (moyen) {
-        case "email":
-          detailMoyen.classList.add("moyen-email");
-          break;
-        case "sms":
-          detailMoyen.classList.add("moyen-sms");
-          break;
-        default:
-          detailMoyen.classList.add("moyen-système");
-      }
-
-      // Urgence avec badge
-      const detailUrgence = document.getElementById("detail-urgence");
-      detailUrgence.textContent = urgence;
-      detailUrgence.className = "urgence-badge"; // Réinitialiser les classes
-
-      // Ajouter la classe appropriée pour l'urgence
-      switch (urgence) {
-        case "haute":
-          detailUrgence.classList.add("urgence-haute");
-          break;
-        case "moyenne":
-          detailUrgence.classList.add("urgence-moyenne");
-          break;
-        case "basse":
-          detailUrgence.classList.add("urgence-basse");
-          break;
+      
+      // Construire le contenu du modal
+      modalBody.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>ID de la notification:</label>
+            <span id="detail-notification-id">${notification.notification_id || "N/A"}</span>
+          </div>
+          <div class="detail-item">
+            <label>Date d'envoi:</label>
+            <span id="detail-date-envoi">${formattedDate}</span>
+          </div>
+          <div class="detail-item">
+            <label>Moyen:</label>
+            <span id="detail-moyen" class="moyen-badge ${moyenClass}">${notification.moyen || "N/A"}</span>
+          </div>
+          <div class="detail-item">
+            <label>Urgence:</label>
+            <span id="detail-urgence" class="urgence-badge ${urgenceClass}">${notification.urgence || "N/A"}</span>
+          </div>
+          <div class="detail-item">
+            <label>FNE ID:</label>
+            <span id="detail-fne-id">${notification.fne?.fne_id || "N/A"}</span>
+          </div>
+          <div class="detail-item">
+            <label>Type d'événement:</label>
+            <span id="detail-type-evt">${typeEvt || "N/A"}</span>
+          </div>
+          <div class="detail-item">
+            <label>Utilisateur ID:</label>
+            <span id="detail-utilisateur-id">${notification.utilisateur?.id || "N/A"}</span>
+          </div>
+        </div>
+        
+        <div class="detail-section">
+          <h3>Contenu complet</h3>
+          <div class="notification-content" id="detail-contenu">
+            ${notification.contenu || "Aucun contenu disponible"}
+          </div>
+        </div>
+      `;
+      
+      // Afficher ou masquer le bouton "Voir la FNE" en fonction de la présence d'une FNE
+      const viewFneBtn = document.getElementById("viewFneBtn");
+      if (viewFneBtn) {
+        if (currentFneId) {
+          viewFneBtn.style.display = "inline-flex";
+          viewFneBtn.onclick = () => voirFNE(currentFneId);
+        } else {
+          viewFneBtn.style.display = "none";
+        }
       }
     })
-    .catch((error) => {
+    .catch(error => {
       console.error("Erreur:", error);
-      document.getElementById("notificationDetailsModal").innerHTML = `
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>Erreur</h2>
-            <button class="close-modal" onclick="closeModal()">&times;</button>
-          </div>
-          <div class="modal-body">
-            <p>Une erreur est survenue lors du chargement des détails de la notification. Veuillez réessayer.</p>
-            <p>Détail de l'erreur: ${error.message}</p>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
-          </div>
+      modalBody.innerHTML = `
+        <div class="error-message">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p>Une erreur est survenue lors du chargement des détails.</p>
+          <p>${error.message}</p>
+          <button class="btn btn-retry" onclick="viewNotificationDetails(${notificationId})">
+            <i class="fas fa-sync-alt"></i> Réessayer
+          </button>
         </div>
       `;
     });
 }
 
-// Fonction pour fermer le modal
-function closeModal() {
-  document.getElementById("notificationDetailsModal").style.display = "none";
-  currentNotificationId = null;
-  currentFneId = null;
+// Fonctions utilitaires pour les classes CSS
+function getMoyenClass(moyen) {
+  switch (moyen) {
+    case "email": return "moyen-email";
+    case "sms": return "moyen-sms";
+    default: return "moyen-systeme";
+  }
+}
+
+function getUrgenceClass(urgence) {
+  switch (urgence) {
+    case "haute": return "urgence-haute";
+    case "moyenne": return "urgence-moyenne";
+    case "basse": return "urgence-basse";
+    default: return "";
+  }
 }
 
 // Fonction pour voir la FNE associée
@@ -456,26 +523,33 @@ function voirFNE(fneId) {
   }
 
   // Rediriger vers la page de détails de la FNE
-  window.location.href = `/auth/fneSML?id=${fneId}`;
+  window.location.href = `/auth/fneAdmin?id=${fneId}`;
+}
+
+// Fonction pour fermer le modal
+function closeModal() {
+  document.getElementById("notificationDetailsModal").style.display = "none";
+  currentNotificationId = null;
+  currentFneId = null;
 }
 
 // Fonction pour réinitialiser les filtres
 function resetFilters() {
-  // Réinitialiser les valeurs des filtres
-  document.getElementById("filterUrgence").value = "";
-  document.getElementById("filterMoyen").value = "";
-  document.getElementById("dateFilter").value = "";
-  document.getElementById("searchInput").value = "";
-
-  // Réinitialiser les données filtrées
-  filteredData = [...notificationsData];
-  currentPage = 1;
-  totalPages = Math.ceil(filteredData.length / 10) || 1;
-
-  // Mettre à jour l'affichage
-  renderTable();
-  updatePagination();
-}
+    // Réinitialiser les valeurs des filtres
+    document.getElementById("filterUrgence").value = "";
+    document.getElementById("filterMoyen").value = "";
+    document.getElementById("dateFilter").value = "";
+    document.getElementById("searchInput").value = "";
+  
+    // Réinitialiser les données filtrées
+    filteredData = [...notificationsData]; // Les données sont déjà triées
+    currentPage = 1;
+    totalPages = Math.ceil(filteredData.length / 10) || 1;
+  
+    // Mettre à jour l'affichage
+    renderTable();
+    updatePagination();
+  }
 
 // Fermer le modal si l'utilisateur clique en dehors
 window.onclick = (event) => {

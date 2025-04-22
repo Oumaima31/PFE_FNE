@@ -1,5 +1,5 @@
 // Validation des champs Indicatif et Code SSR
-document.addEventListener('DOMContentLoaded', function() {
+/*document.addEventListener('DOMContentLoaded', function() {
     // Validation Indicatif
     const indicatifInput = document.getElementById('indicatif_immatricultion');
     const indicatifError = document.getElementById('indicatif_error');
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Veuillez corriger les erreurs dans les champs avant de soumettre.');
         }
     });
-  });
+  });*/
   // Fonction pour basculer l'affichage de la navbar sur mobile
   function toggleNavbar() {
     const navbarContainer = document.querySelector(".navbar-container")

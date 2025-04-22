@@ -26,5 +26,6 @@ public interface FNERepository extends JpaRepository<FNE, Long> {
     // Trouver toutes les FNE triées par date (le plus récent en premier)
     @Query("SELECT f FROM FNE f ORDER BY f.Date DESC")
     List<FNE> findAllOrderByDateDesc();
+    
 }
 

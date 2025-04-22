@@ -41,9 +41,23 @@ function loadFneEnAttente() {
     })
     .then((data) => {
       console.log("Données reçues:", data); // Pour le débogage
-      fneData = data;
+      
+      // Trier les FNE par date, de la plus récente à la plus ancienne
+      fneData = data.sort((a, b) => {
+        // Utiliser la date de création ou la date de l'événement
+        const dateA = a.date_creation || a.date || 0;
+        const dateB = b.date_creation || b.date || 0;
+        
+        // Convertir en timestamps pour comparaison
+        const timestampA = dateA ? new Date(dateA).getTime() : 0;
+        const timestampB = dateB ? new Date(dateB).getTime() : 0;
+        
+        // Tri décroissant (plus récent en premier)
+        return timestampB - timestampA;
+      });
+      
       filteredData = [...fneData];
-      totalPages = Math.ceil(filteredData.length / 10);
+      totalPages = Math.ceil(filteredData.length / 10) || 1;
 
       // Précharger les informations des utilisateurs
       preloadUserInfo();
@@ -189,23 +203,23 @@ function applyFilters() {
   }
   
   // Fonction pour réinitialiser les filtres
-  function resetFilters() {
-    // Réinitialiser les valeurs des filtres
-    document.getElementById("searchInput").value = "";
-    document.getElementById("dateFilter").value = "";
-    document.getElementById("timeFilter").value = "";
-    
-    // Réinitialiser les données filtrées
-    filteredData = [...fneData];
-    currentPage = 1;
-    totalPages = Math.ceil(filteredData.length / 10) || 1;
-    
-    // Mettre à jour l'affichage
-    renderTable();
-    updatePagination();
-    
-    console.log("Filtres réinitialisés");
-  }
+function resetFilters() {
+  // Réinitialiser les valeurs des filtres
+  document.getElementById("searchInput").value = "";
+  document.getElementById("dateFilter").value = "";
+  document.getElementById("timeFilter").value = "";
+  
+  // Réinitialiser les données filtrées (les données sont déjà triées)
+  filteredData = [...fneData];
+  currentPage = 1;
+  totalPages = Math.ceil(filteredData.length / 10) || 1;
+  
+  // Mettre à jour l'affichage
+  renderTable();
+  updatePagination();
+  
+  console.log("Filtres réinitialisés");
+}
   
   // Configuration des écouteurs d'événements
   function setupEventListeners() {

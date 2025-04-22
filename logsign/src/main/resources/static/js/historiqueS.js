@@ -1098,6 +1098,7 @@ function renderChanges(modifications) {
     changesContainer.innerHTML = "<p class='no-changes'>Aucune modification détaillée disponible.</p>";
     return;
   }
+  
 
   const changesList = document.createElement("ul");
   changesList.className = "changes-list";
