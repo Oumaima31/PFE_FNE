@@ -1,3 +1,5 @@
+// Modification du NotificationService.java pour n'envoyer des notifications que lorsqu'un SML soumet une FNE
+
 package com.example.logsign.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import com.example.logsign.models.Notification;
 import com.example.logsign.models.FNE;
 import com.example.logsign.models.User;
 import com.example.logsign.repositories.NotificationRepository;
+import com.example.logsign.repositories.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +26,9 @@ public class NotificationService {
     
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private UserRepository userRepository; // Ajout pour récupérer les admins
     
     /**
      * Récupère toutes les notifications
@@ -85,8 +91,16 @@ public class NotificationService {
     
     /**
      * Crée une notification pour une FNE
+     * Modifié pour n'envoyer des notifications que lorsqu'un SML soumet une FNE
      */
     public Notification createFneNotification(FNE fne, User user) {
+        // Vérifier si l'utilisateur est un SML
+        // Si ce n'est pas un SML, ne pas créer de notification
+        if (user == null || !"SML".equals(user.getRole())) {
+            System.out.println("Pas de notification créée car l'utilisateur n'est pas un SML");
+            return null;
+        }
+        
         // Créer la notification
         Notification notification = new Notification();
         notification.setFne(fne);
@@ -98,26 +112,67 @@ public class NotificationService {
         notification.setUrgence(urgence);
         
         // Définir le contenu de la notification
-        String contenu = "L'utilisateur " + user.getPrenom() + " " + user.getNom() + " (ID: " + user.getId() + ") a soumis une nouvelle FNE.";
-        notification.setContenu(contenu);
+        String contenu = "L'utilisateur " + user.getPrenom() + " " + user.getNom() + " (ID: " + user.getId() + ") a ";
         
-        // Trouver l'administrateur (ID 2 selon la capture d'écran)
-        User admin = new User();
-        admin.setId(2L);
-        notification.setUtilisateur(admin);
-        
-        // Sauvegarder la notification
-        Notification savedNotification = notificationRepository.save(notification);
-        
-        // Envoyer un email à l'administrateur (si configuré)
-        try {
-            emailService.sendFneNotification(fne, user, "admin@example.com");
-        } catch (Exception e) {
-            // Logger l'erreur mais continuer
-            System.err.println("Erreur lors de l'envoi de l'email: " + e.getMessage());
+        // Adapter le message en fonction de l'action (création ou modification)
+        if (fne.getFne_id() != null) {
+            contenu += "modifié la FNE #" + fne.getFne_id() + ".";
+        } else {
+            contenu += "soumis une nouvelle FNE.";
         }
         
-        return savedNotification;
+        notification.setContenu(contenu);
+        
+        // Trouver tous les administrateurs et leur envoyer une notification
+        List<User> admins = userRepository.findByRole("admin");
+        
+        if (admins == null || admins.isEmpty()) {
+            // Si aucun admin n'est trouvé, utiliser l'ID 2 comme fallback
+            User admin = new User();
+            admin.setId(2L);
+            notification.setUtilisateur(admin);
+            
+            // Sauvegarder la notification
+            Notification savedNotification = notificationRepository.save(notification);
+            
+            // Envoyer un email à l'administrateur (si configuré)
+            try {
+                emailService.sendFneNotification(fne, user, "admin@example.com");
+            } catch (Exception e) {
+                // Logger l'erreur mais continuer
+                System.err.println("Erreur lors de l'envoi de l'email: " + e.getMessage());
+            }
+            
+            return savedNotification;
+        } else {
+            // Créer une notification pour chaque admin
+            List<Notification> savedNotifications = new ArrayList<>();
+            
+            for (User admin : admins) {
+                Notification adminNotification = new Notification();
+                adminNotification.setFne(fne);
+                adminNotification.setDate_envoi(LocalDateTime.now());
+                adminNotification.setMoyen("email");
+                adminNotification.setUrgence(urgence);
+                adminNotification.setContenu(contenu);
+                adminNotification.setUtilisateur(admin);
+                
+                // Sauvegarder la notification
+                Notification savedNotification = notificationRepository.save(adminNotification);
+                savedNotifications.add(savedNotification);
+                
+                // Envoyer un email à l'administrateur (si configuré)
+                try {
+                    emailService.sendFneNotification(fne, user, admin.getEmail());
+                } catch (Exception e) {
+                    // Logger l'erreur mais continuer
+                    System.err.println("Erreur lors de l'envoi de l'email à " + admin.getEmail() + ": " + e.getMessage());
+                }
+            }
+            
+            // Retourner la première notification créée
+            return savedNotifications.isEmpty() ? null : savedNotifications.get(0);
+        }
     }
     
     /**

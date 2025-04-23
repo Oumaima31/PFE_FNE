@@ -2,6 +2,8 @@ package com.example.logsign.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Historique {
@@ -62,4 +64,17 @@ public class Historique {
     public void setUtilisateur(User utilisateur) {
         this.utilisateur = utilisateur;
     }
+    // Add this to your Historique.java class
+
+@OneToMany(mappedBy = "historique", cascade = CascadeType.ALL, orphanRemoval = true)
+private List<Modification> modifications = new ArrayList<>();
+
+// Getter and setter for modifications
+public List<Modification> getModifications() {
+    return modifications;
+}
+
+public void setModifications(List<Modification> modifications) {
+    this.modifications = modifications;
+}
 }

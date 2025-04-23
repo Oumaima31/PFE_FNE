@@ -292,5 +292,95 @@ public ResponseEntity<String> testNotification(HttpSession session) {
         return ResponseEntity.status(500).body("Erreur lors du test de notification: " + e.getMessage());
     }
 }
+// Add this method to your FNEController.java
+
+@PostMapping("/updateFNE")
+public String updateFNE(@ModelAttribute FNE fne, HttpSession session, Model model) {
+    User user = (User) session.getAttribute("user");
+
+    if (user != null) {
+        try {
+            // Vérifier que les champs importants sont remplis
+            if (fne.getType_evt() == null || fne.getType_evt().isEmpty()) {
+                model.addAttribute("error", "Le type d'événement est obligatoire.");
+                return "fneSML";
+            }
+    
+            if (fne.getRef_gne() == null || fne.getRef_gne().isEmpty()) {
+                model.addAttribute("error", "La référence GNE est obligatoire.");
+                return "fneSML";
+            }
+    
+            // Mettre à jour la FNE
+            FNE updatedFne = fneService.updateFNE(fne, user);
+            
+            // Ajouter le message directement au modèle
+            model.addAttribute("message", "FNE mise à jour avec succès !");
+            
+            // Retourner directement à la vue sans redirection
+            return "fneSML";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors de la mise à jour de la FNE : " + e.getMessage());
+            e.printStackTrace();
+            // En cas d'erreur, on recharge la FNE pour l'édition
+            if (fne.getFne_id() != null) {
+                FNE originalFne = fneService.getFNEById(fne.getFne_id());
+                if (originalFne != null) {
+                    model.addAttribute("fne", originalFne);
+                }
+            }
+        }
+    } else {
+        model.addAttribute("error", "Utilisateur non connecté.");
+    }
+
+    return "fneSML";
+}
+// Add this method to your FNEController.java
+
+@PostMapping("/updateFNEAdmin")
+public String updateFNEAdmin(@ModelAttribute FNE fne, HttpSession session, Model model) {
+    User user = (User) session.getAttribute("user");
+
+    if (user != null && "admin".equals(user.getRole())) {
+        try {
+            // Vérifier que les champs importants sont remplis
+            if (fne.getType_evt() == null || fne.getType_evt().isEmpty()) {
+                model.addAttribute("error", "Le type d'événement est obligatoire.");
+                return "fneAdmin";
+            }
+    
+            if (fne.getRef_gne() == null || fne.getRef_gne().isEmpty()) {
+                model.addAttribute("error", "La référence GNE est obligatoire.");
+                return "fneAdmin";
+            }
+    
+            // Mettre à jour la FNE
+            FNE updatedFne = fneService.updateFNE(fne, user);
+            
+            // Ajouter le message directement au modèle
+            model.addAttribute("message", "FNE mise à jour avec succès !");
+            
+            // Retourner directement à la vue sans redirection
+            return "fneAdmin";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors de la mise à jour de la FNE : " + e.getMessage());
+            e.printStackTrace();
+            // En cas d'erreur, on recharge la FNE pour l'édition
+            if (fne.getFne_id() != null) {
+                FNE originalFne = fneService.getFNEById(fne.getFne_id());
+                if (originalFne != null) {
+                    model.addAttribute("fne", originalFne);
+                }
+            }
+        }
+    } else {
+        model.addAttribute("error", "Vous n'avez pas les droits pour effectuer cette action.");
+    }
+
+    return "fneAdmin";
+}
 }
 

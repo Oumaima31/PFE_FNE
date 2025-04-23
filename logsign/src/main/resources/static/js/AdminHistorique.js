@@ -196,7 +196,21 @@ function getUserFullName(user) {
   // Sinon, utiliser les informations disponibles dans l'objet utilisateur
   return `${user.prenom || ""} ${user.nom || ""}`.trim() || "Utilisateur inconnu";
 }
-
+function resetFilters() {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("filterAction").value = "";
+    document.getElementById("dateDebut").value = "";
+    document.getElementById("timeFilter").value = "";
+    
+    // Reset the filtered data to show all records
+    filteredData = [...groupedData];
+    currentPage = 1;
+    totalPages = Math.ceil(filteredData.length / 10) || 1;
+    
+    // Update the table and pagination
+    renderTable();
+    updatePagination();
+}
 // Fonction pour configurer les écouteurs d'événements
 function setupEventListeners() {
   // Recherche
@@ -211,6 +225,7 @@ function setupEventListeners() {
       filterData(searchTerm);
     }
   });
+  document.getElementById("resetBtn").addEventListener("click", resetFilters);
 
   // Filtres
   document.getElementById("filterBtn").addEventListener("click", applyFilters);
@@ -287,57 +302,59 @@ function filterData(searchTerm) {
 
 // Fonction pour appliquer les filtres
 function applyFilters() {
-  const actionFilter = document.getElementById("filterAction").value;
-  const dateDebut = document.getElementById("dateDebut").value;
-  const dateFin = document.getElementById("dateFin").value;
+    const actionFilter = document.getElementById("filterAction").value;
+    const dateDebut = document.getElementById("dateDebut").value;
+    const timeFilter = document.getElementById("timeFilter").value;
 
-  let tempData = [...groupedData];
+    let tempData = [...groupedData];
 
-  if (actionFilter) {
-    tempData = tempData.filter((group) => {
-      // Vérifier si au moins un historique correspond à l'action filtrée
-      return group.historiques.some(historique => historique.action === actionFilter);
-    });
-  }
+    if (actionFilter) {
+        tempData = tempData.filter((group) => {
+            // Vérifier si au moins un historique correspond à l'action filtrée
+            return group.historiques.some(historique => historique.action === actionFilter);
+        });
+    }
 
-  // Filtrage par date
-  if (dateDebut || dateFin) {
-    tempData = tempData.filter((group) => {
-      // Vérifier si au moins un historique est dans la plage de dates
-      return group.historiques.some(historique => {
-        const actionDate = new Date(historique.dateAction);
+    // Filtrage par date et heure
+    if (dateDebut || timeFilter) {
+        tempData = tempData.filter((group) => {
+            // Vérifier si au moins un historique est dans la plage de dates/heures
+            return group.historiques.some(historique => {
+                const actionDate = new Date(historique.dateAction);
 
-        // Vérifier la date de début
-        if (dateDebut) {
-          const debutDate = new Date(dateDebut);
-          debutDate.setHours(0, 0, 0, 0); // Début de journée
+                // Vérifier la date
+                if (dateDebut) {
+                    const debutDate = new Date(dateDebut);
+                    debutDate.setHours(0, 0, 0, 0); // Début de journée
 
-          if (actionDate < debutDate) {
-            return false;
-          }
-        }
+                    if (actionDate.toDateString() !== debutDate.toDateString()) {
+                        return false;
+                    }
+                }
 
-        // Vérifier la date de fin
-        if (dateFin) {
-          const finDate = new Date(dateFin);
-          finDate.setHours(23, 59, 59, 999); // Fin de journée
+                // Vérifier l'heure
+                if (timeFilter) {
+                    const [filterHour, filterMinute] = timeFilter.split(":").map(Number);
+                    const actionHour = actionDate.getHours();
+                    const actionMinute = actionDate.getMinutes();
 
-          if (actionDate > finDate) {
-            return false;
-          }
-        }
+                    // Vérifier si l'heure correspond (avec une marge de 5 minutes)
+                    if (Math.abs(actionHour - filterHour) > 0 || Math.abs(actionMinute - filterMinute) > 5) {
+                        return false;
+                    }
+                }
 
-        return true;
-      });
-    });
-  }
+                return true;
+            });
+        });
+    }
 
-  filteredData = tempData;
-  currentPage = 1;
-  totalPages = Math.ceil(filteredData.length / 10);
+    filteredData = tempData;
+    currentPage = 1;
+    totalPages = Math.ceil(filteredData.length / 10) || 1;
 
-  renderTable();
-  updatePagination();
+    renderTable();
+    updatePagination();
 }
 
 // Fonction pour formater les valeurs pour l'affichage
@@ -490,6 +507,9 @@ function renderTable() {
           <button class="btn btn-view" onclick="viewFNEHistory(${fne.fne_id})">
             <i class="fas fa-eye"></i> Voir
           </button>
+          <button class="btn btn-warning" onclick="modifierFNE(${fne.fne_id})">
+            <i class="fas fa-edit"></i> Modifier
+          </button>
           <button class="btn btn-danger" onclick="deleteFNE(${fne.fne_id})">
             <i class="fas fa-trash"></i> Supprimer
           </button>
@@ -500,7 +520,16 @@ function renderTable() {
     tableBody.appendChild(row);
   }
 }
+// Add the modifierFNE function to historiqueA.js
+function modifierFNE(fneId) {
+  if (!fneId) {
+    console.error("L'ID de la FNE est indéfini.");
+    return;
+  }
 
+  // Rediriger vers la page de modification de la FNE
+  window.location.href = `/auth/fneAdmin?id=${fneId}`;
+}
 // Fonction pour mettre à jour la pagination
 function updatePagination() {
   document.getElementById("pageInfo").textContent = `Page ${currentPage} sur ${totalPages || 1}`;
@@ -759,6 +788,9 @@ function createHistoryModal(fne, historiques) {
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
+        <button class="btn btn-warning" onclick="modifierFNE(${fne.fne_id})">
+        <i class="fas fa-edit"></i> Modifier
+      </button>
         <button class="btn btn-primary" onclick="viewFNEPdf(${fne.fne_id})">
           <i class="fas fa-file-pdf"></i> Voir en PDF
         </button>
@@ -1125,9 +1157,11 @@ function createFNEPdfView(fne) {
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
-        
-      </div>
+      <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
+      <button class="btn btn-warning" onclick="modifierFNE(${fne.fne_id})">
+        <i class="fas fa-edit"></i> Modifier
+      </button>
+    </div>
     </div>
   `;
 

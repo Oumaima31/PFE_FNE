@@ -71,7 +71,9 @@
         </div>
         
         <!-- Formulaire avec method POST et action pour soumettre FNE -->
-        <form action="/auth/submitFNEAdmin" method="POST">
+        <form action="/auth/submitFNEAdmin" method="POST" id="fneForm">
+            <!-- Add a hidden input for the FNE ID if we're editing -->
+            <input type="hidden" id="fne_id" name="fne_id" th:if="${fne != null}" th:value="${fne.fne_id}" />
             <div class="section type-selection">
                 <!-- Types d'événements -->
                 <div class="form-group">
@@ -363,7 +365,7 @@
         </div>
     </footer>
 
-    <script src="/js/FNEadmin.js"></script>
+    <script src="/js/adminFNE.js"></script>
     <script>
         // Mettre à jour la date et l'heure toutes les secondes
         setInterval(updateDateTime, 1000);
@@ -380,6 +382,27 @@
                 toggleSection(firstSection.querySelector('.section-header'));
             }
         });
+        // Check if we're in edit mode from Thymeleaf
+    document.addEventListener('DOMContentLoaded', function() {
+        const fne = /*[[${fne}]]*/ null;
+        if (fne) {
+            // We're in edit mode from server-side rendering
+            // Update form action and button text
+            const form = document.getElementById('fneForm');
+            form.action = '/auth/updateFNEAdmin';
+            
+            const submitButton = document.querySelector('.submit-button');
+            if (submitButton) {
+                submitButton.innerHTML = '<i class="fas fa-save"></i> Mettre à jour';
+            }
+            
+            // Show notification that we're in edit mode
+            const notification = document.getElementById('notification');
+            notification.innerHTML = `<span>Vous êtes en train de modifier la FNE #${fne.fne_id}</span>`;
+            notification.style.display = 'block';
+            notification.classList.add('blue');
+        }
+    });
     </script>
 </body>
 </html>

@@ -262,3 +262,194 @@
       window.location.href = '/';
     });
   }
+  // Add this to the beginning of your SMLfne.js file
+
+// Function to load FNE data when editing
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if we're in edit mode by looking for an ID parameter in the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const fneId = urlParams.get('id');
+  
+  if (fneId) {
+      // We're in edit mode, load the FNE data
+      loadFneData(fneId);
+  }
+});
+
+// Function to load FNE data from the server
+function loadFneData(fneId) {
+  fetch(`/auth/api/fne/${fneId}`)
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Erreur lors de la récupération des données de la FNE');
+          }
+          return response.json();
+      })
+      .then(fne => {
+          // Populate form fields with FNE data
+          populateFormFields(fne);
+      })
+      .catch(error => {
+          console.error('Erreur:', error);
+          // Show error notification
+          const notification = document.getElementById('notification');
+          notification.innerHTML = `<span style="color: red;">Erreur lors du chargement des données: ${error.message}</span>`;
+          notification.style.display = 'block';
+          notification.classList.add('red');
+          
+          // Hide notification after 5 seconds
+          setTimeout(() => {
+              notification.style.opacity = "0";
+              setTimeout(() => {
+                  notification.style.display = "none";
+                  notification.style.opacity = "1";
+              }, 300);
+          }, 5000);
+      });
+}
+
+// Function to populate form fields with FNE data
+function populateFormFields(fne) {
+  // Set type_evt and trigger the REF GNE options update
+  const typeEvtSelect = document.getElementById('type_evt');
+  if (fne.type_evt) {
+      typeEvtSelect.value = fne.type_evt;
+      // Trigger the change event to update REF GNE options
+      updateRefGneNumber();
+      
+      // Set REF GNE after options are generated
+      setTimeout(() => {
+          const refGneSelect = document.getElementById('ref_gne');
+          if (refGneSelect && fne.ref_gne) {
+              refGneSelect.value = fne.ref_gne;
+          }
+      }, 100);
+  }
+  
+  // Section 1: Informations générales
+  setValueIfExists('Organisme_concerné', fne.organisme_concerné);
+  setValueIfExists('Date', formatDateForInput(fne.date));
+  setValueIfExists('heure_UTC', fne.heure_UTC);
+  setValueIfExists('Lieu_EVT', fne.lieu_EVT);
+  setValueIfExists('moyen_detection', fne.moyen_detection);
+  setValueIfExists('impacts_operationnels', fne.impacts_operationnels);
+  
+  // Section 2: Aéronef(s) concerné(s)
+  setValueIfExists('indicatif_immatricultion', fne.indicatif_immatricultion);
+  setValueIfExists('code_ssr', fne.code_ssr);
+  setValueIfExists('type_appareil', fne.type_appareil);
+  setValueIfExists('regles_vol', fne.regles_vol);
+  setValueIfExists('terrain_depart', fne.terrain_depart);
+  setValueIfExists('terrain_arrivée', fne.terrain_arrivée);
+  setValueIfExists('cap', fne.cap);
+  setValueIfExists('altitude_reel', fne.altitude_reel);
+  setValueIfExists('altitude_autorise', fne.altitude_autorise);
+  setValueIfExists('vitesse', fne.vitesse);
+  
+  // Section 3: Nombre de victimes
+  setValueIfExists('passagers', fne.passagers);
+  setValueIfExists('personnel', fne.personnel);
+  setValueIfExists('equipage', fne.equipage);
+  setValueIfExists('autre', fne.autre);
+  
+  // Section 4: Conditions météorologiques
+  setValueIfExists('vent_direction', fne.vent_direction);
+  setValueIfExists('vent_vitesse', fne.vent_vitesse);
+  setValueIfExists('visibilite', fne.visibilite);
+  setValueIfExists('nebulosite', fne.nebulosite);
+  setValueIfExists('precipitation', fne.precipitation);
+  setValueIfExists('autres_phenomenes', fne.autres_phenomenes);
+  
+  // Section 5: Matériel, installation ou équipement
+  setRadioValue('evt_implique_installation_équipement', fne.evt_implique_installation_équipement);
+  setValueIfExists('type_installation_équipement', fne.type_installation_équipement);
+  setValueIfExists('nom_compagnie_assistance_organisme_exploitant_véhicule', fne.nom_compagnie_assistance_organisme_exploitant_véhicule);
+  setRadioValue('evt_implique_véhicule_materiel_assistance_sol', fne.evt_implique_véhicule_materiel_assistance_sol);
+  setValueIfExists('type_materiel_véhicule', fne.type_materiel_véhicule);
+  
+  // Section 6: Description de l'événement
+  setValueIfExists('description_evt', fne.description_evt);
+  
+  // Add a hidden input for the FNE ID to submit with the form
+  const form = document.querySelector('form');
+  let hiddenInput = document.getElementById('fne_id');
+  if (!hiddenInput) {
+      hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.id = 'fne_id';
+      hiddenInput.name = 'fne_id';
+      form.appendChild(hiddenInput);
+  }
+  hiddenInput.value = fne.fne_id;
+  
+  // Update form action to indicate this is an update
+  form.action = '/auth/updateFNE';
+  
+  // Update submit button text
+  const submitButton = document.querySelector('.submit-button');
+  if (submitButton) {
+      submitButton.innerHTML = '<i class="fas fa-save"></i> Mettre à jour';
+  }
+  
+  // Show notification that we're in edit mode
+  const notification = document.getElementById('notification');
+  notification.innerHTML = '<span>Vous êtes en train de modifier la FNE #' + fne.fne_id + '</span>';
+  notification.style.display = 'block';
+  notification.classList.add('blue');
+  
+  // Open all sections for easier editing
+  const sectionHeaders = document.querySelectorAll('.section-header');
+  sectionHeaders.forEach(header => {
+      if (!header.classList.contains('active')) {
+          toggleSection(header);
+      }
+  });
+}
+
+// Helper function to set value if the element exists
+function setValueIfExists(id, value) {
+  const element = document.getElementById(id);
+  if (element && value !== null && value !== undefined) {
+      element.value = value;
+  }
+}
+
+// Helper function to set radio button value
+function setRadioValue(name, value) {
+  if (value === null || value === undefined) return;
+  
+  const radioButtons = document.querySelectorAll(`input[name="${name}"]`);
+  radioButtons.forEach(radio => {
+      if (radio.value === String(value)) {
+          radio.checked = true;
+      }
+  });
+}
+
+// Helper function to format date for input fields (YYYY-MM-DD)
+function formatDateForInput(dateString) {
+  if (!dateString) return '';
+  
+  try {
+      // If it's already in the correct format, return it
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+          return dateString;
+      }
+      
+      // Try to parse the date
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+          return '';
+      }
+      
+      // Format as YYYY-MM-DD
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
+  } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+  }
+}

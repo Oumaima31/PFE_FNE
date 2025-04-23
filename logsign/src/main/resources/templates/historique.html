@@ -36,39 +36,177 @@
             background-color: #fee2e2;
             color: #ef4444;
         }
-        
-        .filter-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-container select,
-        .filter-container input {
-            padding: 8px;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-        }
-        
-        .filter-container button {
-            padding: 8px 16px;
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        
-        .filter-container button:hover {
-            background-color: #2563eb;
-        }
-        
-        @media (max-width: 768px) {
-            .filter-container {
-                flex-direction: column;
-            }
-        }
+        /* Ajouter ces styles à votre fichier historiqueA.css */
+
+/* Carte principale */
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Barre de recherche */
+.search-bar {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.search-button {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    color: #3b82f6;
+}
+
+/* Section de filtres */
+.filter-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+    flex: 1;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #4b5563;
+    margin-bottom: 5px;
+}
+
+.select-wrapper,
+.date-input-wrapper,
+.time-input-wrapper {
+    position: relative;
+}
+
+.filter-select,
+.date-input,
+.time-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    appearance: none;
+}
+
+.select-wrapper:after {
+    content: '\f107';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    pointer-events: none;
+}
+
+.calendar-icon,
+.time-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    pointer-events: none;
+}
+
+/* Boutons de filtre */
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    align-self: flex-end;
+}
+
+.btn-filter,
+.btn-reset {
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.btn-filter {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+}
+
+.btn-filter:hover {
+    background-color: #2563eb;
+}
+
+.btn-reset {
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+
+.btn-reset:hover {
+    background-color: #e5e7eb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filter-section {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .filter-buttons {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+        justify-content: space-between;
+    }
+    
+    .btn-filter,
+    .btn-reset {
+        flex: 1;
+        justify-content: center;
+    }
+}
     </style>
 </head>
 <body>
@@ -120,27 +258,52 @@
     <main class="container">
         <div class="page-header">
             <h1><i class="fas fa-history"></i> Historique des FNE</h1>
-            <div class="header-actions">
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Rechercher...">
-                    <button id="searchBtn"><i class="fas fa-search"></i></button>
-                </div>
-            </div>
+            
         </div>
 
         <div class="card">
-            <div class="filter-container">
-                <select id="filterAction">
-                    <option value="">Toutes les actions</option>
-                    <option value="Création">Création</option>
-                    <option value="Modification">Modification</option>
-                    <option value="Validation">Validation</option>
-                    <option value="Refus">Refus</option>
-                </select>
-                <input type="date" id="dateDebut" placeholder="Date début">
-                <input type="date" id="dateFin" placeholder="Date fin">
-                <button id="filterBtn"><i class="fas fa-filter"></i> Filtrer</button>
+            <!-- Nouvelle barre de recherche -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Rechercher par ID, type, lieu ou utilisateur..." class="search-input">
+            <button id="searchBtn" class="search-button"><i class="fas fa-search"></i></button>
+        </div>
+        
+        <!-- Nouvelle section de filtres -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="filterAction">Action:</label>
+                <div class="select-wrapper">
+                    <select id="filterAction" class="filter-select">
+                        <option value="">Toutes les actions</option>
+                        <option value="Création">Création</option>
+                        <option value="Modification">Modification</option>
+                        <option value="Validation">Validation</option>
+                        <option value="Refus">Refus</option>
+                    </select>
+                </div>
             </div>
+            
+            <div class="filter-group">
+                <label for="dateDebut">Date:</label>
+                <div class="date-input-wrapper">
+                    <input type="date" id="dateDebut" class="date-input" placeholder="jj/mm/aaaa">
+                    <span class="calendar-icon"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label for="timeFilter">Heure:</label>
+                <div class="time-input-wrapper">
+                    <input type="time" id="timeFilter" class="time-input" placeholder="--:-- --">
+                    <span class="time-icon"><i class="fas fa-clock"></i></span>
+                </div>
+            </div>
+            
+            <div class="filter-buttons">
+                <button id="filterBtn" class="btn-filter"><i class="fas fa-filter"></i> Filtrer</button>
+                <button id="resetBtn" class="btn-reset"><i class="fas fa-undo"></i> Réinitialiser</button>
+            </div>
+        </div>
 
             <div class="table-responsive">
                 <table id="historique-table" class="data-table">
@@ -225,8 +388,8 @@
         </div>
     </div>
 
-    <script src="/js/FNEadmin.js"></script>
-    <script src="/js/historiqueA.js"></script>
+    <script src="/js/adminFNE.js"></script>
+    <script src="/js/AdminHistorique.js"></script>
     <script>
         // Mettre à jour la date et l'heure toutes les secondes
         setInterval(updateDateTime, 1000);
