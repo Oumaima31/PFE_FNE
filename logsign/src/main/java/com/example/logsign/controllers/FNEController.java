@@ -292,7 +292,7 @@ public ResponseEntity<String> testNotification(HttpSession session) {
         return ResponseEntity.status(500).body("Erreur lors du test de notification: " + e.getMessage());
     }
 }
-// Add this method to your FNEController.java
+
 
 @PostMapping("/updateFNE")
 public String updateFNE(@ModelAttribute FNE fne, HttpSession session, Model model) {

@@ -114,14 +114,15 @@
                     </table>
                 </div>
             </section>
-
-            <!-- Section 2: Aéronef(s) concerné(s) -->
+               <!-- Section 2: Aéronef(s) concerné(s) -->
             <section class="collapsible-section">
                 <div class="section-header" onclick="toggleSection(this)">
                     <h2><i class="fas fa-plane"></i> 2. Aéronef(s) concerné(s) / الطارات المعنية</h2>
                     <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
                 </div>
                 <div class="section-content">
+                    <!-- Ligne A -->
+                    <h3>A. Premier aéronef</h3>
                     <div class="table-responsive">
                         <table>
                             <tr>
@@ -136,6 +137,7 @@
                                 <th>Altitude/FL autorisé</th>
                                 <th>Vitesse</th>
                             </tr>
+                            
                             <tr>
                                 <td>
                                     <input type="text" name="indicatif_immatricultion" id="indicatif_immatricultion" class="enhanced-input">
@@ -182,6 +184,63 @@
                                     </select>
                                 </td>
                                 <td><input type="text" name="vitesse" id="vitesse" class="enhanced-input"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Ligne B (nouvelle) -->
+                    <h3>B. Deuxième aéronef</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <tr>
+                                <th>Indicatif et immatriculation</th>
+                                <th>Code SSR</th>
+                                <th>Type appareil</th>
+                                <th>Règles de vol</th>
+                                <th>Terrain départ</th>
+                                <th>Terrain arrivée</th>
+                                <th>Cap</th>
+                                <th>Altitude/FL réel</th>
+                                <th>Altitude/FL autorisé</th>
+                                <th>Vitesse</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" name="indicatif_immatricultion_b" id="indicatif_immatricultion_b" class="enhanced-input">
+                                </td>
+                                <td>
+                                    <input type="text" name="code_ssr_b" id="code_ssr_b" class="enhanced-input">
+                                </td>
+                                <td><input type="text" name="type_appareil_b" id="type_appareil_b" class="enhanced-input"></td>
+                                <td>
+                                    <select name="regles_vol_b" id="regles_vol_b" class="enhanced-select">
+                                        <option value=""></option>
+                                        <option value="IFR">IFR</option>
+                                        <option value="VFR">VFR</option>
+                                        <option value="IFR/VFR">IFR/VFR</option>
+                                        <option value="VFR/IFR">VFR/IFR</option>   
+                                    </select>
+                                </td>
+                                <td><input type="text" name="terrain_depart_b" id="terrain_depart_b" class="enhanced-input"></td>
+                                <td><input type="text" name="terrain_arrivée_b" id="terrain_arrivée_b" class="enhanced-input"></td>
+                                <td><input type="text" name="cap_b" id="cap_b" class="enhanced-input"></td>
+                                <td>
+                                    <select name="altitude_reel_b" id="altitude_reel_b" class="enhanced-select">
+                                        <option value=""></option>
+                                        <option value="pied">pied</option>
+                                        <option value="FL">FL</option>
+                                        <option value="métre">métre</option>  
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="altitude_autorise_b" id="altitude_autorise_b" class="enhanced-select">
+                                        <option value=""></option>
+                                        <option value="pied">pied</option>
+                                        <option value="FL">FL</option>
+                                        <option value="métre">métre</option>  
+                                    </select>
+                                </td>
+                                <td><input type="text" name="vitesse_b" id="vitesse_b" class="enhanced-input"></td>
                             </tr>
                         </table>
                     </div>

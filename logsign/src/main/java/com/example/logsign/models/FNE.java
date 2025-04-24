@@ -58,7 +58,97 @@ public class FNE {
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private User utilisateur;
+    private String indicatif_immatricultion_b;
+private String code_ssr_b;
+private String type_appareil_b;
+private String regles_vol_b;
+private String terrain_depart_b;
+private String terrain_arrivée_b;
+private String cap_b;
+private String altitude_reel_b;
+private String altitude_autorise_b;
+private String vitesse_b;
 
+// Ajouter les getters et setters pour ces nouveaux champs
+public String getIndicatif_immatricultion_b() {
+    return indicatif_immatricultion_b;
+}
+
+public void setIndicatif_immatricultion_b(String indicatif_immatricultion_b) {
+    this.indicatif_immatricultion_b = indicatif_immatricultion_b;
+}
+
+public String getCode_ssr_b() {
+    return code_ssr_b;
+}
+
+public void setCode_ssr_b(String code_ssr_b) {
+    this.code_ssr_b = code_ssr_b;
+}
+
+public String getType_appareil_b() {
+    return type_appareil_b;
+}
+
+public void setType_appareil_b(String type_appareil_b) {
+    this.type_appareil_b = type_appareil_b;
+}
+
+public String getRegles_vol_b() {
+    return regles_vol_b;
+}
+
+public void setRegles_vol_b(String regles_vol_b) {
+    this.regles_vol_b = regles_vol_b;
+}
+
+public String getTerrain_depart_b() {
+    return terrain_depart_b;
+}
+
+public void setTerrain_depart_b(String terrain_depart_b) {
+    this.terrain_depart_b = terrain_depart_b;
+}
+
+public String getTerrain_arrivée_b() {
+    return terrain_arrivée_b;
+}
+
+public void setTerrain_arrivée_b(String terrain_arrivée_b) {
+    this.terrain_arrivée_b = terrain_arrivée_b;
+}
+
+public String getCap_b() {
+    return cap_b;
+}
+
+public void setCap_b(String cap_b) {
+    this.cap_b = cap_b;
+}
+
+public String getAltitude_reel_b() {
+    return altitude_reel_b;
+}
+
+public void setAltitude_reel_b(String altitude_reel_b) {
+    this.altitude_reel_b = altitude_reel_b;
+}
+
+public String getAltitude_autorise_b() {
+    return altitude_autorise_b;
+}
+
+public void setAltitude_autorise_b(String altitude_autorise_b) {
+    this.altitude_autorise_b = altitude_autorise_b;
+}
+
+public String getVitesse_b() {
+    return vitesse_b;
+}
+
+public void setVitesse_b(String vitesse_b) {
+    this.vitesse_b = vitesse_b;
+}
     // Getters and Setters
     public Long getFne_id() {
         return fne_id;

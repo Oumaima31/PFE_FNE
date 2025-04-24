@@ -225,7 +225,6 @@ public boolean deleteFNE(Long id, User user) {
         throw e;
     }
 }
-// Add these methods to your FNEService.java
 
 // Méthode pour comparer et enregistrer les changements
 private void compareAndRecordChanges(FNE existingFne, FNE updatedFne, List<Modification> modifications) {
@@ -400,7 +399,86 @@ private void compareAndRecordChanges(FNE existingFne, FNE updatedFne, List<Modif
         mod.setNouvelle_valeur(updatedFne.getVitesse());
         modifications.add(mod);
     }
-    
+    // Section 2: Aéronef B
+if (!Objects.equals(existingFne.getIndicatif_immatricultion_b(), updatedFne.getIndicatif_immatricultion_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("indicatif_immatricultion_b");
+    mod.setAncienne_valeur(existingFne.getIndicatif_immatricultion_b());
+    mod.setNouvelle_valeur(updatedFne.getIndicatif_immatricultion_b());
+    modifications.add(mod);
+}
+
+if (!Objects.equals(existingFne.getCode_ssr_b(), updatedFne.getCode_ssr_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("code_ssr_b");
+    mod.setAncienne_valeur(existingFne.getCode_ssr_b());
+    mod.setNouvelle_valeur(updatedFne.getCode_ssr_b());
+    modifications.add(mod);
+}
+
+if (!Objects.equals(existingFne.getType_appareil_b(), updatedFne.getType_appareil_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("type_appareil_b");
+    mod.setAncienne_valeur(existingFne.getType_appareil_b());
+    mod.setNouvelle_valeur(updatedFne.getType_appareil_b());
+    modifications.add(mod);
+}
+
+if (!Objects.equals(existingFne.getRegles_vol_b(), updatedFne.getRegles_vol_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("regles_vol_b");
+    mod.setAncienne_valeur(existingFne.getRegles_vol_b());
+    mod.setNouvelle_valeur(updatedFne.getRegles_vol_b());
+    modifications.add(mod);
+}
+
+if (!Objects.equals(existingFne.getTerrain_depart_b(), updatedFne.getTerrain_depart_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("terrain_depart_b");
+    mod.setAncienne_valeur(existingFne.getTerrain_depart_b());
+    mod.setNouvelle_valeur(updatedFne.getTerrain_depart_b());
+    modifications.add(mod);
+}
+
+if (!Objects.equals(existingFne.getTerrain_arrivée_b(), updatedFne.getTerrain_arrivée_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("terrain_arrivée_b");
+    mod.setAncienne_valeur(existingFne.getTerrain_arrivée_b());
+    mod.setNouvelle_valeur(updatedFne.getTerrain_arrivée_b());
+    modifications.add(mod);
+}
+
+if (!Objects.equals(existingFne.getCap_b(), updatedFne.getCap_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("cap_b");
+    mod.setAncienne_valeur(existingFne.getCap_b());
+    mod.setNouvelle_valeur(updatedFne.getCap_b());
+    modifications.add(mod);
+}
+
+if (!Objects.equals(existingFne.getAltitude_reel_b(), updatedFne.getAltitude_reel_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("altitude_reel_b");
+    mod.setAncienne_valeur(existingFne.getAltitude_reel_b());
+    mod.setNouvelle_valeur(updatedFne.getAltitude_reel_b());
+    modifications.add(mod);
+}
+
+if (!Objects.equals(existingFne.getAltitude_autorise_b(), updatedFne.getAltitude_autorise_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("altitude_autorise_b");
+    mod.setAncienne_valeur(existingFne.getAltitude_autorise_b());
+    mod.setNouvelle_valeur(updatedFne.getAltitude_autorise_b());
+    modifications.add(mod);
+}
+
+if (!Objects.equals(existingFne.getVitesse_b(), updatedFne.getVitesse_b())) {
+    Modification mod = new Modification();
+    mod.setChamp("vitesse_b");
+    mod.setAncienne_valeur(existingFne.getVitesse_b());
+    mod.setNouvelle_valeur(updatedFne.getVitesse_b());
+    modifications.add(mod);
+}
     // Passagers
     if (!Objects.equals(existingFne.getPassagers(), updatedFne.getPassagers())) {
         Modification mod = new Modification();
@@ -560,6 +638,18 @@ private void updateFneFields(FNE existingFne, FNE updatedFne) {
     existingFne.setAltitude_reel(updatedFne.getAltitude_reel());
     existingFne.setAltitude_autorise(updatedFne.getAltitude_autorise());
     existingFne.setVitesse(updatedFne.getVitesse());
+    // Aéronef B
+existingFne.setIndicatif_immatricultion_b(updatedFne.getIndicatif_immatricultion_b());
+existingFne.setCode_ssr_b(updatedFne.getCode_ssr_b());
+existingFne.setType_appareil_b(updatedFne.getType_appareil_b());
+existingFne.setRegles_vol_b(updatedFne.getRegles_vol_b());
+existingFne.setTerrain_depart_b(updatedFne.getTerrain_depart_b());
+existingFne.setTerrain_arrivée_b(updatedFne.getTerrain_arrivée_b());
+existingFne.setCap_b(updatedFne.getCap_b());
+existingFne.setAltitude_reel_b(updatedFne.getAltitude_reel_b());
+existingFne.setAltitude_autorise_b(updatedFne.getAltitude_autorise_b());
+existingFne.setVitesse_b(updatedFne.getVitesse_b());
+
     
     // Victimes
     existingFne.setPassagers(updatedFne.getPassagers());
