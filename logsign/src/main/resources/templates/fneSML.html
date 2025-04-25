@@ -140,21 +140,22 @@
                             
                             <tr>
                                 <td>
-                                    <input type="text" name="indicatif_immatricultion" id="indicatif_immatricultion" class="enhanced-input">
-                                  <!--<div id="indicatif_error" class="error_message" style="display: none; color: red; font-size: 0.8em;">
-                                        Veuillez entrer un indicateur valide (4 caractères)
-                                    </div>
-                                    -->  
+                                    <input type="text" name="indicatif_immatricultion" id="indicatif_immatricultion" class="enhanced-input" maxlength="8" onblur="validateIndicatif('indicatif_immatricultion', 'indicatif_error')">
+                                    <div id="indicatif_error" class="error_message" style="display: none; color: red; font-size: 0.8em;">
+                                        Veuillez entrer un indicateur valide (8 caractères)
+                                    </div> 
                                 </td>
                                 <td>
-                                    <input type="text" name="code_ssr" id="code_ssr" class="enhanced-input">
-                                     <!--<div id="ssr_error" class="error_message" style="display: none; color: red; font-size: 0.8em;">
-                                        Veuillez entrer un indicateur valide (4 caractères)
+                                    <input type="text" name="code_ssr" id="code_ssr" class="enhanced-input" maxlength="4" onblur="validateMaxLength('code_ssr', 'ssr_error', 4)">
+                                    <div id="ssr_error" class="error_message" style="display: none; color: red; font-size: 0.8em;">
+                                        Veuillez entrer un code valide (4 caractères)
                                     </div>
-                                    -->
-                                    
                                 </td>
-                                <td><input type="text" name="type_appareil" id="type_appareil" class="enhanced-input"></td>
+                                <td><input type="text" name="type_appareil" id="type_appareil" class="enhanced-input" maxlength="4" onblur="validateMaxLength('type_appareil', 'type_appareil_error', 4)">
+                                    <div id="type_appareil_error" class="error_message" style="display: none; color: red; font-size: 0.8em;">
+                                        Veuillez entrer un type valide (4 caractères)
+                                    </div>
+                                </td>
                                 <td>
                                     <select name="regles_vol" id="regles_vol" class="enhanced-select">
                                         <option value=""></option>
@@ -206,12 +207,23 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="text" name="indicatif_immatricultion_b" id="indicatif_immatricultion_b" class="enhanced-input">
+                                    <input type="text" name="indicatif_immatricultion_b" id="indicatif_immatricultion_b" class="enhanced-input" maxlength="8" onblur="validateIndicatif('indicatif_immatricultion_b', 'indicatif_error_b')">
+                                    <div id="indicatif_error_b" class="error_message" style="display: none; color: red; font-size: 0.8em;">
+                                        Veuillez entrer un indicateur valide (8 caractères)
+                                    </div>
                                 </td>
                                 <td>
-                                    <input type="text" name="code_ssr_b" id="code_ssr_b" class="enhanced-input">
+                                    <input type="text" name="code_ssr_b" id="code_ssr_b" class="enhanced-input" maxlength="4" onblur="validateMaxLength('code_ssr_b', 'ssr_error_b', 4)">
+                                    <div id="ssr_error_b" class="error_message" style="display: none; color: red; font-size: 0.8em;">
+                                        Veuillez entrer un code valide (4 caractères)
+                                    </div>
                                 </td>
-                                <td><input type="text" name="type_appareil_b" id="type_appareil_b" class="enhanced-input"></td>
+                                <td>
+                                    <input type="text" name="type_appareil_b" id="type_appareil_b" class="enhanced-input" maxlength="4" onblur="validateMaxLength('type_appareil_b', 'type_appareil_error_b', 4)">
+                                    <div id="type_appareil_error_b" class="error_message" style="display: none; color: red; font-size: 0.8em;">
+                                        Veuillez entrer un type valide (4 caractères)
+                                    </div>
+                                </td>
                                 <td>
                                     <select name="regles_vol_b" id="regles_vol_b" class="enhanced-select">
                                         <option value=""></option>
@@ -399,7 +411,7 @@
         </div>
     </footer>
 
-    <script src="/js/smlFNE.js"></script>
+    <script src="/js/smlf.js"></script>
     <script>
         // Mettre à jour la date et l'heure toutes les secondes
         setInterval(updateDateTime, 1000);

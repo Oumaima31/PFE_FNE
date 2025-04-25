@@ -1,49 +1,70 @@
-// Validation des champs Indicatif et Code SSR
-/*document.addEventListener('DOMContentLoaded', function() {
-    // Validation Indicatif
-    const indicatifInput = document.getElementById('indicatif_immatricultion');
-    const indicatifError = document.getElementById('indicatif_error');
-    
-    indicatifInput.addEventListener('blur', function() {
-        if (!/^[A-Za-z]{4}$/.test(this.value)) {
-            indicatifError.style.display = 'block';
-        } else {
-            indicatifError.style.display = 'none';
+// Ajouter cette fonction à votre fichier smlFNE.js
+
+// Fonction pour valider les champs d'indicatif et immatriculation
+function validateIndicatif(inputId, errorId) {
+  const input = document.getElementById(inputId)
+  const errorElement = document.getElementById(errorId)
+
+  // Si le champ est vide, c'est valide (car non obligatoire)
+  if (!input.value.trim()) {
+    errorElement.style.display = "none"
+    return true
+  }
+
+  // Vérifier la longueur (max 8 caractères)
+  if (input.value.length > 8) {
+    errorElement.style.display = "block"
+    return false
+  }
+
+  // Si tout est correct, masquer le message d'erreur
+  errorElement.style.display = "none"
+  return true
+}
+
+// Ajouter la validation au formulaire
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("fneForm")
+
+  if (form) {
+    form.addEventListener("submit", (event) => {
+      // Valider les champs d'indicatif
+      const isIndicatifValid = validateIndicatif("indicatif_immatricultion", "indicatif_error")
+      const isIndicatifBValid = validateIndicatif("indicatif_immatricultion_b", "indicatif_error_b")
+
+      // Si l'un des champs n'est pas valide, empêcher la soumission du formulaire
+      if (!isIndicatifValid || !isIndicatifBValid) {
+        event.preventDefault()
+
+        // Ouvrir la section 2 si elle est fermée
+        const section2Header = document.querySelector(".collapsible-section:nth-child(3) .section-header")
+
+        // Déclaration de la fonction toggleSection (assumant qu'elle est définie ailleurs et accessible)
+        function toggleSection(header) {
+          header.classList.toggle("active")
+          const content = header.nextElementSibling
+          if (content.style.display === "block") {
+            content.style.display = "none"
+          } else {
+            content.style.display = "block"
+          }
         }
-    });
-  
-    // Validation Code SSR
-    const ssrInput = document.getElementById('code_ssr');
-    const ssrError = document.getElementById('ssr_error');
-    
-    ssrInput.addEventListener('blur', function() {
-        if (!/^[A-Za-z]{4}$/.test(this.value)) {
-            ssrError.style.display = 'block';
-        } else {
-            ssrError.style.display = 'none';
+
+        if (section2Header && !section2Header.classList.contains("active")) {
+          toggleSection(section2Header)
         }
-    });
-  
-    // Validation avant soumission
-    document.querySelector('form').addEventListener('submit', function(e) {
-        let isValid = true;
-        
-        if (!/^[A-Za-z]{4}$/.test(indicatifInput.value)) {
-            indicatifError.style.display = 'block';
-            isValid = false;
+
+        // Faire défiler jusqu'au premier champ invalide
+        if (!isIndicatifValid) {
+          document.getElementById("indicatif_immatricultion").scrollIntoView({ behavior: "smooth", block: "center" })
+        } else if (!isIndicatifBValid) {
+          document.getElementById("indicatif_immatricultion_b").scrollIntoView({ behavior: "smooth", block: "center" })
         }
-        
-        if (!/^[A-Za-z]{4}$/.test(ssrInput.value)) {
-            ssrError.style.display = 'block';
-            isValid = false;
-        }
-        
-        if (!isValid) {
-            e.preventDefault();
-            alert('Veuillez corriger les erreurs dans les champs avant de soumettre.');
-        }
-    });
-  });*/
+      }
+    })
+  }
+})
+
   // Fonction pour basculer l'affichage de la navbar sur mobile
   function toggleNavbar() {
     const navbarContainer = document.querySelector(".navbar-container")
@@ -467,10 +488,3 @@ function populateFormFields(fne) {
     }
   })
 }
-
-// Mock functions to resolve errors.  These should be defined elsewhere in the project.
-function updateRefGneNumber() {}
-function setValueIfExists(fieldId, value) {}
-function formatDateForInput(date) {}
-function setRadioValue(radioName, value) {}
-function toggleSection(header) {}
