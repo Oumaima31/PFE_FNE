@@ -1,0 +1,441 @@
+/* FNE Enhanced Design - Overlay CSS */
+/* Ce fichier doit être inclus après le CSS principal */
+
+:root {
+    --primary-color: #1a4b8c;
+    --secondary-color: #3a7bd5;
+    --accent-color: #00bcd4;
+    --light-blue: #e8f4ff;
+    --light-gray: #f5f7fa;
+    --dark-gray: #2c3e50;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+  }
+  
+  /* Polices modernes */
+  @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@400;600;700&display=swap");
+  
+  body {
+    font-family: "Roboto", Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4ecf7 100%);
+    background-attachment: fixed;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  /* Amélioration de la navbar */
+  .navbar {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 12px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  #meteo {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: 8px 12px;
+    backdrop-filter: blur(5px);
+  }
+  
+  #meteo-icon img {
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+  }
+  
+  #real-time {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: 8px 16px;
+    backdrop-filter: blur(5px);
+  }
+  
+  .navbar-item {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .navbar-item::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: white;
+    transition: width 0.3s ease;
+  }
+  
+  .navbar-item:hover::after {
+    width: 100%;
+  }
+  
+  /* Amélioration du conteneur principal */
+  .form-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  /* En-tête du formulaire */
+  .title-container {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+    position: relative;
+  }
+  
+  .title-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2074");
+    background-size: cover;
+    background-position: center;
+    opacity: 0.05;
+    z-index: 0;
+  }
+  
+  .title-container img {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 3px solid white;
+    z-index: 1;
+  }
+  
+  .title-container h1 {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Sections du formulaire */
+  section {
+    padding: 20px;
+    margin: 15px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+    border-left: 4px solid var(--secondary-color);
+  }
+  
+  section:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  section h2 {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+  }
+  
+  section h2::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+    border-radius: 3px;
+  }
+  
+  /* Tableaux */
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 25px;
+  }
+  
+  th {
+    background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    color: var(--dark-gray);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 12px 15px;
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  
+  tr:hover td {
+    background-color: var(--light-blue);
+  }
+  
+  /* Champs de formulaire */
+  input[type="text"],
+  input[type="date"],
+  input[type="time"],
+  input[type="number"],
+  select,
+  textarea {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 12px;
+    width: 100%;
+    transition: var(--transition);
+    background-color: #f9f9f9;
+  }
+  
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  input[type="time"]:focus,
+  input[type="number"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.1);
+    outline: none;
+    background-color: white;
+  }
+  
+  textarea {
+    min-height: 150px;
+    resize: vertical;
+  }
+  
+  /* Boutons radio et checkbox */
+  input[type="radio"],
+  input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: var(--secondary-color);
+  }
+  
+  /* Bouton de soumission */
+  button[type="submit"] {
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: block;
+    margin: 30px auto;
+    min-width: 200px;
+  }
+  
+  button[type="submit"]:hover {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Notifications */
+  .notification {
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin: 20px auto;
+    max-width: 800px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .notification::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+  }
+  
+  .notification.red {
+    background-color: #fdecea;
+    color: var(--danger-color);
+  }
+  
+  .notification.red::before {
+    background-color: var(--danger-color);
+  }
+  
+  .notification.orange {
+    background-color: #fef5e7;
+    color: var(--warning-color);
+  }
+  
+  .notification.orange::before {
+    background-color: var(--warning-color);
+  }
+  
+  .notification.green {
+    background-color: #eafaf1;
+    color: var(--success-color);
+  }
+  
+  .notification.green::before {
+    background-color: var(--success-color);
+  }
+  
+  .notification.gray {
+    background-color: #f8f9fa;
+    color: var(--dark-gray);
+  }
+  
+  .notification.gray::before {
+    background-color: var(--dark-gray);
+  }
+  
+  /* Pied de page */
+  .footer {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 30px 0;
+    margin-top: 40px;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+  }
+  
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .contact-info {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-top: 20px;
+    backdrop-filter: blur(5px);
+  }
+  
+  .contact-info a {
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.5);
+  }
+  
+  .contact-info a:hover {
+    border-bottom: 1px solid white;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    section {
+      padding: 15px;
+      margin: 10px;
+    }
+  
+    th,
+    td {
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+  
+    .title-container h1 {
+      font-size: 1.5rem;
+    }
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  section {
+    animation: fadeIn 0.5s ease-out;
+    animation-fill-mode: both;
+  }
+  
+  section:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  section:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  section:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  section:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+  section:nth-child(5) {
+    animation-delay: 0.5s;
+  }
+  section:nth-child(6) {
+    animation-delay: 0.6s;
+  }
+  section:nth-child(7) {
+    animation-delay: 0.7s;
+  }
+  section:nth-child(8) {
+    animation-delay: 0.8s;
+  }
+  
+  /* Amélioration des sélecteurs */
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233a7bd5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 30px;
+  }
+  
+  /* Amélioration des champs date et heure */
+  input[type="date"],
+  input[type="time"] {
+    position: relative;
+    padding-right: 30px;
+  }
+  
+  /* Effet de focus sur les sections */
+  section:focus-within {
+    border-left-color: var(--accent-color);
+  }
+  
+  

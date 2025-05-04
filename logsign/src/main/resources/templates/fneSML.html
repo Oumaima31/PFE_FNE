@@ -4,10 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fiche de Notification d'Evénement (FNE)</title>
-    <link rel="stylesheet" href="/css/stylesml.css">
+    <link rel="stylesheet" href="/css/styleS.css">
     <!-- Utilisation de FontAwesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
+<!-- Zone du Chatbot -->
+<div id="chatbot-container" class="chatbot-container">
+    <div id="chatbot-header" onclick="toggleChatbot()">🤖 Besoin d'aide ?</div>
+    <div id="chatbot-body" style="display:none;">
+        <div id="chat-log" class="chat-log"></div>
+        <input type="text" id="chat-input" placeholder="Posez votre question..." onkeypress="if(event.key==='Enter') sendQuestion()">
+    </div>
+</div>
+
+<style>
+.chatbot-container {
+    position: fixed;
+    bottom: 0;
+    right: 20px;
+    width: 300px;
+    font-family: Arial;
+    z-index: 1000;
+}
+
+#chatbot-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 10px 10px 0 0;
+}
+
+#chatbot-body {
+    border: 1px solid #007bff;
+    background: white;
+    height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    border-radius: 0 0 10px 10px;
+}
+
+.chat-log {
+    height: 240px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.chat-log p {
+    margin: 5px 0;
+}
+
+#chat-input {
+    width: 100%;
+    padding: 8px;
+}
+</style>
+<script>
+    function toggleChatbot() {
+    const body = document.getElementById("chatbot-body");
+    body.style.display = body.style.display === "none" ? "block" : "none";
+    
+    // Ajouter un message de bienvenue s'il n'y en a pas déjà un
+    const chatLog = document.getElementById("chat-log");
+    if (chatLog.innerHTML === "") {
+        chatLog.innerHTML = `<div class="bot-message">
+            <strong>Assistant GNE:</strong> 
+            <div style='background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 15px; border-radius: 4px; margin: 10px 0;'>
+                <p style='margin: 0; color: #003a8c;'>Bonjour ! Je suis votre assistant pour le Guide de Notification des Événements (GNE). Comment puis-je vous aider ?</p>
+            </div>
+        </div>`;
+    }
+}
+
+function sendQuestion() {
+    const input = document.getElementById("chat-input");
+    const question = input.value.trim();
+    if (!question) return;
+
+    const chatLog = document.getElementById("chat-log");
+    chatLog.innerHTML += `<div class="user-message"><strong>Vous:</strong> ${question}</div>`;
+    input.value = '';
+
+    // Afficher un indicateur de chargement
+    chatLog.innerHTML += `<div id="loading" class="bot-message">
+        <strong>Assistant GNE:</strong> 
+        <div style='background-color: #f0f0f0; border-left: 4px solid #d9d9d9; padding: 15px; border-radius: 4px; margin: 10px 0;'>
+            <p style='margin: 0; color: #595959;'><em>Recherche dans le guide GNE...</em></p>
+        </div>
+    </div>`;
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    fetch("/api/chatbot", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(question)
+    })
+    .then(response => response.text())
+    .then(response => {
+        // Supprimer l'indicateur de chargement
+        document.getElementById("loading")?.remove();
+        
+        // Ajouter la réponse formatée
+        chatLog.innerHTML += `<div class="bot-message"><strong>Assistant GNE:</strong> ${response}</div>`;
+        chatLog.scrollTop = chatLog.scrollHeight;
+    })
+    .catch(err => {
+        document.getElementById("loading")?.remove();
+        chatLog.innerHTML += `<div class="bot-message">
+            <strong>Assistant GNE:</strong> 
+            <div style='background-color: #fff1f0; border-left: 4px solid #ff4d4f; padding: 15px; border-radius: 4px; margin: 10px 0;'>
+                <p style='margin: 0; color: #a8071a;'>Erreur de connexion au serveur. Veuillez réessayer.</p>
+            </div>
+        </div>`;
+        chatLog.scrollTop = chatLog.scrollHeight;
+    });
+}
+    </script>
+    
+
 <body>
     <header class="navbar">
         <!-- Section météo à gauche -->

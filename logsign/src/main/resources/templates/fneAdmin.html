@@ -4,20 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fiche de Notification d'Evénement (FNE)</title>
-    <link rel="stylesheet" href="/css/styleadmin.css">
+    <link rel="stylesheet" href="/css/styleS.css">
+    <link rel="stylesheet" href="/css/fne-enhanced.css">
+    <link rel="stylesheet" href="/css/sidebar-enhanced.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
+<!-- Zone du Chatbot -->
+<div id="chatbot-container" class="chatbot-container">
+    <div id="chatbot-header" onclick="toggleChatbot()">🤖 Besoin d'aide ?</div>
+    <div id="chatbot-body" style="display:none;">
+        <div id="chat-log" class="chat-log"></div>
+        <input type="text" id="chat-input" placeholder="Posez votre question..." onkeypress="if(event.key==='Enter') sendQuestion()">
+    </div>
+</div>
+
+<style>
+.chatbot-container {
+    position: fixed;
+    bottom: 0;
+    right: 20px;
+    width: 300px;
+    font-family: Arial;
+    z-index: 1000;
+}
+
+#chatbot-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 10px 10px 0 0;
+}
+
+#chatbot-body {
+    border: 1px solid #007bff;
+    background: white;
+    height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    border-radius: 0 0 10px 10px;
+}
+
+.chat-log {
+    height: 240px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.chat-log p {
+    margin: 5px 0;
+}
+
+#chat-input {
+    width: 100%;
+    padding: 8px;
+}
+</style>
+<script>
+    function toggleChatbot() {
+    const body = document.getElementById("chatbot-body");
+    body.style.display = body.style.display === "none" ? "block" : "none";
+    
+    // Ajouter un message de bienvenue s'il n'y en a pas déjà un
+    const chatLog = document.getElementById("chat-log");
+    if (chatLog.innerHTML === "") {
+        chatLog.innerHTML = `<div class="bot-message">
+            <strong>Assistant GNE:</strong> 
+            <div style='background-color: #e6f7ff; border-left: 4px solid #1890ff; padding: 15px; border-radius: 4px; margin: 10px 0;'>
+                <p style='margin: 0; color: #003a8c;'>Bonjour ! Je suis votre assistant pour le Guide de Notification des Événements (GNE). Comment puis-je vous aider ?</p>
+            </div>
+        </div>`;
+    }
+}
+
+function sendQuestion() {
+    const input = document.getElementById("chat-input");
+    const question = input.value.trim();
+    if (!question) return;
+
+    const chatLog = document.getElementById("chat-log");
+    chatLog.innerHTML += `<div class="user-message"><strong>Vous:</strong> ${question}</div>`;
+    input.value = '';
+
+    // Afficher un indicateur de chargement
+    chatLog.innerHTML += `<div id="loading" class="bot-message">
+        <strong>Assistant GNE:</strong> 
+        <div style='background-color: #f0f0f0; border-left: 4px solid #d9d9d9; padding: 15px; border-radius: 4px; margin: 10px 0;'>
+            <p style='margin: 0; color: #595959;'><em>Recherche dans le guide GNE...</em></p>
+        </div>
+    </div>`;
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    fetch("/api/chatbot", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(question)
+    })
+    .then(response => response.text())
+    .then(response => {
+        // Supprimer l'indicateur de chargement
+        document.getElementById("loading")?.remove();
+        
+        // Ajouter la réponse formatée
+        chatLog.innerHTML += `<div class="bot-message"><strong>Assistant GNE:</strong> ${response}</div>`;
+        chatLog.scrollTop = chatLog.scrollHeight;
+    })
+    .catch(err => {
+        document.getElementById("loading")?.remove();
+        chatLog.innerHTML += `<div class="bot-message">
+            <strong>Assistant GNE:</strong> 
+            <div style='background-color: #fff1f0; border-left: 4px solid #ff4d4f; padding: 15px; border-radius: 4px; margin: 10px 0;'>
+                <p style='margin: 0; color: #a8071a;'>Erreur de connexion au serveur. Veuillez réessayer.</p>
+            </div>
+        </div>`;
+        chatLog.scrollTop = chatLog.scrollHeight;
+    });
+}
+    </script>
+    
+
 <body>
     <header class="navbar">
         <!-- Section météo à gauche -->
-        <div id="meteo" class="meteo-card">
+        <div id="meteo">
             <span id="meteo-icon"></span>
-            <div class="meteo-info">
-                <span id="meteo-temp"></span>
-                <span id="meteo-description"></span>
-            </div>
+            <span id="meteo-temp"></span>
+            <span id="meteo-description"></span>
         </div>
-        <div id="real-time" class="time-card">
+        <div id="real-time">
             <span id="current-date"></span>
             <span id="current-time"></span>
         </div>
@@ -26,45 +142,72 @@
             <span></span>
             <span></span>    
         </button>
-        <nav class="navbar-container">
-            <!-- Bouton pour les FNE en attente -->
-            <a class="navbar-item" href="/auth/fneEnAttente">
-                <i class="fas fa-list"></i>
-                <span>FNE En Attente</span>
-            </a>
-            <!-- Bouton pour l'historique -->
-            <a class="navbar-item" href="/auth/historique">
-                <i class="fas fa-history"></i> 
-                <span>Historique des FNE</span>
-            </a>
-            <!-- Bouton pour la notification -->
-            <a class="navbar-item" href="/auth/notificationsAdmin">
-                <i class="fas fa-bell"></i>
-                <span>Notifications</span>
-            </a>
-            <!-- Bouton pour les statistiques -->
-            <a class="navbar-item" href="/auth/statistiques">
-                <i class="fas fa-chart-bar"></i> 
-                <span>Statistiques</span>
-            </a>
-            <!-- Bouton pour la liste des utilisateurs -->
-            <a class="navbar-item" href="/auth/adminutilisateurs">
-                <i class="fas fa-users"></i>
-                <span>Liste des Utilisateurs</span>
-            </a>
-            <!-- Bouton de déconnexion -->
-            <a class="navbar-item" href="/auth/index" onclick="logout(); return false;">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Déconnexion</span>
-            </a>
-        </nav>
     </header>
+
+    <!-- Nouvelle structure avec sidebar -->
+    <div class="page-wrapper">
+        <!-- Sidebar pour la navigation -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="/image/oacaLogo.jpg" alt="Logo OACA" class="sidebar-logo">
+                <h3>Menu de Navigation</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <!-- Bouton pour les FNE en attente -->
+                <div class="sidebar-item">
+                    <a href="/auth/fneEnAttente" class="sidebar-link">
+                        <i class="fas fa-list"></i>
+                        <span>FNE En Attente</span>
+                    </a>
+                </div>
+                <!-- Bouton pour l'historique -->
+                <div class="sidebar-item">
+                    <a href="/auth/historique" class="sidebar-link">
+                        <i class="fas fa-history"></i> 
+                        <span>Historique des FNE</span>
+                    </a>
+                </div>
+                <!-- Bouton pour les statistiques -->
+                <div class="sidebar-item">
+                    <a href="/auth/statistiques" class="sidebar-link">
+                        <i class="fas fa-chart-bar"></i> 
+                        <span>Statistiques</span>
+                    </a>
+                </div>
+                <!-- Bouton pour la liste des utilisateurs -->
+                <div class="sidebar-item">
+                    <a href="/auth/adminutilisateurs" class="sidebar-link">
+                        <i class="fas fa-users"></i>
+                        <span>Liste des Utilisateurs</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="/auth/notificationsAdmin" class="sidebar-link">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                    </a>
+                </div>
+                <!-- Bouton de déconnexion -->
+                <div class="sidebar-item">
+                    <a href="/auth/" class="sidebar-link" onclick="logout(); return false;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Déconnexion</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        
+        <!-- Overlay pour fermer le sidebar sur mobile -->
+     <div class="sidebar-overlay" onclick="toggleNavbar()"></div>
+        
+        <!-- Contenu principal -->
+    <div class="main-content">
     
-    <div id="notification" class="notification">
-        <span id="notificationText"></span>
-    </div>
+        <div id="notification" class="notification">
+            <span id="notificationText"></span>
+        </div>
     
-    <div class="form-container">
+        <div class="form-container">
         <div class="title-container">
             <img src="/image/oacaLogo.jpg" alt="Logo"> 
             <h1>Fiche de Notification d'Evénement (FNE)</h1>
@@ -418,6 +561,7 @@
             </div>
         </form>
     </div>
+</div>
        
     <footer class="footer">
         <div class="footer-content">
@@ -438,7 +582,7 @@
             </div>
         </div>
     </footer>
-
+    <script src="/js/sideBar.js" defer></script> 
     <script src="/js/adminFNE.js"></script>
     <script>
         // Mettre à jour la date et l'heure toutes les secondes
