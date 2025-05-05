@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques FNE | Tableau de bord</title>
+    <link rel="stylesheet" href="/css/styleadmin.css">
+    <link rel="stylesheet" href="/css/fne-table.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .dashboard-container {
+            width: 100%;
+            height: 85vh;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background-color: white;
+            border-radius: 8px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .dashboard-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .refresh-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .btn-refresh {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-refresh:hover {
+            background-color: #005a9e;
+        }
+        
+        .dashboard-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .filter-item select, .filter-item input {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .filter-item label {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .dashboard-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 15px;
+            padding: 0 20px;
+        }
+        
+        .dashboard-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .dashboard-tab.active {
+            border-bottom: 2px solid #0078d4;
+            color: #0078d4;
+        }
+        
+        .dashboard-info {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 0 20px;
+        }
+        
+        .info-card {
+            background-color: #f5f9ff;
+            border-left: 4px solid #0078d4;
+            padding: 10px 15px;
+            border-radius: 4px;
+            flex: 1;
+        }
+        
+        .info-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .info-card p {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-filters, .dashboard-info {
+                flex-direction: column;
+            }
+            
+            .dashboard-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <!-- Section météo à gauche -->
+        <div id="meteo">
+            <span id="meteo-icon"></span>
+            <span id="meteo-temp"></span>
+            <span id="meteo-description"></span>
+        </div>
+        <div id="real-time">
+            <span id="current-date"></span>
+            <span id="current-time"></span>
+        </div>
+        <!-- Bouton pour les écrans mobiles -->
+        <button class="navbar-toggle" onclick="toggleNavbar()">
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="navbar-container">
+            <a class="navbar-item" href="/auth/fneAdmin">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            
+            <a class="navbar-item" href="/auth/fneEnAttente">
+                <i class="fas fa-clipboard-list"></i>
+                <span>FNE En Attente</span>
+            </a>
+            
+            <a class="navbar-item" href="/auth/historique">
+                <i class="fas fa-history"></i>
+                <span>Historique des FNE</span>
+            </a>
+            
+            <a class="navbar-item active" href="/auth/statistiques">
+                <i class="fas fa-chart-bar"></i>
+                <span>Statistiques</span>
+            </a>
+            
+            <a class="navbar-item" href="/auth/notificationsAdmin">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+            </a>
+            
+            <a class="navbar-item" href="/auth/adminutilisateurs">
+                <i class="fas fa-users"></i>
+                <span>Liste des Utilisateurs</span>
+            </a>
+            
+            <!-- Bouton de déconnexion -->
+            <a class="navbar-item" href="/auth/index" onclick="logout(); return false;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="container">
+        
+
+        <div class="card">
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">Gestion des FNE</h2>
+                <button class="btn-refresh" onclick="manualRefresh()">
+                    <i class="fas fa-sync-alt"></i> Actualiser maintenant
+                </button>
+            </div>
+            
+            
+            <!-- Iframe Power BI -->
+            <iframe 
+                id="powerbi-frame"
+                class="dashboard-container" 
+                src="https://app.powerbi.com/view?r=eyJrIjoiODFjOWM1NmQtM2U3Ny00MWFmLWFjYjQtYzQzM2EzOGIyYjI4IiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9"
+                frameborder="0" 
+                allowFullScreen="true">
+            </iframe>
+            
+            <div class="refresh-info">
+                <span id="last-refresh">Dernière actualisation: --:--:--</span>
+                <span>Actualisation automatique toutes les 5 minutes</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Fonction pour actualiser l'iframe
+        function refreshDashboard() {
+            const iframe = document.getElementById('powerbi-frame');
+            iframe.src = iframe.src;
+            
+            // Mettre à jour l'heure de dernière actualisation
+            const now = new Date();
+            document.getElementById('last-refresh').textContent = 
+                `Dernière actualisation: ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        }
+        
+        // Configurer l'actualisation automatique toutes les 5 minutes (300000 ms)
+        window.onload = function() {
+            // Actualiser immédiatement pour afficher l'heure
+            refreshDashboard();
+            
+            // Configurer l'actualisation périodique
+            setInterval(refreshDashboard, 300000);
+            
+            // Mettre à jour la date et l'heure toutes les secondes
+            setInterval(updateDateTime, 1000);
+            
+            // Afficher la date et l'heure immédiatement au chargement de la page
+            updateDateTime();
+            
+            // Afficher Meteo
+            fetchMeteo();
+            
+            // Ajouter des écouteurs d'événements pour les filtres
+            document.getElementById('periodeFilter').addEventListener('change', applyFilters);
+            document.getElementById('typeFilter').addEventListener('change', applyFilters);
+            document.getElementById('airportFilter').addEventListener('change', applyFilters);
+            
+            // Ajouter des écouteurs d'événements pour les onglets
+            const tabs = document.querySelectorAll('.dashboard-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+        
+        // Fonction pour actualiser manuellement
+        function manualRefresh() {
+            refreshDashboard();
+        }
+        
+        // Fonction pour mettre à jour la date et l'heure
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            
+            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', options);
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR');
+        }
+        
+        // Fonction pour récupérer les données météo
+        function fetchMeteo() {
+            // Simuler des données météo pour l'exemple
+            const meteoIcon = document.getElementById('meteo-icon');
+            const meteoTemp = document.getElementById('meteo-temp');
+            const meteoDesc = document.getElementById('meteo-description');
+            
+            meteoIcon.innerHTML = '<i class="fas fa-sun"></i>';
+            meteoTemp.textContent = '25°C';
+            meteoDesc.textContent = 'Ensoleillé';
+            
+            // Dans une application réelle, vous feriez un appel API à un service météo
+        }
+        
+        // Fonction pour basculer la navbar sur mobile
+        function toggleNavbar() {
+            const navbarContainer = document.querySelector('.navbar-container');
+            navbarContainer.classList.toggle('active');
+        }
+        
+        // Fonction de déconnexion
+        function logout() {
+            // Logique de déconnexion
+            window.location.href = '/auth/';
+        }
+    </script>
+</body>
+</html>
