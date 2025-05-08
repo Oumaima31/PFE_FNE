@@ -2,6 +2,7 @@ package com.example.logsign.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -36,18 +37,26 @@ public class UserController {
     public String adminutilisateurs() {
         return "adminutilisateurs";
     }
+    
     @PostMapping("/logout")
     public String logout(HttpServletRequest request) {
         // Invalider la session
         request.getSession().invalidate();
-        return "index"; // ou "/login"
+        return "redirect:/auth/index"; // Redirection vers la page de login
     }
+    
+    @GetMapping("/logout")
+    public String logoutGet(HttpServletRequest request) {
+        // Invalider la session
+        request.getSession().invalidate();
+        return "redirect:/auth/index"; // Redirection vers la page de login
+    }
+    
     @GetMapping("/index")
     public String loginPage() {
         return "index"; // Nom de votre template de login
     }
 
-    
     @PostMapping("/login")
     public String login(@RequestParam String matricule, @RequestParam String motDePasse, 
                         HttpSession session, Model model) {
@@ -57,17 +66,15 @@ public class UserController {
         if (user != null) { // Si l'utilisateur est trouvé
             System.out.println("Utilisateur trouvé : " + user.getMatricule() + ", Rôle : " + user.getRole());
 
-            // Stocke l'utilisateur dans la session pour une utilisation ultérieure
+            // Stocke les informations de l'utilisateur dans la session
             session.setAttribute("user", user);
+            session.setAttribute("userName", user.getNom() + " " + user.getPrenom());
+            session.setAttribute("userRole", user.getRole());
+            session.setAttribute("userAirport", user.getAeroport());
+            session.setAttribute("userId", user.getId());
 
-            // Redirige en fonction du rôle de l'utilisateur
-            if (user.getRole().equals("SML")) {
-                System.out.println("Redirection vers /fneSML");
-                return "redirect:/auth/fneSML"; // Redirection vers l'interface SML
-            } else if (user.getRole().equals("admin")) {
-                System.out.println("Redirection vers /fneAdmin");
-                return "redirect:/auth/fneAdmin"; // Redirection vers l'interface administrateur
-            }
+            // Rediriger vers le tableau de bord commun
+            return "redirect:/auth/dashboard";
         } else {
             // Si l'utilisateur n'est pas trouvé, affiche un message d'erreur
             System.out.println("Aucun utilisateur trouvé avec ce matricule et ce mot de passe.");
@@ -75,6 +82,49 @@ public class UserController {
         }
         // Retourne la vue de la page de connexion en cas d'erreur
         return "index"; 
+    }
+    
+    @GetMapping("/dashboard")
+    public String dashboard(HttpSession session, Model model) {
+        // Vérifier si l'utilisateur est connecté
+        if (session.getAttribute("user") == null) {
+            return "redirect:/auth/index";
+        }
+        
+        // L'utilisateur est connecté, afficher le tableau de bord
+        return "dashboard";
+    }
+    
+    @GetMapping("/redirectToFneSML")
+    public String redirectToFneSML(HttpSession session) {
+        // Vérifier si l'utilisateur est connecté et a le rôle SML
+        if (session.getAttribute("user") == null) {
+            return "redirect:/auth/index";
+        }
+        
+        User user = (User) session.getAttribute("user");
+        if (!"SML".equals(user.getRole())) {
+            return "redirect:/auth/dashboard";
+        }
+        
+        // Rediriger vers la page FNE SML gérée par FNEController
+        return "redirect:/auth/fneSML";
+    }
+    
+    @GetMapping("/redirectToFneAdmin")
+    public String redirectToFneAdmin(HttpSession session) {
+        // Vérifier si l'utilisateur est connecté et a le rôle admin
+        if (session.getAttribute("user") == null) {
+            return "redirect:/auth/index";
+        }
+        
+        User user = (User) session.getAttribute("user");
+        if (!"admin".equals(user.getRole())) {
+            return "redirect:/auth/dashboard";
+        }
+        
+        // Rediriger vers la page FNE Admin gérée par FNEController
+        return "redirect:/auth/fneAdmin";
     }
     
     @PostMapping("/register")
@@ -159,5 +209,14 @@ public class UserController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-}
 
+    @GetMapping("/api/current-user")
+    @ResponseBody
+    public ResponseEntity<User> getCurrentUser(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(user);
+    }
+}

@@ -3,7 +3,7 @@ package com.example.logsign.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+
 import org.springframework.web.bind.annotation.*;
 
 import com.example.logsign.models.Historique;
@@ -21,6 +21,8 @@ public class HistoriqueController {
     @Autowired
     private HistoriqueService historiqueService;
 
+    // Supprimez ou commentez ces méthodes pour éviter les conflits avec GestionFNEController
+    /*
     @GetMapping("/historique")
     public String historique(HttpSession session, Model model) {
         // Vérifier si l'utilisateur est connecté et est un admin
@@ -40,6 +42,7 @@ public class HistoriqueController {
         }
         return "historiqueSML";
     }
+    */
     
     // API pour récupérer tout l'historique (réservé aux admins)
     @GetMapping("/api/historique")
@@ -141,4 +144,3 @@ public class HistoriqueController {
         return ResponseEntity.ok(userHistorique);
     }
 }
-

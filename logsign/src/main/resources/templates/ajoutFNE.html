@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche de Notification d'Evénement (FNE)</title>
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="stylesheet" href="/css/dashbord.css">
+    <link rel="stylesheet" href="/css/ajouterFNE.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+</head>
+<!-- Zone du Chatbot -->
+<div id="chatbot-container" class="chatbot-container">
+    <div id="chatbot-header" onclick="toggleChatbot()">
+        <i class="fas fa-robot"></i> Assistant GNE
+        <div class="chatbot-controls">
+            <button id="minimize-btn" onclick="toggleChatbot(event)" title="Réduire">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <div id="chatbot-body" style="display:none;">
+        <div id="chat-log" class="chat-log"></div>
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Posez votre question sur le GNE..." onkeypress="if(event.key==='Enter') sendQuestion()">
+            <button id="send-btn" onclick="sendQuestion()" title="Envoyer">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="/image/oacaLogo.jpg" alt="Logo OACA">
+                <h1>FNE Alertes</h1>
+            </div>
+            <button class="toggle-sidebar" id="toggle-sidebar">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-label">Menu Principal</div>
+            
+            <!-- Menu pour SML -->
+            <div th:if="${session.userRole == 'SML'}" class="menu-item">
+                <a href="/auth/dashboard" class="menu-link">
+                    <i class="fas fa-home"></i>
+                    <span class="menu-text">Accueil</span>
+                </a>
+            </div>
+            
+            <div th:if="${session.userRole == 'SML'}" class="menu-item">
+                <a href="/auth/gestionFNE" class="menu-link">
+                    <i class="fas fa-history"></i>
+                    <span class="menu-text">Gestion FNE</span>
+                </a>
+            </div>
+            
+            <div th:if="${session.userRole == 'SML'}" class="menu-item">
+                <a href="/auth/notifications" class="menu-link">
+                    <i class="fas fa-bell"></i>
+                    <span class="menu-text">Notifications</span>
+                </a>
+            </div>
+            
+            <!-- Menu pour Admin -->
+            <div th:if="${session.userRole == 'admin'}" class="menu-item">
+                <a href="/auth/dashboard" class="menu-link">
+                    <i class="fas fa-home"></i>
+                    <span class="menu-text">Accueil</span>
+                </a>
+            </div>
+            
+            <div th:if="${session.userRole == 'admin'}" class="menu-item">
+                <a href="/auth/gestionFNE" class="menu-link">
+                    <i class="fas fa-history"></i>
+                    <span class="menu-text">Gestion FNE</span>
+                </a>
+            </div>
+            <div th:if="${session.userRole == 'admin'}" class="menu-item">
+                <a href="/auth/fneEnAttente" class="menu-link">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="menu-text">FNE en attente</span>
+                </a>
+            </div>
+            <div th:if="${session.userRole == 'admin'}" class="menu-item">
+                <a href="/auth/notifications" class="menu-link">
+                    <i class="fas fa-bell"></i>
+                    <span class="menu-text">Notifications</span>
+                </a>
+            </div>
+            
+            <div th:if="${session.userRole == 'admin'}" class="menu-item">
+                <a href="/auth/adminutilisateurs" class="menu-link">
+                    <i class="fas fa-users-cog"></i>
+                    <span class="menu-text">Gestion Utilisateurs</span>
+                </a>
+            </div>
+            <div th:if="${session.userRole == 'admin'}" class="menu-item">
+                <a href="/auth/statistiques" class="menu-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="menu-text">Statistiques</span>
+                </a>
+            </div>
+            <!-- Menu commun -->
+            
+            
+            <div class="menu-label">Paramètres</div>
+            
+            
+            <div class="menu-item">
+                <a href="/auth/logout" class="menu-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="menu-text">Déconnexion</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info">
+                <div class="user-name" th:text="${session.userName}">Utilisateur</div>
+                <div class="user-role" th:text="${session.userRole}">Rôle</div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="mobile-toggle" id="mobile-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="header-meteo">
+                    <div class="meteo-icon" id="meteo-icon">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div class="meteo-info">
+                        <div class="meteo-temp" id="meteo-temp">--°C</div>
+                        <div class="meteo-description" id="meteo-description">Chargement...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="time-widget">
+                    <div class="current-date" id="current-date">--/--/----</div>
+                    <div class="current-time" id="current-time">--:--:--</div>
+                </div>
+                <div class="header-item">
+                    <button class="header-button" id="notifications-toggle">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge"></span>
+                    </button>
+                    
+                    <!-- Notifications Dropdown -->
+                    <div class="dropdown-menu" id="notifications-dropdown">
+                        <div class="dropdown-header">
+                            <h3 class="dropdown-title">Notifications</h3>
+                        </div>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-file-alt"></i>
+                            <div>
+                                <div>Nouvelle FNE soumise</div>
+                                <small>Il y a 5 minutes</small>
+                            </div>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <div>FNE approuvée</div>
+                                <small>Il y a 2 heures</small>
+                            </div>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-user-plus"></i>
+                            <div>
+                                <div>Nouvel utilisateur enregistré</div>
+                                <small>Il y a 1 jour</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="header-item dropdown">
+                    <button class="header-button" id="user-toggle">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                    
+                    <!-- User Dropdown -->
+                    <div class="dropdown-menu" id="user-dropdown">
+                        <div class="dropdown-header">
+                            <h3 class="dropdown-title" th:text="${session.userName}">Utilisateur</h3>
+                        </div>
+                        <a href="/auth/profile" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Mon profil</span>
+                        </a>
+                        <a href="/auth/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Paramètres</span>
+                        </a>
+                        <a href="/auth/logout" class="dropdown-item logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Déconnexion</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Content -->
+        <div class="content">
+            <div id="notification" class="notification">
+                <span id="notification-message"></span>
+            </div>
+            
+            <div class="form-container">
+                <div class="title-container">
+                    <img src="/image/oacaLogo.jpg" alt="Logo"> 
+                    <h1>Fiche de Notification d'Evénement (FNE)</h1>
+                </div>
+                
+                <!-- Formulaire avec method POST et action pour soumettre FNE -->
+                <form th:action="${fne != null} ? (${session.userRole == 'admin'} ? '/auth/updateFNEAdmin' : '/auth/updateFNE') : (${session.userRole == 'admin'} ? '/auth/submitFNEAdmin' : '/auth/submitFNE')" method="POST" id="fneForm">
+                    <input type="hidden" id="fne_id" name="fne_id" th:if="${fne != null}" th:value="${fne.fne_id}" />
+                    <div class="section type-selection">
+                        <!-- Types d'événements -->
+                        <div class="form-group">
+                            <label for="type_evt">Type d'événement :</label>
+                            <select id="type_evt" name="type_evt" onchange="updateRefGneNumber()" class="enhanced-select" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option value="accident">Accident (ACCID)</option>
+                                <option value="incident_grave">Incident grave (ING)</option>
+                                <option value="incident">Incident (INC)</option>
+                                <option value="evt_technique">Evenement Technique (EVT)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ref_gne">REF GNE :</label>
+                            <select id="ref_gne" name="ref_gne" class="enhanced-select" required>
+                                <!-- Les options seront générées dynamiquement par JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 1: Informations générales -->
+                    <section class="collapsible-section">
+                        <div class="section-header" onclick="toggleSection(this)">
+                            <h2><i class="fas fa-info-circle"></i> 1. Informations générales / معلومات عامة</h2>
+                            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="section-content">
+                            <table>
+                                <tr>
+                                    <td>1.1 Organisme concerné</td>
+                                    <td><input type="text" name="Organisme_concerné" id="Organisme_concerné" class="enhanced-input"></td>
+                                </tr>
+                                <tr>
+                                    <td>1.2 Date</td>
+                                    <td><input type="date" name="Date" id="Date" class="enhanced-input"></td>
+                                </tr>
+                                <tr>
+                                    <td>1.3 Heure UTC</td>
+                                    <td><input type="time" name="heure_UTC" id="heure_UTC" class="enhanced-input"></td>
+                                </tr>
+                                <tr>
+                                    <td>1.4 Lieu de l'événement</td>
+                                    <td><input type="text" name="Lieu_EVT" id="Lieu_EVT" class="enhanced-input"></td>
+                                </tr>
+                                <tr>
+                                    <td>1.5 Moyen de détection</td>
+                                    <td><input type="text" name="moyen_detection" id="moyen_detection" class="enhanced-input"></td>
+                                </tr>
+                                <tr>
+                                    <td>1.6 Impacts opérationnels</td>
+                                    <td><input type="text" name="impacts_operationnels" id="impacts_operationnels" class="enhanced-input"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </section>
+                    
+                    <!-- Section 2: Aéronef(s) concerné(s) -->
+                    <section class="collapsible-section">
+                        <div class="section-header" onclick="toggleSection(this)">
+                            <h2><i class="fas fa-plane"></i> 2. Aéronef(s) concerné(s) / الطارات المعنية</h2>
+                            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="section-content">
+                            <!-- Ligne A -->
+                            <h3>A. Premier aéronef</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <tr>
+                                        <th>Indicatif et immatriculation</th>
+                                        <th>Code SSR</th>
+                                        <th>Type appareil</th>
+                                        <th>Règles de vol</th>
+                                        <th>Terrain départ</th>
+                                        <th>Terrain arrivée</th>
+                                        <th>Cap</th>
+                                        <th>Altitude/FL réel</th>
+                                        <th>Altitude/FL autorisé</th>
+                                        <th>Vitesse</th>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            <input type="text" name="indicatif_immatricultion" id="indicatif_immatricultion" class="enhanced-input" maxlength="8" onblur="validateIndicatif('indicatif_immatricultion', 'indicatif_error')">
+                                            <div id="indicatif_error" class="error_message" style="display: none;">
+                                                Veuillez entrer un indicateur valide (8 caractères)
+                                            </div> 
+                                        </td>
+                                        <td>
+                                            <input type="text" name="code_ssr" id="code_ssr" class="enhanced-input" maxlength="4" onblur="validateMaxLength('code_ssr', 'ssr_error', 4)">
+                                            <div id="ssr_error" class="error_message" style="display: none;">
+                                                Veuillez entrer un code valide (4 caractères)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="type_appareil" id="type_appareil" class="enhanced-input" maxlength="4" onblur="validateMaxLength('type_appareil', 'type_appareil_error', 4)">
+                                            <div id="type_appareil_error" class="error_message" style="display: none;">
+                                                Veuillez entrer un type valide (4 caractères)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <select name="regles_vol" id="regles_vol" class="enhanced-select">
+                                                <option value=""></option>
+                                                <option value="IFR">IFR</option>
+                                                <option value="VFR">VFR</option>
+                                                <option value="IFR/VFR">IFR/VFR</option>
+                                                <option value="VFR/IFR">VFR/IFR</option>   
+                                            </select>
+                                        </td>
+                                        <td><input type="text" name="terrain_depart" id="terrain_depart" class="enhanced-input"></td>
+                                        <td><input type="text" name="terrain_arrivée" id="terrain_arrivée" class="enhanced-input"></td>
+                                        <td><input type="text" name="cap" id="cap" class="enhanced-input"></td>
+                                        <td>
+                                            <select name="altitude_reel" id="altitude_reel" class="enhanced-select">
+                                                <option value=""></option>
+                                                <option value="pied">pied</option>
+                                                <option value="FL">FL</option>
+                                                <option value="métre">métre</option>  
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="altitude_autorise" id="altitude_autorise" class="enhanced-select">
+                                                <option value=""></option>
+                                                <option value="pied">pied</option>
+                                                <option value="FL">FL</option>
+                                                <option value="métre">métre</option>  
+                                            </select>
+                                        </td>
+                                        <td><input type="text" name="vitesse" id="vitesse" class="enhanced-input"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <!-- Ligne B (nouvelle) -->
+                            <h3>B. Deuxième aéronef</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <tr>
+                                        <th>Indicatif et immatriculation</th>
+                                        <th>Code SSR</th>
+                                        <th>Type appareil</th>
+                                        <th>Règles de vol</th>
+                                        <th>Terrain départ</th>
+                                        <th>Terrain arrivée</th>
+                                        <th>Cap</th>
+                                        <th>Altitude/FL réel</th>
+                                        <th>Altitude/FL autorisé</th>
+                                        <th>Vitesse</th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="text" name="indicatif_immatricultion_b" id="indicatif_immatricultion_b" class="enhanced-input" maxlength="8" onblur="validateIndicatif('indicatif_immatricultion_b', 'indicatif_error_b')">
+                                            <div id="indicatif_error_b" class="error_message" style="display: none;">
+                                                Veuillez entrer un indicateur valide (8 caractères)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="code_ssr_b" id="code_ssr_b" class="enhanced-input" maxlength="4" onblur="validateMaxLength('code_ssr_b', 'ssr_error_b', 4)">
+                                            <div id="ssr_error_b" class="error_message" style="display: none;">
+                                                Veuillez entrer un code valide (4 caractères)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="type_appareil_b" id="type_appareil_b" class="enhanced-input" maxlength="4" onblur="validateMaxLength('type_appareil_b', 'type_appareil_error_b', 4)">
+                                            <div id="type_appareil_error_b" class="error_message" style="display: none;">
+                                                Veuillez entrer un type valide (4 caractères)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <select name="regles_vol_b" id="regles_vol_b" class="enhanced-select">
+                                                <option value=""></option>
+                                                <option value="IFR">IFR</option>
+                                                <option value="VFR">VFR</option>
+                                                <option value="IFR/VFR">IFR/VFR</option>
+                                                <option value="VFR/IFR">VFR/IFR</option>   
+                                            </select>
+                                        </td>
+                                        <td><input type="text" name="terrain_depart_b" id="terrain_depart_b" class="enhanced-input"></td>
+                                        <td><input type="text" name="terrain_arrivée_b" id="terrain_arrivée_b" class="enhanced-input"></td>
+                                        <td><input type="text" name="cap_b" id="cap_b" class="enhanced-input"></td>
+                                        <td>
+                                            <select name="altitude_reel_b" id="altitude_reel_b" class="enhanced-select">
+                                                <option value=""></option>
+                                                <option value="pied">pied</option>
+                                                <option value="FL">FL</option>
+                                                <option value="métre">métre</option>  
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="altitude_autorise_b" id="altitude_autorise_b" class="enhanced-select">
+                                                <option value=""></option>
+                                                <option value="pied">pied</option>
+                                                <option value="FL">FL</option>
+                                                <option value="métre">métre</option>  
+                                            </select>
+                                        </td>
+                                        <td><input type="text" name="vitesse_b" id="vitesse_b" class="enhanced-input"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section 3: Nombre de victimes -->
+                    <section class="collapsible-section">
+                        <div class="section-header" onclick="toggleSection(this)">
+                            <h2><i class="fas fa-user-injured"></i> 3. Nombre estimatif des victimes (si disponible) / عدد الضحايا</h2>
+                            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="section-content">
+                            <table>
+                                <tr>
+                                    <th>Passagers</th>
+                                    <th>Personnel</th>
+                                    <th>Equipage</th>
+                                    <th>Autre</th>
+                                </tr>
+                                <tr>
+                                    <td><input type="number" name="passagers" id="passagers" class="enhanced-input"></td>
+                                    <td><input type="number" name="personnel" id="personnel" class="enhanced-input"></td>
+                                    <td><input type="number" name="equipage" id="equipage" class="enhanced-input"></td>
+                                    <td><input type="number" name="autre" id="autre" class="enhanced-input"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 4: Conditions météorologiques -->
+                    <section class="collapsible-section">
+                        <div class="section-header" onclick="toggleSection(this)">
+                            <h2><i class="fas fa-cloud-rain"></i> 4. Conditions météorologiques / الأحوال الجوية</h2>
+                            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="section-content">
+                            <table>
+                                <tr>
+                                    <th>Vent</th>
+                                    <th>Visibilité</th>
+                                    <th>Nébulosité</th>
+                                    <th>Précipitation</th>
+                                    <th>Autres phénomènes</th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="input-with-icon">
+                                            <i class="fas fa-compass"></i>
+                                            <input type="text" name="vent_direction" id="vent_direction" placeholder="Direction" class="enhanced-input">
+                                        </div>
+                                        <div class="input-with-icon">
+                                            <i class="fas fa-wind"></i>
+                                            <input type="text" name="vent_vitesse" id="vent_vitesse" placeholder="Vitesse" class="enhanced-input">
+                                        </div>
+                                    </td>
+                                    <td><input type="number" name="visibilite" id="visibilite" class="enhanced-input"></td>
+                                    <td>
+                                        <select name="nebulosite" id="nebulosite" class="enhanced-select">
+                                            <option value=""></option>
+                                            <option value="BKN">BKN</option>
+                                            <option value="SCT">SCT</option>
+                                            <option value="FEW">FEW</option>
+                                            <option value="SKC">SKC</option>
+                                            <option value="CB">CB</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="precipitation" id="precipitation" class="enhanced-select">
+                                            <option value=""></option>
+                                            <option value="Pluie">Pluie</option>
+                                            <option value="Grêle">Grêle</option>
+                                            <option value="Neige">Neige</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" name="autres_phenomenes" id="autres_phenomenes" class="enhanced-input"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 5: Matériel, installation ou équipement -->
+                    <section class="collapsible-section">
+                        <div class="section-header" onclick="toggleSection(this)">
+                            <h2><i class="fas fa-tools"></i> 5. Matériel, installation ou équipement / معدات أو تجهيزات أو أجهزة</h2>
+                            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="section-content">
+                            <table>
+                                <tr>
+                                    <td>L'événement implique une installation/équipement</td>
+                                    <td class="radio-group">
+                                        <label class="radio-label"><input type="radio" name="evt_implique_installation_équipement" value="true"> Oui</label>
+                                        <label class="radio-label"><input type="radio" name="evt_implique_installation_équipement" value="false" checked> Non</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Le type de l'installation ou de l'équipement</td>
+                                    <td><input type="text" name="type_installation_équipement" id="type_installation_équipement" class="enhanced-input"></td>
+                                </tr>
+                                <tr>
+                                    <td>Le nom de la compagnie d'assistance / organisme exploitant le véhicule</td>
+                                    <td><input type="text" name="nom_compagnie_assistance_organisme_exploitant_véhicule" id="nom_compagnie_assistance_organisme_exploitant_véhicule" class="enhanced-input"></td>
+                                </tr>
+                                <tr>
+                                    <td>L'événement implique un véhicule ou un matériel d'assistance au sol</td>
+                                    <td class="radio-group">
+                                        <label class="radio-label"><input type="radio" name="evt_implique_véhicule_materiel_assistance_sol" value="true"> Oui</label>
+                                        <label class="radio-label"><input type="radio" name="evt_implique_véhicule_materiel_assistance_sol" value="false" checked> Non</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Type du matériel / véhicule</td>
+                                    <td><input type="text" name="type_materiel_véhicule" id="type_materiel_véhicule" class="enhanced-input"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 6: Description de l'événement -->
+                    <section class="collapsible-section">
+                        <div class="section-header" onclick="toggleSection(this)">
+                            <h2><i class="fas fa-file-alt"></i> 6. Description de l'événement (croquis si nécessaire) / وصف الحدث</h2>
+                            <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                        </div>
+                        <div class="section-content">
+                            <textarea name="description_evt" rows="10" cols="100" id="description_evt" class="enhanced-textarea"></textarea>
+                        </div>
+                    </section>
+                    
+                    <!-- Section pour le statut de la FNE (admin uniquement) -->
+                    <div th:if="${session.userRole == 'admin'}" class="statut-fne">
+                        <h3>Statut de la FNE</h3>
+                        <div class="statut-options">
+                            <label class="statut-option">
+                                <input type="radio" name="statut" value="En attente" checked> En attente
+                            </label>
+                            <label class="statut-option">
+                                <input type="radio" name="statut" value="Validé"> Validé
+                            </label>
+                            <label class="statut-option">
+                                <input type="radio" name="statut" value="Refusé"> Refusé
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Bouton de soumission -->
+                    <div class="button-container">
+                        <button type="submit" class="submit-button">
+                            <i class="fas fa-paper-plane"></i> 
+                            <span th:if="${fne != null}">Mettre à jour</span>
+                            <span th:unless="${fne != null}">Soumettre</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p class="footer-text">
+                    Le système de gestion des Fiches de Notification d'Evénement (FNE) est un outil essentiel pour signaler et enregistrer les événements liés à la sécurité aérienne.
+                </p>
+                <div class="footer-links">
+                    <a href="https://www.oaca.nat.tn/" target="_blank" class="footer-link">
+                        <i class="fas fa-globe"></i>
+                        <span>Site web OACA</span>
+                    </a>
+                    <a href="mailto:contact@oaca.nat.tn" class="footer-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>Contact</span>
+                    </a>
+                    <a href="tel:+21671754000" class="footer-link">
+                        <i class="fas fa-phone"></i>
+                        <span>+216 71 754 000</span>
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Notification Toast -->
+    <div class="notification" id="notification">
+        <span id="notification-message"></span>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="/js/chatbot.js"></script>
+    <script>
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebar = document.getElementById('toggle-sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const notificationsToggle = document.getElementById('notifications-toggle');
+        const notificationsDropdown = document.getElementById('notifications-dropdown');
+        const userToggle = document.getElementById('user-toggle');
+        const userDropdown = document.getElementById('user-dropdown');
+        
+        // Initialisation au chargement de la page
+        document.addEventListener("DOMContentLoaded", () => {
+            // Vérifier si nous sommes en mode édition
+            checkEditMode();
+            
+            // Mettre à jour la date et l'heure
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            // Afficher la météo
+            fetchMeteo();
+            
+            // Ouvrir la première section par défaut
+            const firstSection = document.querySelector('.collapsible-section');
+            if (firstSection) {
+                toggleSection(firstSection.querySelector('.section-header'));
+            }
+        });
+        
+        // Toggle Sidebar
+        toggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            
+            // Change icon
+            const icon = toggleSidebar.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+            }
+        });
+        
+        // Mobile Toggle
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.add('show');
+            sidebarOverlay.classList.add('show');
+        });
+        
+        // Close Sidebar on Overlay Click
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+        
+        // Toggle Notifications Dropdown
+        notificationsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notificationsDropdown.classList.toggle('show');
+            userDropdown.classList.remove('show');
+        });
+        
+        // Toggle User Dropdown
+        userToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+            notificationsDropdown.classList.remove('show');
+        });
+        
+        // Close Dropdowns on Outside Click
+        document.addEventListener('click', (e) => {
+            if (!notificationsToggle.contains(e.target) && !notificationsDropdown.contains(e.target)) {
+                notificationsDropdown.classList.remove('show');
+            }
+            
+            if (!userToggle.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+        
+        // Fonction pour vérifier si nous sommes en mode édition
+        function checkEditMode() {
+            // Vérifier si l'URL contient un paramètre id
+            const urlParams = new URLSearchParams(window.location.search);
+            const fneId = urlParams.get('id');
+            
+            if (fneId) {
+                // Nous sommes en mode édition, charger les données de la FNE
+                loadFneData(fneId);
+            }
+        }
+        
+        // Fonction pour charger les données d'une FNE
+        function loadFneData(fneId) {
+            fetch(`/auth/api/fne/${fneId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la récupération des données de la FNE');
+                    }
+                    return response.json();
+                })
+                .then(fne => {
+                    // Remplir le formulaire avec les données de la FNE
+                    populateFormFields(fne);
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    // Afficher une notification d'erreur
+                    showNotification("Erreur lors du chargement des données: " + error.message, "error");
+                });
+        }
+        
+        // Fonction pour remplir les champs du formulaire
+        function populateFormFields(fne) {
+            // Définir l'ID de la FNE
+            document.getElementById('fne_id').value = fne.fne_id;
+            
+            // Mettre à jour le type d'événement et déclencher la mise à jour des options REF GNE
+            const typeEvtSelect = document.getElementById('type_evt');
+            if (fne.type_evt) {
+                typeEvtSelect.value = fne.type_evt;
+                // Déclencher la mise à jour des options REF GNE
+                updateRefGneNumber();
+                
+                // Définir la valeur de REF GNE après la génération des options
+                setTimeout(() => {
+                    const refGneSelect = document.getElementById('ref_gne');
+                    if (refGneSelect && fne.ref_gne) {
+                        refGneSelect.value = fne.ref_gne;
+                    }
+                }, 100);
+            }
+            
+            // Section 1: Informations générales
+            setValueIfExists('Organisme_concerné', fne.organisme_concerné);
+            setValueIfExists('Date', formatDateForInput(fne.date));
+            setValueIfExists('heure_UTC', fne.heure_UTC);
+            setValueIfExists('Lieu_EVT', fne.lieu_EVT);
+            setValueIfExists('moyen_detection', fne.moyen_detection);
+            setValueIfExists('impacts_operationnels', fne.impacts_operationnels);
+            
+            // Section 2: Aéronef(s) concerné(s) - Ligne A
+            setValueIfExists('indicatif_immatricultion', fne.indicatif_immatricultion);
+            setValueIfExists('code_ssr', fne.code_ssr);
+            setValueIfExists('type_appareil', fne.type_appareil);
+            setValueIfExists('regles_vol', fne.regles_vol);
+            setValueIfExists('terrain_depart', fne.terrain_depart);
+            setValueIfExists('terrain_arrivée', fne.terrain_arrivée);
+            setValueIfExists('cap', fne.cap);
+            setValueIfExists('altitude_reel', fne.altitude_reel);
+            setValueIfExists('altitude_autorise', fne.altitude_autorise);
+            setValueIfExists('vitesse', fne.vitesse);
+            
+            // Section 2: Aéronef(s) concerné(s) - Ligne B
+            setValueIfExists('indicatif_immatricultion_b', fne.indicatif_immatricultion_b);
+            setValueIfExists('code_ssr_b', fne.code_ssr_b);
+            setValueIfExists('type_appareil_b', fne.type_appareil_b);
+            setValueIfExists('regles_vol_b', fne.regles_vol_b);
+            setValueIfExists('terrain_depart_b', fne.terrain_depart_b);
+            setValueIfExists('terrain_arrivée_b', fne.terrain_arrivée_b);
+            setValueIfExists('cap_b', fne.cap_b);
+            setValueIfExists('altitude_reel_b', fne.altitude_reel_b);
+            setValueIfExists('altitude_autorise_b', fne.altitude_autorise_b);
+            setValueIfExists('vitesse_b', fne.vitesse_b);
+            
+            // Section 3: Nombre de victimes
+            setValueIfExists('passagers', fne.passagers);
+            setValueIfExists('personnel', fne.personnel);
+            setValueIfExists('equipage', fne.equipage);
+            setValueIfExists('autre', fne.autre);
+            
+            // Section 4: Conditions météorologiques
+            setValueIfExists('vent_direction', fne.vent_direction);
+            setValueIfExists('vent_vitesse', fne.vent_vitesse);
+            setValueIfExists('visibilite', fne.visibilite);
+            setValueIfExists('nebulosite', fne.nebulosite);
+            setValueIfExists('precipitation', fne.precipitation);
+            setValueIfExists('autres_phenomenes', fne.autres_phenomenes);
+            
+            // Section 5: Matériel, installation ou équipement
+            setRadioValue('evt_implique_installation_équipement', fne.evt_implique_installation_équipement);
+            setValueIfExists('type_installation_équipement', fne.type_installation_équipement);
+            setValueIfExists('nom_compagnie_assistance_organisme_exploitant_véhicule', fne.nom_compagnie_assistance_organisme_exploitant_véhicule);
+            setRadioValue('evt_implique_véhicule_materiel_assistance_sol', fne.evt_implique_véhicule_materiel_assistance_sol);
+            setValueIfExists('type_materiel_véhicule', fne.type_materiel_véhicule);
+            
+            // Section 6: Description de l'événement
+            setValueIfExists('description_evt', fne.description_evt);
+            
+            // Statut de la FNE (admin uniquement)
+            if (fne.statut) {
+                setRadioValue('statut', fne.statut);
+            }
+            
+            // Mettre à jour le texte du bouton de soumission
+            const submitButton = document.querySelector('.submit-button span');
+            if (submitButton) {
+                submitButton.textContent = 'Mettre à jour';
+            }
+            
+            // Afficher une notification indiquant que nous sommes en mode édition
+            showNotification(`Vous êtes en train de modifier la FNE #${fne.fne_id}`, "blue");
+            
+            // Ouvrir toutes les sections pour faciliter l'édition
+            const sectionHeaders = document.querySelectorAll('.section-header');
+            sectionHeaders.forEach(header => {
+                if (!header.classList.contains('active')) {
+                    toggleSection(header);
+                }
+            });
+        }
+        
+        // Fonction pour définir la valeur d'un élément s'il existe
+        function setValueIfExists(id, value) {
+            const element = document.getElementById(id);
+            if (element && value !== null && value !== undefined) {
+                element.value = value;
+            }
+        }
+        
+        // Fonction pour définir la valeur d'un bouton radio
+        function setRadioValue(name, value) {
+            if (value === null || value === undefined) return;
+            
+            const radioButtons = document.querySelectorAll(`input[name="${name}"]`);
+            radioButtons.forEach(radio => {
+                if (radio.value === String(value)) {
+                    radio.checked = true;
+                }
+            });
+        }
+        
+        // Fonction pour formater une date pour les champs input (YYYY-MM-DD)
+        function formatDateForInput(dateString) {
+            if (!dateString) return '';
+            
+            try {
+                // Si la date est déjà au format correct, la retourner
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                    return dateString;
+                }
+                
+                // Essayer de parser la date
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    return '';
+                }
+                
+                // Formater au format YYYY-MM-DD
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                
+                return `${year}-${month}-${day}`;
+            } catch (error) {
+                console.error('Erreur lors du formatage de la date:', error);
+                return '';
+            }
+        }
+        
+        // Fonction pour basculer l'affichage des sections
+        function toggleSection(headerElement) {
+            // Trouver la section parente
+            const section = headerElement.closest('.collapsible-section');
+            const content = section.querySelector('.section-content');
+            const icon = headerElement.querySelector('.toggle-icon i');
+            
+            // Basculer la classe active
+            headerElement.classList.toggle('active');
+            content.classList.toggle('active');
+            
+            // Changer l'icône
+            if (content.classList.contains('active')) {
+                icon.className = 'fas fa-chevron-up';
+            } else {
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+        
+        // Fonction pour mettre à jour les options REF GNE en fonction du type d'événement
+        function updateRefGneNumber() {
+            const type_evt = document.getElementById("type_evt").value;
+            const REF_GNE = document.getElementById("ref_gne");
+            const notification = document.getElementById("notification");
+            const notificationMessage = document.getElementById("notification-message");
+            
+            REF_GNE.innerHTML = ""; // Efface les options précédentes
+            notification.style.display = "none"; // Masque la notification par défaut
+            
+            let start, end, prefix, message, colorClass;
+            
+            switch (type_evt) {
+                case "accident":
+                    start = 1;
+                    end = 11;
+                    prefix = "ACCID";
+                    message = "Accident détecté !";
+                    colorClass = "error";
+                    break;
+                case "incident_grave":
+                    start = 1;
+                    end = 25;
+                    prefix = "ING";
+                    message = "Incident grave détecté !";
+                    colorClass = "warning";
+                    break;
+                case "incident":
+                    start = 1;
+                    end = 13;
+                    prefix = "INC";
+                    message = "Incident détecté !";
+                    colorClass = "success";
+                    break;
+                case "evt_technique":
+                    start = 1;
+                    end = 39;
+                    prefix = "EVT";
+                    message = "Evenement Technique détecté !";
+                    colorClass = "blue";
+                    break;
+                default:
+                    return; // Ne rien faire si aucun type sélectionné
+            }
+            
+            // Générer les options avec préfixe
+            for (let i = start; i <= end; i++) {
+                const option = document.createElement("option");
+                option.value = `${prefix}/${i}`;
+                option.textContent = `${prefix}/${i}`;
+                REF_GNE.appendChild(option);
+            }
+            
+            // Afficher la notification
+            showNotification(message, colorClass);
+        }
+        
+        // Fonction pour valider les champs d'indicatif et immatriculation
+        function validateIndicatif(inputId, errorId) {
+            const input = document.getElementById(inputId);
+            const errorElement = document.getElementById(errorId);
+            
+            // Si le champ est vide, c'est valide (car non obligatoire)
+            if (!input.value.trim()) {
+                errorElement.style.display = "none";
+                return true;
+            }
+            
+            // Vérifier la longueur (max 8 caractères)
+            if (input.value.length > 8) {
+                errorElement.style.display = "block";
+                return false;
+            }
+            
+            // Si tout est correct, masquer le message d'erreur
+            errorElement.style.display = "none";
+            return true;
+        }
+        
+        // Fonction pour valider la longueur maximale d'un champ
+        function validateMaxLength(inputId, errorId, maxLength) {
+            const input = document.getElementById(inputId);
+            const errorElement = document.getElementById(errorId);
+            
+            // Si le champ est vide, c'est valide (car non obligatoire)
+            if (!input.value.trim()) {
+                errorElement.style.display = "none";
+                return true;
+            }
+            
+            // Vérifier la longueur
+            if (input.value.length > maxLength) {
+                errorElement.style.display = "block";
+                return false;
+            }
+            
+            // Si tout est correct, masquer le message d'erreur
+            errorElement.style.display = "none";
+            return true;
+        }
+        
+        // Fonction pour afficher une notification
+        function showNotification(message, type) {
+            const notification = document.getElementById("notification");
+            const notificationMessage = document.getElementById("notification-message");
+            
+            // Définir le message
+            notificationMessage.textContent = message;
+            
+            // Définir le type (info, success, error, warning, blue)
+            notification.className = "notification";
+            notification.classList.add(type);
+            notification.classList.add("show");
+            
+            // Masquer après 5 secondes
+            setTimeout(() => {
+                notification.classList.remove("show");
+            }, 5000);
+        }
+        
+        // Fonction pour mettre à jour la date et l'heure
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Format de la date: JJ/MM/AAAA
+            const dateOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', dateOptions);
+            
+            // Format de l'heure: HH:MM:SS
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR', timeOptions);
+        }
+        
+        // Fonction pour récupérer les données météo
+        async function fetchMeteo() {
+            const apiKey = '17cf16edeaed1f9b3bb60006a242d5d1';
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=Tunis,tn&units=metric&lang=fr&appid=${apiKey}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP : ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Vérification des données
+                if (!data.weather || !data.main) {
+                    throw new Error("Données météo non disponibles");
+                }
+                
+                // Récupération des valeurs
+                const iconCode = data.weather[0].icon;
+                const temperature = Math.round(data.main.temp) + "°C";
+                const description = data.weather[0].description;
+                
+                // Affichage des valeurs avec animation
+                const meteoIcon = document.getElementById("meteo-icon");
+                const meteoTemp = document.getElementById("meteo-temp");
+                const meteoDesc = document.getElementById("meteo-description");
+                
+                // Choisir l'icône appropriée
+                const weatherCode = data.weather[0].id;
+                
+                if (weatherCode >= 200 && weatherCode < 300) {
+                    meteoIcon.innerHTML = '<i class="fas fa-bolt"></i>'; // Orage
+                } else if (weatherCode >= 300 && weatherCode < 500) {
+                    meteoIcon.innerHTML = '<i class="fas fa-cloud-rain"></i>'; // Bruine
+                } else if (weatherCode >= 500 && weatherCode < 600) {
+                    meteoIcon.innerHTML = '<i class="fas fa-cloud-showers-heavy"></i>'; // Pluie
+                } else if (weatherCode >= 600 && weatherCode < 700) {
+                    meteoIcon.innerHTML = '<i class="fas fa-snowflake"></i>'; // Neige
+                } else if (weatherCode >= 700 && weatherCode < 800) {
+                    meteoIcon.innerHTML = '<i class="fas fa-smog"></i>'; // Brouillard
+                } else if (weatherCode === 800) {
+                    meteoIcon.innerHTML = '<i class="fas fa-sun"></i>'; // Ciel dégagé
+                } else {
+                    meteoIcon.innerHTML = '<i class="fas fa-cloud-sun"></i>'; // Nuageux
+                }
+                
+                // Animation simple pour les valeurs de température et description
+                meteoTemp.style.opacity = "0";
+                meteoDesc.style.opacity = "0";
+                
+                setTimeout(() => {
+                    meteoTemp.textContent = temperature;
+                    meteoDesc.textContent = description;
+                    meteoTemp.style.transition = "opacity 0.5s ease";
+                    meteoDesc.style.transition = "opacity 0.5s ease";
+                    meteoTemp.style.opacity = "1";
+                    meteoDesc.style.opacity = "1";
+                }, 300);
+            } catch (error) {
+                console.error("Erreur : ", error);
+                document.getElementById("meteo-icon").innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                document.getElementById("meteo-temp").textContent = "--°C";
+                document.getElementById("meteo-description").textContent = "Non disponible";
+            }
+        }
+        
+        // Fonction de déconnexion
+        function logout() {
+            fetch("/auth/logout", {
+                method: "POST",
+                credentials: "include",
+            })
+            .then((response) => {
+                if (response.ok) {
+                    // Rediriger vers la page de login
+                    window.location.href = "/auth/index";
+                } else {
+                    console.error("Échec de la déconnexion");
+                    window.location.href = "/auth/index"; // Redirection même en cas d'erreur
+                }
+            })
+            .catch((error) => {
+                console.error("Erreur lors de la déconnexion:", error);
+                window.location.href = "/auth/index";
+            });
+        }
+    </script>
+</body>
+</html>

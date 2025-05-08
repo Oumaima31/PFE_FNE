@@ -15,13 +15,18 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
     
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.username:noreply@example.com}")
     private String fromEmail;
     
     /**
      * Envoie une notification par email pour une FNE
      */
     public void sendFneNotification(FNE fne, User submitter, String toEmail) {
+        if (toEmail == null || toEmail.isEmpty()) {
+            System.out.println("Adresse email de destination non spécifiée, email non envoyé");
+            return;
+        }
+        
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(toEmail);
@@ -94,8 +99,14 @@ public class EmailService {
         
         message.setText(body.toString());
         
-        // Envoyer l'email
-        mailSender.send(message);
+        try {
+            // Envoyer l'email
+            mailSender.send(message);
+            System.out.println("Email envoyé avec succès à " + toEmail);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'envoi de l'email à " + toEmail + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /**

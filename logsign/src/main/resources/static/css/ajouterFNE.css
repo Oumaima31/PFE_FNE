@@ -1,0 +1,311 @@
+
+        
+        /* Formulaire FNE */
+        .form-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .title-container {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .title-container img {
+            height: 50px;
+            width: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .title-container h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .section {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .type-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        
+        .enhanced-select,
+        .enhanced-input,
+        .enhanced-textarea {
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        
+        .enhanced-select:focus,
+        .enhanced-input:focus,
+        .enhanced-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+        }
+        
+        .enhanced-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .collapsible-section {
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background-color: #f9fafb;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .section-header:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .section-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-header.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .section-header.active h2 {
+            color: white;
+        }
+        
+        .toggle-icon {
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .section-content {
+            padding: 20px;
+            display: none;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        .section-content table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .section-content table th,
+        .section-content table td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .section-content table th {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .input-with-icon {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        
+        .input-with-icon i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+        
+        .input-with-icon input {
+            padding-left: 35px;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        
+        .button-container {
+            padding: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .submit-button {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .submit-button:hover {
+            background-color: #059669;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 1001;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .mobile-toggle {
+                display: block;
+            }
+            
+            .header-meteo {
+                margin-left: 10px;
+            }
+
+            .time-widget {
+                margin-right: 10px;
+            }
+            
+            .type-selection {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 0 15px;
+            }
+            
+            .header-meteo .meteo-description {
+                display: none;
+            }
+
+            .current-date {
+                display: none;
+            }
+            
+            .section-content table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+        
+        /* Overlay for mobile sidebar */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        /* Styles pour les erreurs */
+        .error_message {
+            color: var(--danger-color);
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        
+        /* Styles pour le statut de la FNE (admin uniquement) */
+        .statut-fne {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .statut-fne h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+        
+        .statut-options {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .statut-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .statut-option input[type="radio"] {
+            margin: 0;
+        }

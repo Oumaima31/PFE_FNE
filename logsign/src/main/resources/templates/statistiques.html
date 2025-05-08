@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistiques FNE | Tableau de bord</title>
-    <link rel="stylesheet" href="/css/styleadmin.css">
-    <link rel="stylesheet" href="/css/fne-table.css">
+    <link rel="stylesheet" href="/css/notificationa.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .dashboard-container {
@@ -15,14 +14,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             background-color: white;
             border-radius: 8px;
-        }
-        
-        .card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 0;
-            margin-bottom: 20px;
         }
         
         .dashboard-header {
@@ -67,176 +58,373 @@
         .btn-refresh:hover {
             background-color: #005a9e;
         }
-        
-        .dashboard-filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .filter-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .filter-item select, .filter-item input {
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .filter-item label {
-            font-size: 14px;
-            color: #555;
-        }
-        
-        .dashboard-tabs {
-            display: flex;
-            border-bottom: 1px solid #e0e0e0;
-            margin-bottom: 15px;
-            padding: 0 20px;
-        }
-        
-        .dashboard-tab {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .dashboard-tab.active {
-            border-bottom: 2px solid #0078d4;
-            color: #0078d4;
-        }
-        
-        .dashboard-info {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            padding: 0 20px;
-        }
-        
-        .info-card {
-            background-color: #f5f9ff;
-            border-left: 4px solid #0078d4;
-            padding: 10px 15px;
-            border-radius: 4px;
-            flex: 1;
-        }
-        
-        .info-card h3 {
-            margin: 0 0 5px 0;
-            font-size: 14px;
-            color: #555;
-        }
-        
-        .info-card p {
-            margin: 0;
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard-filters, .dashboard-info {
-                flex-direction: column;
-            }
-            
-            .dashboard-tabs {
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-        }
     </style>
 </head>
 <body>
-    <header class="navbar">
-        <!-- Section météo à gauche -->
-        <div id="meteo">
-            <span id="meteo-icon"></span>
-            <span id="meteo-temp"></span>
-            <span id="meteo-description"></span>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="/image/oacaLogo.jpg" alt="Logo OACA">
+                <h1>FNE Alertes</h1>
+            </div>
+            <button class="toggle-sidebar" id="toggle-sidebar">
+                <i class="fas fa-chevron-left"></i>
+            </button>
         </div>
-        <div id="real-time">
-            <span id="current-date"></span>
-            <span id="current-time"></span>
-        </div>
-        <!-- Bouton pour les écrans mobiles -->
-        <button class="navbar-toggle" onclick="toggleNavbar()">
-            <span></span>
-            <span></span>
-        </button>
-        <nav class="navbar-container">
-            <a class="navbar-item" href="/auth/fneAdmin">
-                <i class="fas fa-home"></i>
-                <span>Accueil</span>
-            </a>
-            
-            <a class="navbar-item" href="/auth/fneEnAttente">
-                <i class="fas fa-clipboard-list"></i>
-                <span>FNE En Attente</span>
-            </a>
-            
-            <a class="navbar-item" href="/auth/historique">
-                <i class="fas fa-history"></i>
-                <span>Historique des FNE</span>
-            </a>
-            
-            <a class="navbar-item active" href="/auth/statistiques">
-                <i class="fas fa-chart-bar"></i>
-                <span>Statistiques</span>
-            </a>
-            
-            <a class="navbar-item" href="/auth/notificationsAdmin">
-                <i class="fas fa-bell"></i>
-                <span>Notifications</span>
-            </a>
-            
-            <a class="navbar-item" href="/auth/adminutilisateurs">
-                <i class="fas fa-users"></i>
-                <span>Liste des Utilisateurs</span>
-            </a>
-            
-            <!-- Bouton de déconnexion -->
-            <a class="navbar-item" href="/auth/index" onclick="logout(); return false;">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Déconnexion</span>
-            </a>
-        </nav>
-    </header>
-
-    <main class="container">
         
-
-        <div class="card">
-            <div class="dashboard-header">
-                <h2 class="dashboard-title">Gestion des FNE</h2>
-                <button class="btn-refresh" onclick="manualRefresh()">
-                    <i class="fas fa-sync-alt"></i> Actualiser maintenant
-                </button>
+        <div class="sidebar-menu">
+            <div class="menu-label">Menu Principal</div>
+            
+            <div class="menu-item">
+                <a href="/auth/dashboard" class="menu-link">
+                    <i class="fas fa-home"></i>
+                    <span class="menu-text">Accueil</span>
+                </a>
             </div>
             
+            <div class="menu-item">
+                <a href="/auth/gestionFNE" class="menu-link">
+                    <i class="fas fa-history"></i>
+                    <span class="menu-text">Gestion FNE</span>
+                </a>
+            </div>
             
-            <!-- Iframe Power BI -->
-            <iframe 
-                id="powerbi-frame"
-                class="dashboard-container" 
-                src="https://app.powerbi.com/view?r=eyJrIjoiODFjOWM1NmQtM2U3Ny00MWFmLWFjYjQtYzQzM2EzOGIyYjI4IiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9"
-                frameborder="0" 
-                allowFullScreen="true">
-            </iframe>
+            <div class="menu-item">
+                <a href="/auth/fneEnAttente" class="menu-link">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="menu-text">FNE En Attente</span>
+                </a>
+            </div>
             
-            <div class="refresh-info">
-                <span id="last-refresh">Dernière actualisation: --:--:--</span>
-                <span>Actualisation automatique toutes les 5 minutes</span>
+            <div class="menu-item">
+                <a href="/auth/notifications" class="menu-link">
+                    <i class="fas fa-bell"></i>
+                    <span class="menu-text">Notifications</span>
+                </a>
+            </div>
+            
+            <div class="menu-item">
+                <a href="/auth/adminutilisateurs" class="menu-link">
+                    <i class="fas fa-users-cog"></i>
+                    <span class="menu-text">Gestion Utilisateurs</span>
+                </a>
+            </div>
+            
+            <div class="menu-item">
+                <a href="/auth/statistiques" class="menu-link active">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="menu-text">Statistiques</span>
+                </a>
+            </div>
+            
+            <div class="menu-label">Paramètres</div>
+            
+            <div class="menu-item">
+                <a href="/auth/logout" class="menu-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="menu-text">Déconnexion</span>
+                </a>
             </div>
         </div>
-    </main>
+        
+        <div class="sidebar-footer">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info">
+                <div class="user-name" id="userName">Utilisateur</div>
+                <div class="user-role" id="userRole">Rôle</div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="mobile-toggle" id="mobile-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="header-meteo">
+                    <div class="meteo-icon" id="meteo-icon">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div class="meteo-info">
+                        <div class="meteo-temp" id="meteo-temp">--°C</div>
+                        <div class="meteo-description" id="meteo-description">Chargement...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="time-widget">
+                    <div class="current-date" id="current-date">--/--/----</div>
+                    <div class="current-time" id="current-time">--:--:--</div>
+                </div>
+                <div class="header-item">
+                    <button class="header-button" id="notifications-toggle">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge"></span>
+                    </button>
+                    
+                    <!-- Notifications Dropdown -->
+                    <div class="dropdown-menu" id="notifications-dropdown">
+                        <div class="dropdown-header">
+                            <h3 class="dropdown-title">Notifications</h3>
+                        </div>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-file-alt"></i>
+                            <div>
+                                <div>Nouvelle FNE soumise</div>
+                                <small>Il y a 5 minutes</small>
+                            </div>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <div>FNE approuvée</div>
+                                <small>Il y a 2 heures</small>
+                            </div>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-user-plus"></i>
+                            <div>
+                                <div>Nouvel utilisateur enregistré</div>
+                                <small>Il y a 1 jour</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="header-item dropdown">
+                    <button class="header-button" id="user-toggle">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                    
+                    <!-- User Dropdown -->
+                    <div class="dropdown-menu" id="user-dropdown">
+                        <div class="dropdown-header">
+                            <h3 class="dropdown-title" id="userNameDropdown">Utilisateur</h3>
+                        </div>
+                        <a href="/auth/profile" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Mon profil</span>
+                        </a>
+                        <a href="/auth/settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Paramètres</span>
+                        </a>
+                        <a href="/auth/logout" class="dropdown-item logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Déconnexion</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="page-header">
+                <h1><i class="fas fa-chart-bar"></i> Statistiques</h1>
+            </div>
+
+            <div class="card">
+                <div class="dashboard-header">
+                    <h2 class="dashboard-title">Gestion des FNE</h2>
+                    <button class="btn-refresh" onclick="manualRefresh()">
+                        <i class="fas fa-sync-alt"></i> Actualiser maintenant
+                    </button>
+                </div>
+                
+                <!-- Iframe Power BI -->
+                <iframe 
+                    id="powerbi-frame"
+                    class="dashboard-container" 
+                    src="https://app.powerbi.com/view?r=eyJrIjoiODFjOWM1NmQtM2U3Ny00MWFmLWFjYjQtYzQzM2EzOGIyYjI4IiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9"
+                    frameborder="0" 
+                    allowFullScreen="true">
+                </iframe>
+                
+                <div class="refresh-info">
+                    <span id="last-refresh">Dernière actualisation: --:--:--</span>
+                    <span>Actualisation automatique toutes les 5 minutes</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p class="footer-text">
+                    Le système de gestion des Fiches de Notification d'Evénement (FNE) est un outil essentiel pour signaler et enregistrer les événements liés à la sécurité aérienne.
+                </p>
+                <div class="footer-links">
+                    <a href="https://www.oaca.nat.tn/" target="_blank" class="footer-link">
+                        <i class="fas fa-globe"></i>
+                        <span>Site web OACA</span>
+                    </a>
+                    <a href="mailto:contact@oaca.nat.tn" class="footer-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>Contact</span>
+                    </a>
+                    <a href="tel:+21671754000" class="footer-link">
+                        <i class="fas fa-phone"></i>
+                        <span>+216 71 754 000</span>
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
 
     <script>
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebar = document.getElementById('toggle-sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const notificationsToggle = document.getElementById('notifications-toggle');
+        const notificationsDropdown = document.getElementById('notifications-dropdown');
+        const userToggle = document.getElementById('user-toggle');
+        const userDropdown = document.getElementById('user-dropdown');
+        
+        // Toggle Sidebar
+        toggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            
+            // Change icon
+            const icon = toggleSidebar.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+            }
+        });
+        
+        // Mobile Toggle
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.add('show');
+            sidebarOverlay.classList.add('show');
+        });
+        
+        // Close Sidebar on Overlay Click
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+        
+        // Toggle Notifications Dropdown
+        notificationsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notificationsDropdown.classList.toggle('show');
+            userDropdown.classList.remove('show');
+        });
+        
+        // Toggle User Dropdown
+        userToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+            notificationsDropdown.classList.remove('show');
+        });
+        
+        // Close Dropdowns on Outside Click
+        document.addEventListener('click', (e) => {
+            if (!notificationsToggle.contains(e.target) && !notificationsDropdown.contains(e.target)) {
+                notificationsDropdown.classList.remove('show');
+            }
+            
+            if (!userToggle.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+        
+        // Fonction pour mettre à jour la date et l'heure
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Format de la date: JJ/MM/AAAA
+            const dateOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', dateOptions);
+            
+            // Format de l'heure: HH:MM:SS
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR', timeOptions);
+        }
+        
+        // Fonction pour récupérer les données météo
+        async function fetchMeteo() {
+            const apiKey = '17cf16edeaed1f9b3bb60006a242d5d1';
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=Tunis,tn&units=metric&lang=fr&appid=${apiKey}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP : ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Vérification des données
+                if (!data.weather || !data.main) {
+                    throw new Error("Données météo non disponibles");
+                }
+                
+                // Récupération des valeurs
+                const iconCode = data.weather[0].icon;
+                const temperature = Math.round(data.main.temp) + "°C";
+                const description = data.weather[0].description;
+                
+                // Affichage des valeurs avec animation
+                const meteoIcon = document.getElementById("meteo-icon");
+                const meteoTemp = document.getElementById("meteo-temp");
+                const meteoDesc = document.getElementById("meteo-description");
+                
+                // Choisir l'icône appropriée
+                const weatherCode = data.weather[0].id;
+                
+                if (weatherCode >= 200 && weatherCode < 300) {
+                    meteoIcon.innerHTML = '<i class="fas fa-bolt"></i>'; // Orage
+                } else if (weatherCode >= 300 && weatherCode < 500) {
+                    meteoIcon.innerHTML = '<i class="fas fa-cloud-rain"></i>'; // Bruine
+                } else if (weatherCode >= 500 && weatherCode < 600) {
+                    meteoIcon.innerHTML = '<i class="fas fa-cloud-showers-heavy"></i>'; // Pluie
+                } else if (weatherCode >= 600 && weatherCode < 700) {
+                    meteoIcon.innerHTML = '<i class="fas fa-snowflake"></i>'; // Neige
+                } else if (weatherCode >= 700 && weatherCode < 800) {
+                    meteoIcon.innerHTML = '<i class="fas fa-smog"></i>'; // Brouillard
+                } else if (weatherCode === 800) {
+                    meteoIcon.innerHTML = '<i class="fas fa-sun"></i>'; // Ciel dégagé
+                } else {
+                    meteoIcon.innerHTML = '<i class="fas fa-cloud-sun"></i>'; // Nuageux
+                }
+                
+                // Animation simple pour les valeurs de température et description
+                meteoTemp.style.opacity = "0";
+                meteoDesc.style.opacity = "0";
+                
+                setTimeout(() => {
+                    meteoTemp.textContent = temperature;
+                    meteoDesc.textContent = description;
+                    meteoTemp.style.transition = "opacity 0.5s ease";
+                    meteoDesc.style.transition = "opacity 0.5s ease";
+                    meteoTemp.style.opacity = "1";
+                    meteoDesc.style.opacity = "1";
+                }, 300);
+            } catch (error) {
+                console.error("Erreur : ", error);
+                document.getElementById("meteo-icon").innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                document.getElementById("meteo-temp").textContent = "--°C";
+                document.getElementById("meteo-description").textContent = "Non disponible";
+            }
+        }
+        
         // Fonction pour actualiser l'iframe
         function refreshDashboard() {
             const iframe = document.getElementById('powerbi-frame');
@@ -248,77 +436,31 @@
                 `Dernière actualisation: ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
         }
         
-        // Configurer l'actualisation automatique toutes les 5 minutes (300000 ms)
-        window.onload = function() {
-            // Actualiser immédiatement pour afficher l'heure
-            refreshDashboard();
-            
-            // Configurer l'actualisation périodique
-            setInterval(refreshDashboard, 300000);
-            
-            // Mettre à jour la date et l'heure toutes les secondes
-            setInterval(updateDateTime, 1000);
-            
-            // Afficher la date et l'heure immédiatement au chargement de la page
-            updateDateTime();
-            
-            // Afficher Meteo
-            fetchMeteo();
-            
-            // Ajouter des écouteurs d'événements pour les filtres
-            document.getElementById('periodeFilter').addEventListener('change', applyFilters);
-            document.getElementById('typeFilter').addEventListener('change', applyFilters);
-            document.getElementById('airportFilter').addEventListener('change', applyFilters);
-            
-            // Ajouter des écouteurs d'événements pour les onglets
-            const tabs = document.querySelectorAll('.dashboard-tab');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        }
-        
         // Fonction pour actualiser manuellement
         function manualRefresh() {
             refreshDashboard();
         }
         
-        // Fonction pour mettre à jour la date et l'heure
-        function updateDateTime() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        // Initialisation
+        document.addEventListener("DOMContentLoaded", () => {
+            // Mettre à jour la date et l'heure immédiatement
+            updateDateTime();
             
-            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', options);
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR');
-        }
-        
-        // Fonction pour récupérer les données météo
-        function fetchMeteo() {
-            // Simuler des données météo pour l'exemple
-            const meteoIcon = document.getElementById('meteo-icon');
-            const meteoTemp = document.getElementById('meteo-temp');
-            const meteoDesc = document.getElementById('meteo-description');
+            // Mettre à jour la date et l'heure toutes les secondes
+            setInterval(updateDateTime, 1000);
             
-            meteoIcon.innerHTML = '<i class="fas fa-sun"></i>';
-            meteoTemp.textContent = '25°C';
-            meteoDesc.textContent = 'Ensoleillé';
+            // Récupérer les données météo
+            fetchMeteo();
             
-            // Dans une application réelle, vous feriez un appel API à un service météo
-        }
-        
-        // Fonction pour basculer la navbar sur mobile
-        function toggleNavbar() {
-            const navbarContainer = document.querySelector('.navbar-container');
-            navbarContainer.classList.toggle('active');
-        }
-        
-        // Fonction de déconnexion
-        function logout() {
-            // Logique de déconnexion
-            window.location.href = '/auth/';
-        }
+            // Récupérer les données météo toutes les 30 minutes
+            setInterval(fetchMeteo, 30 * 60 * 1000);
+            
+            // Actualiser immédiatement pour afficher l'heure
+            refreshDashboard();
+            
+            // Configurer l'actualisation périodique
+            setInterval(refreshDashboard, 300000);
+        });
     </script>
 </body>
 </html>

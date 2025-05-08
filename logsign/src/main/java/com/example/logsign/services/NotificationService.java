@@ -1,13 +1,11 @@
-// Modification du NotificationService.java pour n'envoyer des notifications que lorsqu'un SML soumet une FNE
-
 package com.example.logsign.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.logsign.models.Notification;
 import com.example.logsign.models.FNE;
+import com.example.logsign.models.Notification;
 import com.example.logsign.models.User;
 import com.example.logsign.repositories.NotificationRepository;
 import com.example.logsign.repositories.UserRepository;
@@ -28,7 +26,7 @@ public class NotificationService {
     private EmailService emailService;
     
     @Autowired
-    private UserRepository userRepository; // Ajout pour récupérer les admins
+    private UserRepository userRepository; // Pour récupérer les admins
     
     /**
      * Récupère toutes les notifications
@@ -64,10 +62,6 @@ public class NotificationService {
     
     /**
      * Détermine le niveau d'urgence en fonction du type d'événement
-     * - accident: urgence "haute" (rouge)
-     * - incident grave: urgence "moyenne" (orange)
-     * - incident: urgence "normale" (vert)
-     * - evt technique: urgence "normale" (gris)
      */
     private String determineUrgenceLevel(String typeEvt) {
         if (typeEvt == null) {
@@ -95,41 +89,40 @@ public class NotificationService {
      */
     public Notification createFneNotification(FNE fne, User user) {
         // Vérifier si l'utilisateur est un SML
-        // Si ce n'est pas un SML, ne pas créer de notification
         if (user == null || !"SML".equals(user.getRole())) {
             System.out.println("Pas de notification créée car l'utilisateur n'est pas un SML");
             return null;
         }
         
-        // Créer la notification
-        Notification notification = new Notification();
-        notification.setFne(fne);
-        notification.setDate_envoi(LocalDateTime.now());
-        notification.setMoyen("email");
-        
         // Déterminer le niveau d'urgence en fonction du type d'événement
         String urgence = determineUrgenceLevel(fne.getType_evt());
-        notification.setUrgence(urgence);
         
         // Définir le contenu de la notification
         String contenu = "L'utilisateur " + user.getPrenom() + " " + user.getNom() + " (ID: " + user.getId() + ") a ";
         
         // Adapter le message en fonction de l'action (création ou modification)
         if (fne.getFne_id() != null) {
-            contenu += "modifié la FNE #" + fne.getFne_id() + ".";
+            contenu += "ajouté la FNE #" + fne.getFne_id() + ".";
         } else {
             contenu += "soumis une nouvelle FNE.";
         }
-        
-        notification.setContenu(contenu);
         
         // Trouver tous les administrateurs et leur envoyer une notification
         List<User> admins = userRepository.findByRole("admin");
         
         if (admins == null || admins.isEmpty()) {
+            System.out.println("Aucun administrateur trouvé pour créer la notification");
+            
             // Si aucun admin n'est trouvé, utiliser l'ID 2 comme fallback
             User admin = new User();
             admin.setId(2L);
+            
+            Notification notification = new Notification();
+            notification.setFne(fne);
+            notification.setDate_envoi(LocalDateTime.now());
+            notification.setMoyen("email");
+            notification.setUrgence(urgence);
+            notification.setContenu(contenu);
             notification.setUtilisateur(admin);
             
             // Sauvegarder la notification
@@ -138,34 +131,36 @@ public class NotificationService {
             // Envoyer un email à l'administrateur (si configuré)
             try {
                 emailService.sendFneNotification(fne, user, "admin@example.com");
+                System.out.println("Email envoyé à admin@example.com (fallback)");
             } catch (Exception e) {
-                // Logger l'erreur mais continuer
                 System.err.println("Erreur lors de l'envoi de l'email: " + e.getMessage());
             }
             
             return savedNotification;
         } else {
+            System.out.println("Création de notifications pour " + admins.size() + " administrateurs");
+            
             // Créer une notification pour chaque admin
             List<Notification> savedNotifications = new ArrayList<>();
             
             for (User admin : admins) {
-                Notification adminNotification = new Notification();
-                adminNotification.setFne(fne);
-                adminNotification.setDate_envoi(LocalDateTime.now());
-                adminNotification.setMoyen("email");
-                adminNotification.setUrgence(urgence);
-                adminNotification.setContenu(contenu);
-                adminNotification.setUtilisateur(admin);
+                Notification notification = new Notification();
+                notification.setFne(fne);
+                notification.setDate_envoi(LocalDateTime.now());
+                notification.setMoyen("email");
+                notification.setUrgence(urgence);
+                notification.setContenu(contenu);
+                notification.setUtilisateur(admin);
                 
                 // Sauvegarder la notification
-                Notification savedNotification = notificationRepository.save(adminNotification);
+                Notification savedNotification = notificationRepository.save(notification);
                 savedNotifications.add(savedNotification);
                 
-                // Envoyer un email à l'administrateur (si configuré)
+                // Envoyer un email à l'administrateur
                 try {
                     emailService.sendFneNotification(fne, user, admin.getEmail());
+                    System.out.println("Email envoyé à " + admin.getEmail());
                 } catch (Exception e) {
-                    // Logger l'erreur mais continuer
                     System.err.println("Erreur lors de l'envoi de l'email à " + admin.getEmail() + ": " + e.getMessage());
                 }
             }

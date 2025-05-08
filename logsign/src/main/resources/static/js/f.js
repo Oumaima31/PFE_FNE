@@ -764,80 +764,112 @@ function closeModal() {
 function modifierFNE(fneId) {
   window.location.href = `/auth/fneAdmin?id=${fneId}`
 }
+// Fonction pour valider une FNE
 function validerFNE(fneId) {
-  if (!confirm(`Êtes-vous sûr de vouloir valider la FNE #${fneId} ?`)) return;
-
-  // Afficher un indicateur de chargement
-  const loadingIndicator = document.createElement("div");
-  loadingIndicator.className = "loading-overlay";
-  loadingIndicator.innerHTML =
-    '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p>Validation en cours...</p></div>';
-  document.body.appendChild(loadingIndicator);
-
-  fetch(`/auth/api/fne/${fneId}/valider`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Échec de la validation");
+    if (!confirm(`Êtes-vous sûr de vouloir valider la FNE #${fneId} ?`)) return;
+  
+    // Afficher un indicateur de chargement
+    const loadingIndicator = document.createElement("div");
+    loadingIndicator.className = "loading-overlay";
+    loadingIndicator.innerHTML =
+      '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p>Validation en cours...</p></div>';
+    document.body.appendChild(loadingIndicator);
+  
+    // Appel à l'API pour valider la FNE
+    fetch(`/auth/api/fne/${fneId}/valider`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
       }
-      return response.json();
     })
-    .then((data) => {
-      document.body.removeChild(loadingIndicator);
-      showNotification("FNE validée avec succès !", "success");
-      loadFneEnAttente(); // Recharger les données
-      closeModal(); // Fermer le modal si ouvert
-    })
-    .catch((error) => {
-      if (document.body.contains(loadingIndicator)) {
-        document.body.removeChild(loadingIndicator);
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            throw new Error(data.message || "Échec de la validation");
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Supprimer l'indicateur de chargement
+        if (document.body.contains(loadingIndicator)) {
+          document.body.removeChild(loadingIndicator);
+        }
+        
+        if (data.success) {
+          showNotification("FNE validée avec succès !", "success");
+          // Recharger les données et fermer le modal
+          loadFneEnAttente();
+          closeModal();
+        } else {
+          showNotification(data.message || "Erreur lors de la validation", "error");
+        }
+      })
+      .catch(error => {
+        // Supprimer l'indicateur de chargement
+        if (document.body.contains(loadingIndicator)) {
+          document.body.removeChild(loadingIndicator);
+        }
+        
+        console.error("Erreur:", error);
+        showNotification(error.message || "Erreur lors de la validation", "error");
+      });
+  }
+  
+  // Fonction pour refuser une FNE
+  function refuserFNE(fneId) {
+    if (!confirm(`Êtes-vous sûr de vouloir refuser la FNE #${fneId} ?`)) return;
+  
+    // Afficher un indicateur de chargement
+    const loadingIndicator = document.createElement("div");
+    loadingIndicator.className = "loading-overlay";
+    loadingIndicator.innerHTML =
+      '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p>Refus en cours...</p></div>';
+    document.body.appendChild(loadingIndicator);
+  
+    // Appel à l'API pour refuser la FNE
+    fetch(`/auth/api/fne/${fneId}/refuser`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
       }
-      console.error("Erreur:", error);
-      showNotification(error.message, "error");
-    });
-}
-function refuserFNE(fneId) {
-  if (!confirm(`Êtes-vous sûr de vouloir refuser la FNE #${fneId} ?`)) return;
-
-  // Afficher un indicateur de chargement
-  const loadingIndicator = document.createElement("div");
-  loadingIndicator.className = "loading-overlay";
-  loadingIndicator.innerHTML =
-    '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p>Refus en cours...</p></div>';
-  document.body.appendChild(loadingIndicator);
-
-  fetch(`/auth/api/fne/${fneId}/refuser`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Erreur lors du refus");
-      }
-      return response.json();
     })
-    .then((data) => {
-      document.body.removeChild(loadingIndicator);
-      showNotification("FNE refusée avec succès !", "success");
-      loadFneEnAttente(); // Recharger les données
-      closeModal(); // Fermer le modal si ouvert
-    })
-    .catch((error) => {
-      if (document.body.contains(loadingIndicator)) {
-        document.body.removeChild(loadingIndicator);
-      }
-      console.error("Erreur:", error);
-      showNotification(error.message, "error");
-    });
-}
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            throw new Error(data.message || "Échec du refus");
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Supprimer l'indicateur de chargement
+        if (document.body.contains(loadingIndicator)) {
+          document.body.removeChild(loadingIndicator);
+        }
+        
+        if (data.success) {
+          showNotification("FNE refusée avec succès !", "success");
+          // Recharger les données et fermer le modal
+          loadFneEnAttente();
+          closeModal();
+        } else {
+          showNotification(data.message || "Erreur lors du refus", "error");
+        }
+      })
+      .catch(error => {
+        // Supprimer l'indicateur de chargement
+        if (document.body.contains(loadingIndicator)) {
+          document.body.removeChild(loadingIndicator);
+        }
+        
+        console.error("Erreur:", error);
+        showNotification(error.message || "Erreur lors du refus", "error");
+      });
+  }
+ 
 // Fonction pour créer une entrée dans l'historique
 function createHistoryEntry(fneId, action) {
   // Cette fonction est optionnelle si l'historique est déjà créé côté serveur
