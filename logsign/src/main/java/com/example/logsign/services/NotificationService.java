@@ -85,7 +85,7 @@ public class NotificationService {
     
     /**
      * Crée une notification pour une FNE
-     * Modifié pour n'envoyer des notifications que lorsqu'un SML soumet une FNE
+     * Modifié pour éviter les doublons d'emails
      */
     public Notification createFneNotification(FNE fne, User user) {
         // Vérifier si l'utilisateur est un SML
@@ -140,8 +140,9 @@ public class NotificationService {
         } else {
             System.out.println("Création de notifications pour " + admins.size() + " administrateurs");
             
-            // Créer une notification pour chaque admin
+            // Créer une notification pour chaque admin, mais n'envoyer qu'un seul email par admin
             List<Notification> savedNotifications = new ArrayList<>();
+            List<String> emailsSent = new ArrayList<>(); // Pour suivre les emails déjà envoyés
             
             for (User admin : admins) {
                 Notification notification = new Notification();
@@ -156,12 +157,17 @@ public class NotificationService {
                 Notification savedNotification = notificationRepository.save(notification);
                 savedNotifications.add(savedNotification);
                 
-                // Envoyer un email à l'administrateur
-                try {
-                    emailService.sendFneNotification(fne, user, admin.getEmail());
-                    System.out.println("Email envoyé à " + admin.getEmail());
-                } catch (Exception e) {
-                    System.err.println("Erreur lors de l'envoi de l'email à " + admin.getEmail() + ": " + e.getMessage());
+                // Envoyer un email à l'administrateur seulement si on ne lui a pas déjà envoyé
+                if (admin.getEmail() != null && !emailsSent.contains(admin.getEmail())) {
+                    try {
+                        emailService.sendFneNotification(fne, user, admin.getEmail());
+                        System.out.println("Email envoyé à " + admin.getEmail());
+                        emailsSent.add(admin.getEmail()); // Marquer cet email comme envoyé
+                    } catch (Exception e) {
+                        System.err.println("Erreur lors de l'envoi de l'email à " + admin.getEmail() + ": " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("Email déjà envoyé à " + admin.getEmail() + " ou adresse email manquante");
                 }
             }
             

@@ -32,7 +32,6 @@ public class GestionFNEViewController {
         
         logger.info("Affichage de la page de gestion des FNE pour l'utilisateur: " + user.getEmail() + " (Rôle: " + user.getRole() + ")");
         
-        // Retourner le nom de la vue Thymeleaf (sans l'extension .html)
         return "gestionFNE";
     }
 }

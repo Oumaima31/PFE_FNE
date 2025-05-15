@@ -20,29 +20,6 @@ public class HistoriqueController {
 
     @Autowired
     private HistoriqueService historiqueService;
-
-    // Supprimez ou commentez ces méthodes pour éviter les conflits avec GestionFNEController
-    /*
-    @GetMapping("/historique")
-    public String historique(HttpSession session, Model model) {
-        // Vérifier si l'utilisateur est connecté et est un admin
-        User user = (User) session.getAttribute("user");
-        if (user == null || !"admin".equals(user.getRole())) {
-            return "redirect:/auth/login";
-        }
-        return "historique";
-    }
-    
-    @GetMapping("/historiqueSML")
-    public String historiqueSML(HttpSession session, Model model) {
-        // Vérifier si l'utilisateur est connecté et est un SML
-        User user = (User) session.getAttribute("user");
-        if (user == null || !"SML".equals(user.getRole())) {
-            return "redirect:/auth/login";
-        }
-        return "historiqueSML";
-    }
-    */
     
     // API pour récupérer tout l'historique (réservé aux admins)
     @GetMapping("/api/historique")
@@ -100,7 +77,7 @@ public class HistoriqueController {
     
     // API pour récupérer un historique par son ID
     @GetMapping("/api/historique/{id}")
-    @ResponseBody
+    @ResponseBody // @ResponseBody: pour gérer les données entrantes
     public ResponseEntity<Historique> getHistoriqueById(@PathVariable Long id, HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {

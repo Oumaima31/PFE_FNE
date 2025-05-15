@@ -30,10 +30,7 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(toEmail);
-        
-        // Déterminer le type d'action (création ou modification)
-        String action = fne.getFne_id() != null ? "modifié" : "soumis";
-        
+
         // Construire l'objet de l'email
         String subject = "[FNE] ";
         if (fne.getType_evt() != null) {
@@ -68,7 +65,7 @@ public class EmailService {
         body.append("Bonjour,\n\n");
         
         body.append("L'utilisateur ").append(submitter.getPrenom()).append(" ").append(submitter.getNom())
-            .append(" (").append(submitter.getRole()).append(") a ").append(action).append(" une FNE");
+            .append(" (").append(submitter.getRole()).append(") a soumis une FNE");
         
         if (fne.getFne_id() != null) {
             body.append(" #").append(fne.getFne_id());
@@ -130,4 +127,5 @@ public class EmailService {
                 return typeEvt;
         }
     }
+    
 }

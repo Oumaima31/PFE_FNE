@@ -9,25 +9,30 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.logsign.models.FNE;
 import com.example.logsign.models.User;
 import com.example.logsign.services.FNEService;
+import com.example.logsign.services.HistoriqueService;
 import com.example.logsign.services.NotificationService;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.logging.Logger;
 
 
-@Controller
-@RequestMapping("/auth")
+@Controller //utilisé quand tu veux afficher une page HTML avec Thymeleaf
+@RequestMapping("/auth") //Toutes les méthodes de ce contrôleur auront comme chemin de base /auth
 public class FNEController {
     private static final Logger logger = Logger.getLogger(FNEController.class.getName());
 
-    @Autowired
+    @Autowired //@Autowired: pour dire :Injecte automatiquement cette classe/service ici
     private FNEService fneService;
     
     @Autowired
     private NotificationService notificationService;
     
-    // Nouvelle méthode pour afficher la vue unifiée ajoutFNE
-    @GetMapping("/ajoutFNE")
+    @Autowired
+    private HistoriqueService historiqueService;
+    
+    //@GetMapping:Cette méthode va répondre aux requêtes HTTP de type GET envoyées à l’URL
+    // cette méthode pour afficher la vue unifiée ajoutFNE
+    @GetMapping("/ajoutFNE") 
     public String ajoutFNE(@RequestParam(required = false) Long id, Model model, HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
@@ -53,7 +58,7 @@ public class FNEController {
     }
     
     // Méthode unifiée pour soumettre une FNE
-    @PostMapping("/submitFNE")
+    @PostMapping("/submitFNE") //@PostMapping(): Si tu veux envoyer un fichier, tu utiliseras
     public String submitFNE(@ModelAttribute FNE fne, HttpSession session, RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("user");
 
@@ -77,11 +82,6 @@ public class FNEController {
                 
                 // Soumettre la FNE
                 FNE newFNE = fneService.submitFNE(fne, user);
-                
-                // Si l'utilisateur est un SML, envoyer une notification aux admins
-                if ("SML".equals(user.getRole())) {
-                    notificationService.createFneNotification(newFNE, user);
-                }
             
                 // Rediriger vers la page de gestion FNE avec un message de succès
                 redirectAttributes.addFlashAttribute("success", "FNE soumise avec succès !");
@@ -190,5 +190,4 @@ public class FNEController {
     public String fneEnAttente(HttpSession session) {       
         return "fneEnAttente";
     }
-    // Conserver les autres méthodes existantes...
 }

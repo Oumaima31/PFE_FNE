@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notifications | Tableau de bord</title>
-    <link rel="stylesheet" href="/css/notificationa.css">
+    <link rel="stylesheet" href="/css/notifications.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -115,111 +115,13 @@
     
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-left">
-                <button class="mobile-toggle" id="mobile-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="header-meteo">
-                    <div class="meteo-icon" id="meteo-icon">
-                        <i class="fas fa-cloud-sun"></i>
-                    </div>
-                    <div class="meteo-info">
-                        <div class="meteo-temp" id="meteo-temp">--°C</div>
-                        <div class="meteo-description" id="meteo-description">Chargement...</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="header-right">
-                <div class="time-widget">
-                    <div class="current-date" id="current-date">--/--/----</div>
-                    <div class="current-time" id="current-time">--:--:--</div>
-                </div>
-                <div class="header-item">
-                    <button class="header-button" id="notifications-toggle">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge" id="notification-badge"></span>
-                    </button>
-                    
-                    <!-- Notifications Dropdown -->
-                    <div class="dropdown-menu" id="notifications-dropdown">
-                        <div class="dropdown-header">
-                            <h3 class="dropdown-title">Notifications</h3>
-                        </div>
-                        <div id="quick-notifications-container">
-                            <!-- Les notifications récentes seront chargées ici -->
-                            <div class="dropdown-empty">
-                                <i class="fas fa-bell-slash"></i>
-                                <p>Aucune notification récente</p>
-                            </div>
-                        </div>
-                        <a href="/auth/notifications" class="dropdown-footer">
-                            Voir toutes les notifications
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="header-item dropdown">
-                    <button class="header-button" id="user-toggle">
-                        <i class="fas fa-user-circle"></i>
-                    </button>
-                    
-                    <!-- User Dropdown -->
-                    <div class="dropdown-menu" id="user-dropdown">
-                        <div class="dropdown-header">
-                            <h3 class="dropdown-title" th:text="${session.userName}">Utilisateur</h3>
-                        </div>
-                        <a href="/auth/profile" class="dropdown-item">
-                            <i class="fas fa-user"></i>
-                            <span>Mon profil</span>
-                        </a>
-                        <a href="/auth/settings" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            <span>Paramètres</span>
-                        </a>
-                        <a href="/auth/logout" class="dropdown-item logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Déconnexion</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </header>
+        
         
         <!-- Content -->
         <div class="content">
             <div class="page-header">
                 <h1><i class="fas fa-bell"></i> Notifications</h1>
-                <div class="header-actions">
-                    <div class="search-container">
-                        <input type="text" id="searchInput" placeholder="Rechercher...">
-                        <button id="searchBtn"><i class="fas fa-search"></i></button>
-                    </div>
-                    <div class="filter-container">
-                        <select id="filterUrgence">
-                            <option value="">Toutes les urgences</option>
-                            <option value="haute">Haute</option>
-                            <option value="moyenne">Moyenne</option>
-                            <option value="basse">Basse</option>
-                        </select>
-                        <select id="filterMoyen">
-                            <option value="">Tous les moyens</option>
-                            <option value="email">Email</option>
-                            <option value="sms">SMS</option>
-                            <option value="système">Système</option>
-                        </select>
-                        <div class="date-time-filter">
-                            <div class="filter-group">
-                                <label for="dateFilter">Date:</label>
-                                <input type="date" id="dateFilter">
-                            </div>
-                        </div>
-                        <button id="filterBtn" class="btn btn-primary">Filtrer</button>
-                        <button id="resetBtn" class="btn btn-secondary">Réinitialiser</button>
-                    </div>
-                </div>
+                
             </div>
 
             <div class="card">

@@ -717,10 +717,6 @@ public FNE updateFNE(FNE updatedFne, User user) {
         // Enregistrer la FNE mise à jour
         FNE savedFne = fneRepository.save(existingFne);
         
-        // Créer une notification uniquement si l'utilisateur est un SML
-        if ("SML".equals(user.getRole())) {
-            notificationService.createFneNotification(savedFne, user);
-        }
         
         return savedFne;
     } else {
@@ -729,4 +725,3 @@ public FNE updateFNE(FNE updatedFne, User user) {
     }
 }
 }
-

@@ -17,7 +17,39 @@
     --sidebar-collapsed-width: 70px;
     --header-height: 60px;
   }
-  
+/* Ajouter ces styles pour les boutons d'action */
+.actions-cell {
+    text-align: center;
+    padding: 8px !important;
+}
+
+.btn-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    background: transparent;
+    color: var(--text-color);
+}
+
+.btn-action:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.view-btn {
+    color: var(--primary-color);
+}
+
+.view-btn:hover {
+    background-color: rgba(0, 120, 212, 0.1);
+}
+
+/* Supprimer les styles liés à la recherche et au filtrage si nécessaire */
   /* Styles généraux */
   * {
     margin: 0;
@@ -966,4 +998,133 @@
       grid-template-columns: 1fr;
     }
   }
-  
+ /* Styles pour les tableaux dans la vue PDF */
+.pdf-table {
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.pdf-table table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e5e7eb;
+}
+
+.pdf-table th {
+  background-color: #f9fafb;
+  padding: 10px;
+  text-align: left;
+  font-weight: 600;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.pdf-table td {
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.pdf-table tr:nth-child(even) td {
+  background-color: #f9fafb;
+}
+
+/* Style pour le modal PDF */
+.pdf-modal .modal-content {
+  max-width: 900px;
+}
+
+.pdf-modal .modal-header {
+  background-color: #f3f4f6;
+}
+
+.pdf-modal .modal-header.red {
+  background-color: #fee2e2;
+  border-bottom: 3px solid #ef4444;
+}
+
+.pdf-modal .modal-header.orange {
+  background-color: #fef3c7;
+  border-bottom: 3px solid #f59e0b;
+}
+
+.pdf-modal .modal-header.green {
+  background-color: #e8f5e9;
+  border-bottom: 3px solid #10b981;
+}
+
+.pdf-modal .modal-header.gray {
+  background-color: #f3f4f6;
+  border-bottom: 3px solid #6b7280;
+}
+
+.pdf-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.pdf-logo {
+  height: 40px;
+  width: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.pdf-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f9fafb;
+  border-radius: 4px;
+}
+
+.pdf-status-label {
+  font-weight: 600;
+}
+
+.pdf-status-value {
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-en-attente {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.status-validé {
+  background-color: #e8f5e9;
+  color: #10b981;
+}
+
+.status-refusé {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.pdf-section {
+  margin-bottom: 20px;
+}
+
+.pdf-section-header {
+  margin-bottom: 10px;
+}
+
+.pdf-section-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdf-section-content {
+  padding: 0 10px;
+}
+ 

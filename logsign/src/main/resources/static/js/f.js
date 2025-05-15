@@ -179,100 +179,169 @@ function setupTabButtons() {
   })
 }
 
-// Fonction pour appliquer les filtres
-function applyFilters() {
-  const searchTerm = document.getElementById("searchInput").value.toLowerCase()
-  const dateFilter = document.getElementById("dateFilter").value
-  const timeFilter = document.getElementById("timeFilter").value
 
-  console.log("Filtres appliqués:", {
-    search: searchTerm,
-    date: dateFilter,
-    time: timeFilter,
-  })
+// Fonction pour filtrer les données
+function filterData(searchTerm) {
+  if (!searchTerm) {
+    filteredData = [...fneData]
+  } else {
+    const searchInDescription = document.getElementById("searchInDescription").checked
+    const caseSensitive = document.getElementById("searchCaseSensitive").checked
 
-  // Commencer avec toutes les données
-  let result = [...fneData]
+    // Ajuster le terme de recherche en fonction de la sensibilité à la casse
+    const term = caseSensitive ? searchTerm : searchTerm.toLowerCase()
 
-  // Filtre par terme de recherche
-  if (searchTerm) {
-    result = result.filter((fne) => {
-      const userName = getUserFullName(fne.utilisateur).toLowerCase()
-      return (
-        (fne.fne_id && fne.fne_id.toString().includes(searchTerm)) ||
-        (fne.type_evt && fne.type_evt.toLowerCase().includes(searchTerm)) ||
-        (fne.lieu_EVT && fne.lieu_EVT.toLowerCase().includes(searchTerm)) ||
-        userName.includes(searchTerm)
-      )
-    })
-  }
+    filteredData = fneData.filter((fne) => {
+      // Fonction pour vérifier si une valeur correspond au terme de recherche
+      const matchesSearchTerm = (value) => {
+        if (!value) return false
 
-  // Filtrage par date
-  if (dateFilter) {
-    result = result.filter((fne) => {
-      if (!fne.date) return false
-
-      const fneDatee = new Date(fne.date)
-      const filterDate = new Date(dateFilter)
-
-      return (
-        fneDatee.getFullYear() === filterDate.getFullYear() &&
-        fneDatee.getMonth() === filterDate.getMonth() &&
-        fneDatee.getDate() === filterDate.getDate()
-      )
-    })
-  }
-
-  // Filtrage par heure
-  if (timeFilter) {
-    const [filterHour, filterMinute] = timeFilter.split(":").map(Number)
-
-    result = result.filter((fne) => {
-      if (!fne.heure_UTC) return false
-
-      // Si c'est déjà au format heure (HH:MM ou HH:MM:SS)
-      if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(fne.heure_UTC)) {
-        const [hour, minute] = fne.heure_UTC.split(":").map(Number)
-        return hour === filterHour && minute === filterMinute
+        if (caseSensitive) {
+          return String(value).includes(term)
+        } else {
+          return String(value).toLowerCase().includes(term)
+        }
       }
 
-      // Si c'est une date complète
-      const fneTime = new Date(fne.heure_UTC)
-      return fneTime.getHours() === filterHour && fneTime.getMinutes() === filterMinute
+      // Vérifier les champs de base
+      const basicFieldsMatch =
+        matchesSearchTerm(fne.fne_id) ||
+        matchesSearchTerm(fne.type_evt) ||
+        matchesSearchTerm(fne.ref_gne) ||
+        matchesSearchTerm(fne.statut) ||
+        matchesSearchTerm(fne.lieu_EVT) ||
+        (fne.utilisateur && (matchesSearchTerm(fne.utilisateur.nom) || matchesSearchTerm(fne.utilisateur.prenom)))
+
+      // Si l'option de recherche dans la description est activée, vérifier également la description
+      const descriptionMatch = searchInDescription && matchesSearchTerm(fne.description_evt)
+
+      return basicFieldsMatch || descriptionMatch
     })
   }
 
-  console.log("Résultats filtrés:", result.length)
-
-  filteredData = result
   currentPage = 1
   totalPages = Math.ceil(filteredData.length / 10) || 1
 
   renderTable()
   updatePagination()
+
+  // Afficher un message indiquant le nombre de résultats trouvés
+  showNotification(
+    `${filteredData.length} FNE${filteredData.length > 1 ? "s" : ""} trouvée${filteredData.length > 1 ? "s" : ""}`,
+    "info",
+  )
+}
+
+// Fonction pour appliquer les filtres
+function applyFilters() {
+  // Vérifier si les éléments de filtrage existent
+  const filterAeroport = document.getElementById("filterAeroport")
+  const filterType = document.getElementById("filterType")
+  const dateFilter = document.getElementById("dateFilter")
+  const timeFilter = document.getElementById("timeFilter")
+
+  const aeroport = filterAeroport ? filterAeroport.value : ""
+  const type = filterType ? filterType.value : ""
+  const dateFilterValue = dateFilter ? dateFilter.value : ""
+  const timeFilterValue = timeFilter ? timeFilter.value : ""
+
+  let tempData = [...fneData]
+
+  // Filtrer par aéroport (lié à l'utilisateur)
+  if (aeroport) {
+    tempData = tempData.filter((fne) => {
+      // Vérifier si l'utilisateur existe et si son aéroport correspond
+      if (fne.utilisateur && fne.utilisateur.aeroport) {
+        return fne.utilisateur.aeroport === aeroport
+      }
+      // Si le lieu_EVT est défini, vérifier aussi ce champ comme fallback
+      if (fne.lieu_EVT) {
+        return fne.lieu_EVT === aeroport
+      }
+      return false
+    })
+  }
+
+  // Filtrer par statut
+  if (status) {
+    tempData = tempData.filter((fne) => fne.statut === status)
+  }
+
+  // Filtrer par type d'événement
+  if (type) {
+    tempData = tempData.filter((fne) => fne.type_evt === type)
+  }
+
+  // Filtrer par date
+  if (dateFilterValue) {
+    const filterDate = new Date(dateFilterValue)
+    tempData = tempData.filter((fne) => {
+      if (!fne.date) return false
+      const fneDate = new Date(fne.date)
+      return (
+        fneDate.getFullYear() === filterDate.getFullYear() &&
+        fneDate.getMonth() === filterDate.getMonth() &&
+        fneDate.getDate() === filterDate.getDate()
+      )
+    })
+  }
+
+  // Filtrer par heure
+  if (timeFilterValue) {
+    const [filterHour, filterMinute] = timeFilterValue.split(":").map(Number)
+    tempData = tempData.filter((fne) => {
+      if (!fne.heure_UTC) return false
+      const fneTime = fne.heure_UTC.split(":")
+      const fneHour = Number.parseInt(fneTime[0])
+      const fneMinute = Number.parseInt(fneTime[1])
+      return fneHour === filterHour && fneMinute === filterMinute
+    })
+  }
+
+  filteredData = tempData
+  currentPage = 1
+  totalPages = Math.ceil(filteredData.length / 10) || 1
+
+  renderTable()
+  updatePagination()
+
+  // Afficher un message indiquant le nombre de résultats trouvés après filtrage
+  showNotification(
+    `${filteredData.length} FNE${filteredData.length > 1 ? "s" : ""} correspond${filteredData.length > 1 ? "ent" : ""} aux filtres appliqués`,
+    "info",
+  )
 }
 
 // Fonction pour réinitialiser les filtres
 function resetFilters() {
-  // Réinitialiser les valeurs des filtres
   document.getElementById("searchInput").value = ""
-  document.getElementById("dateFilter").value = ""
-  document.getElementById("timeFilter").value = ""
 
-  // Réinitialiser les données filtrées
+  // Vérifier si les éléments de filtrage existent
+  const filterAeroport = document.getElementById("filterAeroport")
+  const filterType = document.getElementById("filterType")
+  const dateFilter = document.getElementById("dateFilter")
+  const timeFilter = document.getElementById("timeFilter")
+
+  if (filterAeroport) filterAeroport.value = ""
+  if (filterType) filterType.value = ""
+  if (dateFilter) dateFilter.value = ""
+  if (timeFilter) timeFilter.value = ""
+
+  document.getElementById("searchInDescription").checked = true
+  document.getElementById("searchCaseSensitive").checked = false
+
   filteredData = [...fneData]
   currentPage = 1
   totalPages = Math.ceil(filteredData.length / 10) || 1
 
-  // Mettre à jour l'affichage
   renderTable()
   updatePagination()
 
-  console.log("Filtres réinitialisés")
+  showNotification("Filtres réinitialisés", "info")
 }
 
 // Fonction pour formater les valeurs pour l'affichage
-function formatValue(value, defaultValue = "Non spécifié") {
+function formatValue(value, defaultValue = "") {
   if (value === null || value === undefined || value === "") {
     return defaultValue
   }
@@ -281,7 +350,7 @@ function formatValue(value, defaultValue = "Non spécifié") {
 
 // Fonction pour formater la date
 function formatDate(dateString) {
-  if (!dateString) return "Non spécifiée"
+  if (!dateString) return ""
 
   try {
     const date = new Date(dateString)
@@ -300,7 +369,7 @@ function formatDate(dateString) {
 
 // Fonction pour formater l'heure
 function formatTime(timeString) {
-  if (!timeString) return "Non spécifiée"
+  if (!timeString) return ""
 
   // Si c'est déjà au format heure (HH:MM ou HH:MM:SS)
   if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(timeString)) {
@@ -361,9 +430,7 @@ function renderTable() {
           <button class="btn btn-view" onclick="viewFneDetails(${fne.fne_id})">
             <i class="fas fa-eye"></i> Voir
           </button>
-          <button class="btn btn-warning" onclick="modifierFNE(${fne.fne_id})">
-            <i class="fas fa-edit"></i> Modifier
-          </button>
+          
           <button class="btn btn-danger" onclick="refuserFNE(${fne.fne_id})">
             <i class="fas fa-times"></i> Refuser
           </button>
@@ -728,9 +795,7 @@ function createFNEPdfView(fne) {
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
-        <button class="btn btn-warning" onclick="modifierFNE(${fne.fne_id})">
-          <i class="fas fa-edit"></i> Modifier
-        </button>
+        
         <button class="btn btn-danger" onclick="refuserFNE(${fne.fne_id})">
           <i class="fas fa-times"></i> Refuser
         </button>
@@ -760,10 +825,7 @@ function closeModal() {
   }
 }
 
-// Fonction pour modifier une FNE
-function modifierFNE(fneId) {
-  window.location.href = `/auth/fneAdmin?id=${fneId}`
-}
+
 // Fonction pour valider une FNE
 function validerFNE(fneId) {
     if (!confirm(`Êtes-vous sûr de vouloir valider la FNE #${fneId} ?`)) return;

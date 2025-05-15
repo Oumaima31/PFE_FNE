@@ -3,406 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FNE Alertes - Tableau de bord</title>
-    <link rel="stylesheet" href="/css/dashbord.css">
+    <title>FNE Alertes - Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+    <style>
+        :root {
+            --primary: #0078d4;
+            --primary-dark: #005a9e;
+            --accent: #3a7bd5;
+            --bg-glass: rgba(255, 255, 255, 0.15);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: url("https://images.unsplash.com/photo-1542296332-2e4473faf563?q=80&w=2070") no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            box-shadow: var(--shadow);
+            color: white;
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-meteo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-glass);
+            padding: 8px 15px;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+        }
+
+        .header-meteo i {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        #meteo-temp {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        #meteo-description {
+            font-size: 0.85rem;
+            text-transform: capitalize;
+            opacity: 0.8;
+        }
+
+        .logout-button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 8px 15px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .logout-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, var(--accent), var(--primary-dark));
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            padding: 40px;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            flex: 1;
+        }
+
+        .card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 30px 20px;
+            color: white;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        footer {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+            font-size: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow);
+            margin-top: auto;
+        }
+
+        footer::before {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 4px;
+            margin: 0 auto 15px;
+            background: var(--accent);
+            border-radius: 5px;
+        }
+
+        /* Position spécifique */
+        .card.utilisateurs {
+            grid-column: 1;
+        }
+
+        .card.statistiques {
+            grid-column: 2;
+        }
+    </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <img src="/image/oacaLogo.jpg" alt="Logo OACA">
-                <h1>FNE Alertes</h1>
-            </div>
-            <button class="toggle-sidebar" id="toggle-sidebar">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-        </div>
-        
-        <div class="sidebar-menu">
-            <div class="menu-label">Menu Principal</div>
-            
-            
-            <!-- Menu pour SML -->
-            
-            <div th:if="${session.userRole == 'SML'}" class="menu-item">
-                <a href="/auth/dashboard" class="menu-link">
-                    <i class="fas fa-home"></i>
-                    <span class="menu-text">Accueil</span>
-                </a>
-            </div>
-            <div th:if="${session.userRole == 'SML'}" class="menu-item">
-                <a href="/auth/gestionFNE" class="menu-link">
-                    <i class="fas fa-history"></i>
-                    <span class="menu-text">Gestion FNE</span>
-                </a>
-            </div>
-            
-            <div th:if="${session.userRole == 'SML'}" class="menu-item">
-                <a href="/auth/notifications" class="menu-link">
-                    <i class="fas fa-bell"></i>
-                    <span class="menu-text">Notifications</span>
-                </a>
-            </div>
-            
-            <!-- Menu pour Admin -->
-            <div th:if="${session.userRole == 'admin'}" class="menu-item">
-                <a href="/auth/dashboard" class="menu-link">
-                    <i class="fas fa-home"></i>
-                    <span class="menu-text">Accueil</span>
-                </a>
-            </div>
-            
-            <div th:if="${session.userRole == 'admin'}" class="menu-item">
-                <a href="/auth/gestionFNE" class="menu-link">
-                    <i class="fas fa-history"></i>
-                    <span class="menu-text">Gestion FNE</span>
-                </a>
-            </div>
-            <div th:if="${session.userRole == 'admin'}" class="menu-item">
-                <a href="/auth/fneEnAttente" class="menu-link">
-                    <i class="fas fa-clipboard-list"></i>
-                    <span class="menu-text">FNE en attente</span>
-                </a>
-            </div>
-            <div th:if="${session.userRole == 'admin'}" class="menu-item">
-                <a href="/auth/notifications" class="menu-link">
-                    <i class="fas fa-bell"></i>
-                    <span class="menu-text">Notifications</span>
-                </a>
-            </div>
-            
-            <div th:if="${session.userRole == 'admin'}" class="menu-item">
-                <a href="/auth/adminutilisateurs" class="menu-link">
-                    <i class="fas fa-users-cog"></i>
-                    <span class="menu-text">Gestion Utilisateurs</span>
-                </a>
-            </div>
-            <div th:if="${session.userRole == 'admin'}" class="menu-item">
-                <a href="/auth/statistiques" class="menu-link">
-                    <i class="fas fa-chart-bar"></i>
-                    <span class="menu-text">Statistiques</span>
-                </a>
-            </div>
-            <!-- Menu commun -->
-            
-            
-            <div class="menu-label">Paramètres</div>
-            
-            
-            <div class="menu-item">
-                <a href="/auth/logout" class="menu-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span class="menu-text">Déconnexion</span>
-                </a>
+<header>
+    <div class="header-left">
+        <div class="header-meteo">
+            <i class="fas fa-cloud-sun"></i>
+            <div>
+                <div id="meteo-temp">--°C</div>
+                <div id="meteo-description">Chargement...</div>
             </div>
         </div>
-        
-        <div class="sidebar-footer">
-            <div class="user-avatar">
-                <i class="fas fa-user"></i>
-            </div>
-            <div class="user-info">
-                <div class="user-name" th:text="${session.userName}">Utilisateur</div>
-                <div class="user-role" th:text="${session.userRole}">Rôle</div>
-            </div>
+    </div>
+    <div class="header-right">
+        <div>
+            <div id="current-date">--/--/----</div>
+            <div id="current-time">--:--:--</div>
         </div>
-    </aside>
-    
-    <!-- Overlay for mobile sidebar -->
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-    
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-left">
-                <button class="mobile-toggle" id="mobile-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="header-meteo">
-                    <div class="meteo-icon" id="meteo-icon">
-                        <i class="fas fa-cloud-sun"></i>
-                    </div>
-                    <div class="meteo-info">
-                        <div class="meteo-temp" id="meteo-temp">--°C</div>
-                        <div class="meteo-description" id="meteo-description">Chargement...</div>
-                    </div>
-                </div>
-            </div>
+        <a href="/auth/logout" class="logout-button">
+            <i class="fas fa-sign-out-alt"></i> Déconnexion
+        </a>
+    </div>
+</header>
 
-            <div class="header-right">
-                <div class="time-widget">
-                    <div class="current-date" id="current-date">--/--/----</div>
-                    <div class="current-time" id="current-time">--:--:--</div>
-                </div>
-                <div class="header-item">
-                    <button class="header-button" id="notifications-toggle">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge"></span>
-                    </button>
-                    
-                </div>
-                
-                <div class="header-item dropdown">
-                    <button class="header-button" id="user-toggle">
-                        <i class="fas fa-user-circle"></i>
-                    </button>
-                    
-                    <!-- User Dropdown -->
-                    <div class="dropdown-menu" id="user-dropdown">
-                        <div class="dropdown-header">
-                            <h3 class="dropdown-title" th:text="${session.userName}">Utilisateur</h3>
-                        </div>
-                        
-                        
-                        <a href="/auth/logout" class="dropdown-item logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Déconnexion</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </header>
-        
-        <!-- Content - Vide, seulement l'image d'arrière-plan -->
-        <div class="content">
-            <!-- Aucun contenu ici, seulement l'image d'arrière-plan -->
-        </div>
-        
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <p class="footer-text">
-                    Le système de gestion des Fiches de Notification d'Evénement (FNE) est un outil essentiel pour signaler et enregistrer les événements liés à la sécurité aérienne.
-                </p>
-                <div class="footer-links">
-                    <a href="https://www.oaca.nat.tn/" target="_blank" class="footer-link">
-                        <i class="fas fa-globe"></i>
-                        <span>Site web OACA</span>
-                    </a>
-                    <a href="mailto:contact@oaca.nat.tn" class="footer-link">
-                        <i class="fas fa-envelope"></i>
-                        <span>Contact</span>
-                    </a>
-                    <a href="tel:+21671754000" class="footer-link">
-                        <i class="fas fa-phone"></i>
-                        <span>+216 71 754 000</span>
-                    </a>
-                </div>
-            </div>
-        </footer>
-    </div>
-    
-    <!-- Notification Toast -->
-    <div class="notification" id="notification">
-        <span id="notification-message"></span>
-    </div>
-    
-    <!-- Scripts -->
-    <script>
-        // DOM Elements
-        const sidebar = document.getElementById('sidebar');
-        const toggleSidebar = document.getElementById('toggle-sidebar');
-        const mobileToggle = document.getElementById('mobile-toggle');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const notificationsToggle = document.getElementById('notifications-toggle');
-        const notificationsDropdown = document.getElementById('notifications-dropdown');
-        const userToggle = document.getElementById('user-toggle');
-        const userDropdown = document.getElementById('user-dropdown');
-        
-        // Toggle Sidebar
-        toggleSidebar.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            
-            // Change icon
-            const icon = toggleSidebar.querySelector('i');
-            if (sidebar.classList.contains('collapsed')) {
-                icon.classList.remove('fa-chevron-left');
-                icon.classList.add('fa-chevron-right');
-            } else {
-                icon.classList.remove('fa-chevron-right');
-                icon.classList.add('fa-chevron-left');
-            }
-        });
-        
-        // Mobile Toggle
-        mobileToggle.addEventListener('click', () => {
-            sidebar.classList.add('show');
-            sidebarOverlay.classList.add('show');
-        });
-        
-        // Close Sidebar on Overlay Click
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('show');
-            sidebarOverlay.classList.remove('show');
-        });
-        
-        // Toggle Notifications Dropdown
-        notificationsToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            notificationsDropdown.classList.toggle('show');
-            userDropdown.classList.remove('show');
-        });
-        
-        // Toggle User Dropdown
-        userToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            userDropdown.classList.toggle('show');
-            notificationsDropdown.classList.remove('show');
-        });
-        
-        // Close Dropdowns on Outside Click
-        document.addEventListener('click', (e) => {
-            if (!notificationsToggle.contains(e.target) && !notificationsDropdown.contains(e.target)) {
-                notificationsDropdown.classList.remove('show');
-            }
-            
-            if (!userToggle.contains(e.target) && !userDropdown.contains(e.target)) {
-                userDropdown.classList.remove('show');
-            }
-        });
-        
-        // Fonction pour afficher une notification
-        function showNotification(message, type = "info") {
-            const notification = document.getElementById("notification");
-            const notificationMessage = document.getElementById("notification-message");
-            
-            // Définir le message
-            notificationMessage.textContent = message;
-            
-            // Définir le type (info, success, error, warning)
-            notification.className = "notification";
-            notification.classList.add(type);
-            notification.classList.add("show");
-            
-            // Masquer après 5 secondes
-            setTimeout(() => {
-                notification.classList.remove("show");
-            }, 5000);
+<div class="dashboard-container">
+    <a href="/auth/gestionFNE" class="card" th:if="${session.userRole == 'admin' or session.userRole == 'SML'}">
+        <i class="fas fa-history"></i>
+        <h3>Gestion FNE</h3>
+        <p>Suivi et gestion des fiches</p>
+    </a>
+    <a href="/auth/notifications" class="card" th:if="${session.userRole == 'admin' or session.userRole == 'SML'}">
+        <i class="fas fa-bell"></i>
+        <h3>Notifications</h3>
+        <p>Alertes et mises à jour</p>
+    </a>
+    <a href="/auth/fneEnAttente" class="card" th:if="${session.userRole == 'admin'}">
+        <i class="fas fa-clipboard-list"></i>
+        <h3>FNE en attente</h3>
+        <p>Vérification des FNE en attente</p>
+    </a>
+    <a href="/auth/adminutilisateurs" class="card utilisateurs" th:if="${session.userRole == 'admin'}">
+        <i class="fas fa-users-cog"></i>
+        <h3>Utilisateurs</h3>
+        <p>Gestion des comptes utilisateurs</p>
+    </a>
+    <a href="/auth/statistiques" class="card statistiques" th:if="${session.userRole == 'admin'}">
+        <i class="fas fa-chart-bar"></i>
+        <h3>Statistiques</h3>
+        <p>Analyse et indicateurs clés</p>
+    </a>
+</div>
+
+<footer>
+ Le système de gestion des Fiches de Notification d'Evénement (FNE) est un outil essentiel pour signaler et enregistrer les événements liés à la sécurité aérienne.
+</footer>
+
+<script>
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    }
+
+    async function fetchMeteo() {
+        const apiKey = '17cf16edeaed1f9b3bb60006a242d5d1';
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=Tunis,tn&units=metric&lang=fr&appid=${apiKey}`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            document.getElementById('meteo-temp').textContent = Math.round(data.main.temp) + "°C";
+            document.getElementById('meteo-description').textContent = data.weather[0].description;
+        } catch {
+            document.getElementById('meteo-temp').textContent = "--°C";
+            document.getElementById('meteo-description').textContent = "Non disponible";
         }
-        
-        // Fonction pour mettre à jour la date et l'heure
-        function updateDateTime() {
-            const now = new Date();
-            
-            // Format de la date: JJ/MM/AAAA
-            const dateOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
-            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', dateOptions);
-            
-            // Format de l'heure: HH:MM:SS
-            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR', timeOptions);
-        }
-        
-        // Fonction pour récupérer les données météo
-        async function fetchMeteo() {
-            const apiKey = '17cf16edeaed1f9b3bb60006a242d5d1';
-            const url = `https://api.openweathermap.org/data/2.5/weather?q=Tunis,tn&units=metric&lang=fr&appid=${apiKey}`;
-            
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP : ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                // Vérification des données
-                if (!data.weather || !data.main) {
-                    throw new Error("Données météo non disponibles");
-                }
-                
-                // Récupération des valeurs
-                const iconCode = data.weather[0].icon;
-                const temperature = Math.round(data.main.temp) + "°C";
-                const description = data.weather[0].description;
-                
-                // Affichage des valeurs avec animation
-                const meteoIcon = document.getElementById("meteo-icon");
-                const meteoTemp = document.getElementById("meteo-temp");
-                const meteoDesc = document.getElementById("meteo-description");
-                
-                // Choisir l'icône appropriée
-                const weatherCode = data.weather[0].id;
-                
-                if (weatherCode >= 200 && weatherCode < 300) {
-                    meteoIcon.innerHTML = '<i class="fas fa-bolt"></i>'; // Orage
-                } else if (weatherCode >= 300 && weatherCode < 500) {
-                    meteoIcon.innerHTML = '<i class="fas fa-cloud-rain"></i>'; // Bruine
-                } else if (weatherCode >= 500 && weatherCode < 600) {
-                    meteoIcon.innerHTML = '<i class="fas fa-cloud-showers-heavy"></i>'; // Pluie
-                } else if (weatherCode >= 600 && weatherCode < 700) {
-                    meteoIcon.innerHTML = '<i class="fas fa-snowflake"></i>'; // Neige
-                } else if (weatherCode >= 700 && weatherCode < 800) {
-                    meteoIcon.innerHTML = '<i class="fas fa-smog"></i>'; // Brouillard
-                } else if (weatherCode === 800) {
-                    meteoIcon.innerHTML = '<i class="fas fa-sun"></i>'; // Ciel dégagé
-                } else {
-                    meteoIcon.innerHTML = '<i class="fas fa-cloud-sun"></i>'; // Nuageux
-                }
-                
-                // Animation simple pour les valeurs de température et description
-                meteoTemp.style.opacity = "0";
-                meteoDesc.style.opacity = "0";
-                
-                setTimeout(() => {
-                    meteoTemp.textContent = temperature;
-                    meteoDesc.textContent = description;
-                    meteoTemp.style.transition = "opacity 0.5s ease";
-                    meteoDesc.style.transition = "opacity 0.5s ease";
-                    meteoTemp.style.opacity = "1";
-                    meteoDesc.style.opacity = "1";
-                }, 300);
-            } catch (error) {
-                console.error("Erreur : ", error);
-                document.getElementById("meteo-icon").innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
-                document.getElementById("meteo-temp").textContent = "--°C";
-                document.getElementById("meteo-description").textContent = "Non disponible";
-            }
-        }
-        
-        // Fonction de déconnexion
-        function logout() {
-            fetch("/auth/logout", {
-                method: "POST",
-                credentials: "include",
-            })
-            .then((response) => {
-                if (response.ok) {
-                    // Rediriger vers la page de login
-                    window.location.href = "/auth/index";
-                } else {
-                    console.error("Échec de la déconnexion");
-                    window.location.href = "/auth/index"; // Redirection même en cas d'erreur
-                }
-            })
-            .catch((error) => {
-                console.error("Erreur lors de la déconnexion:", error);
-                window.location.href = "/auth/index";
-            });
-        }
-        
-        // Initialisation
-        document.addEventListener("DOMContentLoaded", () => {
-            // Mettre à jour la date et l'heure immédiatement
-            updateDateTime();
-            
-            // Mettre à jour la date et l'heure toutes les secondes
-            setInterval(updateDateTime, 1000);
-            
-            // Récupérer les données météo
-            fetchMeteo();
-            
-            // Récupérer les données météo toutes les 30 minutes
-            setInterval(fetchMeteo, 30 * 60 * 1000);
-            
-            // Afficher un message de bienvenue
-            const userName = document.querySelector(".user-name").textContent;
-            showNotification(`Bienvenue, ${userName} ! Vous êtes connecté avec succès.`, "success");
-        });
-    </script>
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        fetchMeteo();
+        setInterval(fetchMeteo, 30 * 60 * 1000);
+    });
+</script>
 </body>
 </html>

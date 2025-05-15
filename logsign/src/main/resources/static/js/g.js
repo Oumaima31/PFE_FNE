@@ -23,117 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Vérifier s'il y a un message de succès dans l'URL
   checkForSuccessMessage()
-
-  // Ajouter des styles pour le PDF
-  const styleElement = document.createElement("style")
-  styleElement.textContent = `
-    /* Styles pour le modal PDF */
-    #fnePdfModal .modal-content {
-      width: 80%;
-      max-width: 800px;
-      margin: 30px auto;
-      max-height: 85vh;
-      overflow-y: auto;
-    }
-    
-    .pdf-content {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .pdf-section {
-      margin-bottom: 15px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    
-    .pdf-section h3 {
-      padding: 8px 12px;
-      background-color: #f9fafb;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #333;
-      border-bottom: 1px solid #e5e7eb;
-      margin: 0;
-    }
-    
-    .pdf-section h4 {
-      padding: 6px 12px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #555;
-      margin: 0;
-      background-color: #f3f4f6;
-    }
-    
-    .pdf-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 10px;
-      padding: 10px;
-    }
-    
-    .pdf-item {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    
-    .pdf-item label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #666;
-    }
-    
-    .pdf-item span {
-      font-size: 0.85rem;
-    }
-    
-    .pdf-description {
-      padding: 10px;
-      white-space: pre-line;
-      line-height: 1.4;
-    }
-    
-    .pdf-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .pdf-logo {
-      height: 40px;
-      width: 40px;
-      border-radius: 6px;
-      object-fit: cover;
-    }
-    
-    .modal-header.red {
-      background-color: #fee2e2;
-      color: #b91c1c;
-    }
-    
-    .modal-header.orange {
-      background-color: #ffedd5;
-      color: #c2410c;
-    }
-    
-    .modal-header.green {
-      background-color: #dcfce7;
-      color: #15803d;
-    }
-    
-    .modal-header.gray {
-      background-color: #f3f4f6;
-      color: #4b5563;
-    }
-    
-    .modal-header.blue {
-      background-color: #dbeafe;
-      color: #1e40af;
-    }
-  `
-  document.head.appendChild(styleElement)
 })
 
 // Fonction pour vérifier et afficher le message de succès
@@ -226,9 +115,17 @@ function setupEventListeners() {
     }
   })
 
-  // Filtres
-  document.getElementById("filterBtn").addEventListener("click", applyFilters)
-  document.getElementById("resetBtn").addEventListener("click", resetFilters)
+  // Filtres - vérifier si les éléments existent (pour admin et SML uniquement)
+  const filterBtn = document.getElementById("filterBtn")
+  const resetBtn = document.getElementById("resetBtn")
+
+  if (filterBtn) {
+    filterBtn.addEventListener("click", applyFilters)
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener("click", resetFilters)
+  }
 
   // Pagination
   document.getElementById("prevPage").addEventListener("click", () => {
@@ -253,16 +150,37 @@ function filterData(searchTerm) {
   if (!searchTerm) {
     filteredData = [...fneData]
   } else {
+    const searchInDescription = document.getElementById("searchInDescription").checked
+    const caseSensitive = document.getElementById("searchCaseSensitive").checked
+
+    // Ajuster le terme de recherche en fonction de la sensibilité à la casse
+    const term = caseSensitive ? searchTerm : searchTerm.toLowerCase()
+
     filteredData = fneData.filter((fne) => {
-      return (
-        fne.fne_id.toString().includes(searchTerm) ||
-        (fne.type_evt && fne.type_evt.toLowerCase().includes(searchTerm)) ||
-        (fne.ref_gne && fne.ref_gne.toLowerCase().includes(searchTerm)) ||
-        (fne.statut && fne.statut.toLowerCase().includes(searchTerm)) ||
-        (fne.utilisateur &&
-          ((fne.utilisateur.nom && fne.utilisateur.nom.toLowerCase().includes(searchTerm)) ||
-            (fne.utilisateur.prenom && fne.utilisateur.prenom.toLowerCase().includes(searchTerm))))
-      )
+      // Fonction pour vérifier si une valeur correspond au terme de recherche
+      const matchesSearchTerm = (value) => {
+        if (!value) return false
+
+        if (caseSensitive) {
+          return String(value).includes(term)
+        } else {
+          return String(value).toLowerCase().includes(term)
+        }
+      }
+
+      // Vérifier les champs de base
+      const basicFieldsMatch =
+        matchesSearchTerm(fne.fne_id) ||
+        matchesSearchTerm(fne.type_evt) ||
+        matchesSearchTerm(fne.ref_gne) ||
+        matchesSearchTerm(fne.statut) ||
+        matchesSearchTerm(fne.lieu_EVT) ||
+        (fne.utilisateur && (matchesSearchTerm(fne.utilisateur.nom) || matchesSearchTerm(fne.utilisateur.prenom)))
+
+      // Si l'option de recherche dans la description est activée, vérifier également la description
+      const descriptionMatch = searchInDescription && matchesSearchTerm(fne.description_evt)
+
+      return basicFieldsMatch || descriptionMatch
     })
   }
 
@@ -271,24 +189,59 @@ function filterData(searchTerm) {
 
   renderTable()
   updatePagination()
+
+  // Afficher un message indiquant le nombre de résultats trouvés
+  showNotification(
+    `${filteredData.length} FNE${filteredData.length > 1 ? "s" : ""} trouvée${filteredData.length > 1 ? "s" : ""}`,
+    "info",
+  )
 }
 
 // Fonction pour appliquer les filtres
 function applyFilters() {
-  const statusFilter = document.getElementById("filterAction").value
-  const dateFilter = document.getElementById("dateFilter").value
-  const timeFilter = document.getElementById("timeFilter").value
+  // Vérifier si les éléments de filtrage existent
+  const filterAeroport = document.getElementById("filterAeroport")
+  const filterStatus = document.getElementById("filterStatus")
+  const filterType = document.getElementById("filterType")
+  const dateFilter = document.getElementById("dateFilter")
+  const timeFilter = document.getElementById("timeFilter")
+
+  const aeroport = filterAeroport ? filterAeroport.value : ""
+  const status = filterStatus ? filterStatus.value : ""
+  const type = filterType ? filterType.value : ""
+  const dateFilterValue = dateFilter ? dateFilter.value : ""
+  const timeFilterValue = timeFilter ? timeFilter.value : ""
 
   let tempData = [...fneData]
 
+  // Filtrer par aéroport (lié à l'utilisateur)
+  if (aeroport) {
+    tempData = tempData.filter((fne) => {
+      // Vérifier si l'utilisateur existe et si son aéroport correspond
+      if (fne.utilisateur && fne.utilisateur.aeroport) {
+        return fne.utilisateur.aeroport === aeroport
+      }
+      // Si le lieu_EVT est défini, vérifier aussi ce champ comme fallback
+      if (fne.lieu_EVT) {
+        return fne.lieu_EVT === aeroport
+      }
+      return false
+    })
+  }
+
   // Filtrer par statut
-  if (statusFilter) {
-    tempData = tempData.filter((fne) => fne.statut === statusFilter)
+  if (status) {
+    tempData = tempData.filter((fne) => fne.statut === status)
+  }
+
+  // Filtrer par type d'événement
+  if (type) {
+    tempData = tempData.filter((fne) => fne.type_evt === type)
   }
 
   // Filtrer par date
-  if (dateFilter) {
-    const filterDate = new Date(dateFilter)
+  if (dateFilterValue) {
+    const filterDate = new Date(dateFilterValue)
     tempData = tempData.filter((fne) => {
       if (!fne.date) return false
       const fneDate = new Date(fne.date)
@@ -301,8 +254,8 @@ function applyFilters() {
   }
 
   // Filtrer par heure
-  if (timeFilter) {
-    const [filterHour, filterMinute] = timeFilter.split(":").map(Number)
+  if (timeFilterValue) {
+    const [filterHour, filterMinute] = timeFilterValue.split(":").map(Number)
     tempData = tempData.filter((fne) => {
       if (!fne.heure_UTC) return false
       const fneTime = fne.heure_UTC.split(":")
@@ -318,14 +271,33 @@ function applyFilters() {
 
   renderTable()
   updatePagination()
+
+  // Afficher un message indiquant le nombre de résultats trouvés après filtrage
+  showNotification(
+    `${filteredData.length} FNE${filteredData.length > 1 ? "s" : ""} correspond${filteredData.length > 1 ? "ent" : ""} aux filtres appliqués`,
+    "info",
+  )
 }
 
 // Fonction pour réinitialiser les filtres
 function resetFilters() {
   document.getElementById("searchInput").value = ""
-  document.getElementById("filterAction").value = ""
-  document.getElementById("dateFilter").value = ""
-  document.getElementById("timeFilter").value = ""
+
+  // Vérifier si les éléments de filtrage existent
+  const filterAeroport = document.getElementById("filterAeroport")
+  const filterStatus = document.getElementById("filterStatus")
+  const filterType = document.getElementById("filterType")
+  const dateFilter = document.getElementById("dateFilter")
+  const timeFilter = document.getElementById("timeFilter")
+
+  if (filterAeroport) filterAeroport.value = ""
+  if (filterStatus) filterStatus.value = ""
+  if (filterType) filterType.value = ""
+  if (dateFilter) dateFilter.value = ""
+  if (timeFilter) timeFilter.value = ""
+
+  document.getElementById("searchInDescription").checked = true
+  document.getElementById("searchCaseSensitive").checked = false
 
   filteredData = [...fneData]
   currentPage = 1
@@ -333,6 +305,8 @@ function resetFilters() {
 
   renderTable()
   updatePagination()
+
+  showNotification("Filtres réinitialisés", "info")
 }
 
 // Fonction pour afficher les données dans le tableau
@@ -387,11 +361,6 @@ function renderTable() {
       userName = `${fne.utilisateur.prenom || ""} ${fne.utilisateur.nom || ""}`.trim()
     }
 
-    // Debug: Afficher les informations pour comprendre pourquoi le bouton ne s'affiche pas
-    console.log(
-      `FNE #${fne.fne_id} - Statut: ${fne.statut}, Utilisateur: ${fne.utilisateur ? fne.utilisateur.id : "N/A"}, UserID: ${userId}`,
-    )
-
     // Créer la ligne du tableau
     const row = document.createElement("tr")
     row.innerHTML = `
@@ -434,11 +403,6 @@ function renderTable() {
 
 // Fonction pour vérifier si l'utilisateur peut modifier une FNE
 function canModifyFNE(fne) {
-  // Debug: Afficher les informations pour comprendre pourquoi la fonction retourne false
-  console.log(
-    `canModifyFNE - Rôle: ${userRole}, Statut: ${fne.statut}, FNE User ID: ${fne.utilisateur ? fne.utilisateur.id : "N/A"}, Current User ID: ${userId}`,
-  )
-
   if (userRole === "admin") {
     return true
   }
@@ -476,12 +440,22 @@ function viewFNE(fneId) {
       return response.json()
     })
     .then((fne) => {
+      // Récupérer l'historique de la FNE
+      return fetch(`/auth/api/historique/fne/${fneId}`).then((historyResponse) => {
+        if (!historyResponse.ok) {
+          console.warn("Impossible de récupérer l'historique de la FNE")
+          return { fne, historique: [] }
+        }
+        return historyResponse.json().then((historique) => ({ fne, historique }))
+      })
+    })
+    .then(({ fne, historique }) => {
       // Afficher le modal avec les détails
       document.getElementById("modalFneId").textContent = fne.fne_id
 
       // Générer le contenu du modal
       const modalBody = document.querySelector("#fneDetailsModal .modal-body")
-      modalBody.innerHTML = generateFNEDetailsHTML(fne)
+      modalBody.innerHTML = generateFNEDetailsHTML(fne, historique)
 
       // Configurer les boutons d'action
       const editBtn = document.getElementById("editFneBtn")
@@ -516,6 +490,14 @@ function viewFNE(fneId) {
       if (modal) {
         modal.style.display = "block"
       }
+
+      // Ajouter les écouteurs d'événements pour les boutons d'historique
+      document.querySelectorAll(".history-event").forEach((button) => {
+        button.addEventListener("click", function () {
+          const eventId = this.getAttribute("data-event-id")
+          showEventDetails(eventId, historique)
+        })
+      })
     })
     .catch((error) => {
       console.error("Erreur:", error)
@@ -523,8 +505,125 @@ function viewFNE(fneId) {
     })
 }
 
+// Fonction pour afficher les détails d'un événement d'historique
+function showEventDetails(eventId, historique) {
+  // Trouver l'événement correspondant
+  const event = historique.find((h) => h.id == eventId)
+  if (!event) return
+
+  // Créer le modal s'il n'existe pas déjà
+  let eventModal = document.getElementById("eventDetailsModal")
+  if (!eventModal) {
+    eventModal = document.createElement("div")
+    eventModal.id = "eventDetailsModal"
+    eventModal.className = "event-modal"
+    document.body.appendChild(eventModal)
+  }
+
+  // Formatter la date
+  const eventDate = new Date(event.dateAction)
+  const formattedDate = eventDate.toLocaleDateString("fr-FR") + " à " + eventDate.toLocaleTimeString("fr-FR")
+
+  // Récupérer le nom de l'utilisateur
+  let userName = "Utilisateur inconnu"
+  if (event.utilisateur) {
+    userName = `${event.utilisateur.prenom || ""} ${event.utilisateur.nom || ""}`.trim()
+  }
+
+  // Générer le contenu du modal
+  let modificationsHTML = ""
+  if (event.modifications && event.modifications.length > 0) {
+    modificationsHTML = `
+      <h3>Détails des modifications</h3>
+      <table class="modifications-table">
+        <thead>
+          <tr>
+            <th>Champ</th>
+            <th>Ancienne valeur</th>
+            <th>Nouvelle valeur</th>
+          </tr>
+        </thead>
+        <tbody>
+    `
+
+    event.modifications.forEach((mod) => {
+      modificationsHTML += `
+        <tr>
+          <td>${mod.champ || ""}</td>
+          <td>${mod.ancienne_valeur || ""}</td>
+          <td>${mod.nouvelle_valeur || ""}</td>
+        </tr>
+      `
+    })
+
+    modificationsHTML += `
+        </tbody>
+      </table>
+    `
+  }
+
+  // Déterminer l'icône en fonction du type d'action
+  let actionIcon = ""
+  switch (event.action) {
+    case "Création":
+      actionIcon = '<i class="fas fa-plus-circle"></i>'
+      break
+    case "Modification":
+      actionIcon = '<i class="fas fa-edit"></i>'
+      break
+    case "Validation":
+      actionIcon = '<i class="fas fa-check-circle"></i>'
+      break
+    case "Refus":
+      actionIcon = '<i class="fas fa-times-circle"></i>'
+      break
+    default:
+      actionIcon = '<i class="fas fa-info-circle"></i>'
+  }
+
+  eventModal.innerHTML = `
+    <div class="event-modal-content">
+      <div class="event-modal-header">
+        <h2 class="event-modal-title">${actionIcon} ${event.action}</h2>
+        <button class="event-modal-close" onclick="closeEventModal()">&times;</button>
+      </div>
+      <div class="event-modal-body">
+        <div class="event-info">
+          <div class="event-info-item">
+            <div class="event-info-label">Date:</div>
+            <div class="event-info-value">${formattedDate}</div>
+          </div>
+          <div class="event-info-item">
+            <div class="event-info-label">Utilisateur:</div>
+            <div class="event-info-value">${userName}</div>
+          </div>
+          <div class="event-info-item">
+            <div class="event-info-label">Action:</div>
+            <div class="event-info-value">${event.action}</div>
+          </div>
+        </div>
+        ${modificationsHTML}
+      </div>
+      <div class="event-modal-footer">
+        <button class="event-modal-close-btn" onclick="closeEventModal()">Fermer</button>
+      </div>
+    </div>
+  `
+
+  // Afficher le modal
+  eventModal.style.display = "block"
+}
+
+// Fonction pour fermer le modal d'événement
+function closeEventModal() {
+  const eventModal = document.getElementById("eventDetailsModal")
+  if (eventModal) {
+    eventModal.style.display = "none"
+  }
+}
+
 // Fonction pour générer le HTML des détails d'une FNE
-function generateFNEDetailsHTML(fne) {
+function generateFNEDetailsHTML(fne, historique) {
   // Récupérer le nom de l'utilisateur
   let userName = "Utilisateur inconnu"
   if (fne.utilisateur) {
@@ -554,8 +653,73 @@ function generateFNEDetailsHTML(fne) {
       statusClass = "action-modification"
   }
 
+  // Générer le HTML pour l'historique
+  let historiqueHTML = ""
+  if (historique && historique.length > 0) {
+    // Trier l'historique par date (du plus ancien au plus récent)
+    historique.sort((a, b) => {
+      const dateA = new Date(a.dateAction)
+      const dateB = new Date(b.dateAction)
+      return dateA - dateB
+    })
+
+    historiqueHTML = `<div class="history-timeline">`
+
+    // Ajouter chaque entrée d'historique
+    historique.forEach((entry) => {
+      const dateAction = new Date(entry.dateAction)
+      const formattedDate = dateAction.toLocaleDateString("fr-FR")
+      const formattedTime = dateAction.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+
+      let actionClass = ""
+      let actionIcon = ""
+      switch (entry.action) {
+        case "Création":
+          actionClass = "creation"
+          actionIcon = '<i class="fas fa-plus"></i>'
+          break
+        case "Modification":
+          actionClass = "modification"
+          actionIcon = '<i class="fas fa-edit"></i>'
+          break
+        case "Validation":
+          actionClass = "validation"
+          actionIcon = '<i class="fas fa-check"></i>'
+          break
+        case "Refus":
+          actionClass = "refus"
+          actionIcon = '<i class="fas fa-times"></i>'
+          break
+        default:
+          actionClass = ""
+          actionIcon = '<i class="fas fa-info"></i>'
+      }
+
+      // Récupérer le nom de l'utilisateur qui a effectué l'action
+      let actionUserName = "Utilisateur inconnu"
+      if (entry.utilisateur) {
+        actionUserName = `${entry.utilisateur.prenom || ""} ${entry.utilisateur.nom || ""}`.trim()
+      }
+
+      historiqueHTML += `
+        <div class="history-event" data-event-id="${entry.id}">
+          <div class="event-icon ${actionClass}">${actionIcon}</div>
+          <div class="event-details">
+            <div class="event-type">${entry.action}</div>
+            <div class="event-date">${formattedDate} à ${formattedTime}</div>
+            <div class="event-user">${actionUserName}</div>
+          </div>
+        </div>
+      `
+    })
+
+    historiqueHTML += `</div>`
+  }
+
   return `
         <div class="fne-details">
+            ${historiqueHTML}
+            
             <div class="detail-section">
                 <h3>Informations générales</h3>
                 <div class="detail-grid">
@@ -606,8 +770,20 @@ function generateFNEDetailsHTML(fne) {
 
 // Fonction pour modifier une FNE
 function editFNE(fneId) {
-  // Rediriger vers la page de modification appropriée selon le rôle
-  window.location.href = `/auth/ajoutFNE?id=${fneId}`
+  // Vérifier d'abord si l'utilisateur peut modifier cette FNE
+  fetch(`/auth/api/fne/${fneId}`)
+    .then((response) => response.json())
+    .then((fne) => {
+      if (canModifyFNE(fne)) {
+        window.location.href = `/auth/ajoutFNE?id=${fneId}`
+      } else {
+        showNotification("Vous n'êtes pas autorisé à modifier cette FNE", "error")
+      }
+    })
+    .catch((error) => {
+      console.error("Erreur:", error)
+      showNotification("Erreur lors de la récupération de la FNE", "error")
+    })
 }
 
 // Fonction pour supprimer une FNE
@@ -694,19 +870,19 @@ function generateFNEPdfHTML(fne) {
   switch (fne.type_evt) {
     case "accident":
       typeClass = "red"
-      typeLabel = "accident"
+      typeLabel = "Accident (ACCID)"
       break
     case "incident_grave":
       typeClass = "orange"
-      typeLabel = "incident_grave"
+      typeLabel = "Incident grave (ING)"
       break
     case "incident":
       typeClass = "green"
-      typeLabel = "incident"
+      typeLabel = "Incident (INC)"
       break
     case "evt_technique":
       typeClass = "gray"
-      typeLabel = "evt_technique"
+      typeLabel = "Evenement Technique (EVT)"
       break
     default:
       typeClass = "blue"
@@ -751,48 +927,57 @@ function generateFNEPdfHTML(fne) {
         </div>
         
         <!-- Type d'événement et référence -->
-        <table class="pdf-table" style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-          <tr>
-            <th style="width: 50%; background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; text-align: left;">Type d'événement</th>
-            <th style="width: 50%; background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; text-align: left;">REF GNE</th>
-          </tr>
-          <tr>
-            <td style="padding: 8px; border: 1px solid #e5e7eb;">${typeLabel || ""}</td>
-            <td style="padding: 8px; border: 1px solid #e5e7eb;">${fne.ref_gne || ""}</td>
-          </tr>
-        </table>
+        <div style="margin-bottom: 15px;">
+          <div style="background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; font-weight: bold; font-size: 0.9rem;">
+            Type d'événement et référence
+          </div>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <th style="width: 50%; background-color: #f9fafb; padding: 8px; border: 1px solid #e5e7eb; text-align: left;">Type d'événement</th>
+                <th style="width: 50%; background-color: #f9fafb; padding: 8px; border: 1px solid #e5e7eb; text-align: left;">REF GNE</th>
+              </tr>
+              <tr>
+                <td style="padding: 8px; border: 1px solid #e5e7eb;">${typeLabel || ""}</td>
+                <td style="padding: 8px; border: 1px solid #e5e7eb;">${fne.ref_gne || ""}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
         
         <!-- 1. Informations générales -->
         <div style="margin-bottom: 15px;">
           <div style="background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; font-weight: bold; font-size: 0.9rem;">
             1. Informations générales
           </div>
-          <table class="pdf-table" style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Organisme concerné</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.organisme_concerné || ""}</td>
-            </tr>
-            <tr>
-              <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Date</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${dateCreation || ""}</td>
-            </tr>
-            <tr>
-              <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Heure UTC</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.heure_UTC || ""}</td>
-            </tr>
-            <tr>
-              <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Lieu de l'événement</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.lieu_EVT || ""}</td>
-            </tr>
-            <tr>
-              <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Moyen de détection</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.moyen_detection || ""}</td>
-            </tr>
-            <tr>
-              <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Impacts opérationnels</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.impacts_operationnels || ""}</td>
-            </tr>
-          </table>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Organisme concerné</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.organisme_concerné || ""}</td>
+              </tr>
+              <tr>
+                <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Date</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${dateCreation || ""}</td>
+              </tr>
+              <tr>
+                <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Heure UTC</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.heure_UTC || ""}</td>
+              </tr>
+              <tr>
+                <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Lieu de l'événement</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.lieu_EVT || ""}</td>
+              </tr>
+              <tr>
+                <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Moyen de détection</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.moyen_detection || ""}</td>
+              </tr>
+              <tr>
+                <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Impacts opérationnels</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.impacts_operationnels || ""}</td>
+              </tr>
+            </table>
+          </div>
         </div>
         
         <!-- 2. Aéronef(s) concerné(s) -->
@@ -800,79 +985,78 @@ function generateFNEPdfHTML(fne) {
           <div style="background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; font-weight: bold; font-size: 0.9rem;">
             2. Aéronef(s) concerné(s)
           </div>
-          
-          <!-- Premier aéronef -->
-          <div style="margin-top: 8px; margin-bottom: 12px;">
-            <div style="font-weight: 600; margin-bottom: 5px; font-size: 0.85rem; padding-left: 5px;">A. Premier aéronef</div>
-            <table class="pdf-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+          <h4 style="margin: 10px 0 5px 0; padding-left: 8px; font-size: 0.85rem;">A. Premier aéronef</h4>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
               <tr>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Indicatif/Immatriculation</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Code SSR</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Type appareil</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Règles de vol</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Indicatif/Immatriculation</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Code SSR</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Type appareil</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Règles de vol</th>
               </tr>
               <tr>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.indicatif_immatricultion || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.code_ssr || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.type_appareil || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.regles_vol || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.indicatif_immatricultion || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.code_ssr || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.type_appareil || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.regles_vol || ""}</td>
               </tr>
             </table>
-            
-            <table class="pdf-table" style="width: 100%; border-collapse: collapse;">
+          </div>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
               <tr>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Terrain départ</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Terrain arrivée</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Cap</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Altitude réelle</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Altitude autorisée</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Vitesse</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Terrain départ</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Terrain arrivée</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Cap</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Altitude réelle</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Altitude autorisée</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Vitesse</th>
               </tr>
               <tr>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.terrain_depart || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.terrain_arrivée || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.cap || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.altitude_reel || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.altitude_autorise || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.vitesse || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.terrain_depart || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.terrain_arrivée || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.cap || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.altitude_reel || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.altitude_autorise || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.vitesse || ""}</td>
               </tr>
             </table>
           </div>
           
-          <!-- Deuxième aéronef -->
-          <div style="margin-top: 8px; margin-bottom: 12px;">
-            <div style="font-weight: 600; margin-bottom: 5px; font-size: 0.85rem; padding-left: 5px;">B. Deuxième aéronef</div>
-            <table class="pdf-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+          <h4 style="margin: 10px 0 5px 0; padding-left: 8px; font-size: 0.85rem;">B. Deuxième aéronef</h4>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
               <tr>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Indicatif/Immatriculation</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Code SSR</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Type appareil</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Règles de vol</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Indicatif/Immatriculation</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Code SSR</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Type appareil</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Règles de vol</th>
               </tr>
               <tr>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.indicatif_immatricultion_b || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.code_ssr_b || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.type_appareil_b || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.regles_vol_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.indicatif_immatricultion_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.code_ssr_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.type_appareil_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.regles_vol_b || ""}</td>
               </tr>
             </table>
-            
-            <table class="pdf-table" style="width: 100%; border-collapse: collapse;">
+          </div>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
               <tr>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Terrain départ</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Terrain arrivée</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Cap</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Altitude réelle</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Altitude autorisée</th>
-                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left; font-size: 0.8rem;">Vitesse</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Terrain départ</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Terrain arrivée</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Cap</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Altitude réelle</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Altitude autorisée</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Vitesse</th>
               </tr>
               <tr>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.terrain_depart_b || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.terrain_arrivée_b || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.cap_b || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.altitude_reel_b || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.altitude_autorise_b || ""}</td>
-                <td style="padding: 6px; border: 1px solid #e5e7eb; font-size: 0.8rem;">${fne.vitesse_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.terrain_depart_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.terrain_arrivée_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.cap_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.altitude_reel_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.altitude_autorise_b || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.vitesse_b || ""}</td>
               </tr>
             </table>
           </div>
@@ -883,20 +1067,22 @@ function generateFNEPdfHTML(fne) {
           <div style="background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; font-weight: bold; font-size: 0.9rem;">
             3. Nombre estimatif des victimes
           </div>
-          <table class="pdf-table" style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <th style="width: 25%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Passagers</th>
-              <th style="width: 25%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Personnel</th>
-              <th style="width: 25%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Équipage</th>
-              <th style="width: 25%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Autre</th>
-            </tr>
-            <tr>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.passagers || ""}</td>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.personnel || ""}</td>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.equipage || ""}</td>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.autre || ""}</td>
-            </tr>
-          </table>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Passagers</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Personnel</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Équipage</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Autre</th>
+              </tr>
+              <tr>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.passagers || "0"}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.personnel || "0"}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.equipage || "0"}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.autre || "0"}</td>
+              </tr>
+            </table>
+          </div>
         </div>
         
         <!-- 4. Conditions météorologiques -->
@@ -904,28 +1090,42 @@ function generateFNEPdfHTML(fne) {
           <div style="background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; font-weight: bold; font-size: 0.9rem;">
             4. Conditions météorologiques
           </div>
-          <table class="pdf-table" style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <th style="width: 33%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Direction du vent</th>
-              <th style="width: 33%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Vitesse du vent</th>
-              <th style="width: 34%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Visibilité</th>
-            </tr>
-            <tr>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.vent_direction || ""}</td>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.vent_vitesse || ""}</td>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.visibilite || ""}</td>
-            </tr>
-            <tr>
-              <th style="width: 33%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Nébulosité</th>
-              <th style="width: 33%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Précipitation</th>
-              <th style="width: 34%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Autres phénomènes</th>
-            </tr>
-            <tr>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.nebulosite || ""}</td>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.precipitation || ""}</td>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.autres_phenomenes || ""}</td>
-            </tr>
-          </table>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Direction du vent</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Vitesse du vent</th>
+              </tr>
+              <tr>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.vent_direction || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.vent_vitesse || ""}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Visibilité</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Nébulosité</th>
+              </tr>
+              <tr>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.visibilite ? `${fne.visibilite} m` : ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.nebulosite || ""}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Précipitation</th>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Autres phénomènes</th>
+              </tr>
+              <tr>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.precipitation || ""}</td>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.autres_phenomenes || ""}</td>
+              </tr>
+            </table>
+          </div>
         </div>
         
         <!-- 5. Matériel, installation ou équipement -->
@@ -933,28 +1133,30 @@ function generateFNEPdfHTML(fne) {
           <div style="background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; font-weight: bold; font-size: 0.9rem;">
             5. Matériel, installation ou équipement
           </div>
-          <table class="pdf-table" style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <th style="width: 50%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">L'événement implique une installation/équipement</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.evt_implique_installation_équipement === "true" ? "Oui" : "Non"}</td>
-            </tr>
-            <tr>
-              <th style="width: 50%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Type installation/équipement</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.type_installation_équipement || ""}</td>
-            </tr>
-            <tr>
-              <th style="width: 50%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">L'événement implique un véhicule ou un matériel d'assistance au sol</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.evt_implique_véhicule_materiel_assistance_sol === "true" ? "Oui" : "Non"}</td>
-            </tr>
-            <tr>
-              <th style="width: 50%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Type du matériel/véhicule</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.type_materiel_véhicule || ""}</td>
-            </tr>
-            <tr>
-              <th style="width: 50%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Nom compagnie assistance/organisme/exploitant véhicule</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.nom_compagnie_assistance_organisme_exploitant_véhicule || ""}</td>
-            </tr>
-          </table>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">L'événement implique une installation/équipement</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.evt_implique_installation_équipement ? "Oui" : "Non"}</td>
+              </tr>
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Type installation/équipement</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.type_installation_equipement || ""}</td>
+              </tr>
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Nom compagnie assistance/organisme/exploitant véhicule</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.nom_compagnie_assistance_organisme_exploitant_véhicule || ""}</td>
+              </tr>
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">L'événement implique un véhicule/matériel assistance sol</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.evt_implique_véhicule_materiel_assistance_sol ? "Oui" : "Non"}</td>
+              </tr>
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Type matériel/véhicule</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${fne.type_materiel_véhicule || ""}</td>
+              </tr>
+            </table>
+          </div>
         </div>
         
         <!-- 6. Description de l'événement -->
@@ -962,8 +1164,12 @@ function generateFNEPdfHTML(fne) {
           <div style="background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; font-weight: bold; font-size: 0.9rem;">
             6. Description de l'événement
           </div>
-          <div style="padding: 10px; border: 1px solid #e5e7eb; white-space: pre-line; font-size: 0.85rem;">
-            ${fne.description_evt || ""}
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 10px; border: 1px solid #e5e7eb; white-space: pre-line;">${fne.description_evt || "Aucune description fournie."}</td>
+              </tr>
+            </table>
           </div>
         </div>
         
@@ -972,12 +1178,14 @@ function generateFNEPdfHTML(fne) {
           <div style="background-color: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; font-weight: bold; font-size: 0.9rem;">
             7. Informations complémentaires
           </div>
-          <table class="pdf-table" style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <th style="width: 30%; background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Créé par</th>
-              <td style="padding: 6px; border: 1px solid #e5e7eb;">${userName || ""}</td>
-            </tr>
-          </table>
+          <div class="pdf-table">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <th style="background-color: #f9fafb; padding: 6px; border: 1px solid #e5e7eb; text-align: left;">Créé par</th>
+                <td style="padding: 6px; border: 1px solid #e5e7eb;">${userName || ""}</td>
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -991,6 +1199,7 @@ function generateFNEPdfHTML(fne) {
 function closeModal() {
   const detailsModal = document.getElementById("fneDetailsModal")
   const pdfModal = document.getElementById("fnePdfModal")
+  const eventModal = document.getElementById("eventDetailsModal")
 
   if (detailsModal) {
     detailsModal.style.display = "none"
@@ -998,6 +1207,10 @@ function closeModal() {
 
   if (pdfModal) {
     pdfModal.style.display = "none"
+  }
+
+  if (eventModal) {
+    eventModal.style.display = "none"
   }
 }
 
@@ -1020,4 +1233,26 @@ function showNotification(message, type) {
       notification.classList.remove("show")
     }, 5000)
   }
+}
+
+// Toggle Filters - vérifier si l'élément existe
+const toggleFilters = document.getElementById("toggleFilters")
+const filterContent = document.getElementById("filterContent")
+const toggleFiltersText = document.getElementById("toggleFiltersText")
+const toggleFiltersIcon = document.getElementById("toggleFiltersIcon")
+
+if (toggleFilters) {
+  toggleFilters.addEventListener("click", () => {
+    const isVisible = filterContent.style.display !== "none"
+
+    if (isVisible) {
+      filterContent.style.display = "none"
+      toggleFiltersText.textContent = "Afficher les filtres"
+      toggleFiltersIcon.className = "fas fa-chevron-down"
+    } else {
+      filterContent.style.display = "grid"
+      toggleFiltersText.textContent = "Masquer les filtres"
+      toggleFiltersIcon.className = "fas fa-chevron-up"
+    }
+  })
 }

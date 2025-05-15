@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistiques FNE | Tableau de bord</title>
-    <link rel="stylesheet" href="/css/notificationa.css">
+    <link rel="stylesheet" href="/css/notifications.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .dashboard-container {
@@ -144,89 +144,7 @@
     
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-left">
-                <button class="mobile-toggle" id="mobile-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="header-meteo">
-                    <div class="meteo-icon" id="meteo-icon">
-                        <i class="fas fa-cloud-sun"></i>
-                    </div>
-                    <div class="meteo-info">
-                        <div class="meteo-temp" id="meteo-temp">--°C</div>
-                        <div class="meteo-description" id="meteo-description">Chargement...</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="header-right">
-                <div class="time-widget">
-                    <div class="current-date" id="current-date">--/--/----</div>
-                    <div class="current-time" id="current-time">--:--:--</div>
-                </div>
-                <div class="header-item">
-                    <button class="header-button" id="notifications-toggle">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge"></span>
-                    </button>
-                    
-                    <!-- Notifications Dropdown -->
-                    <div class="dropdown-menu" id="notifications-dropdown">
-                        <div class="dropdown-header">
-                            <h3 class="dropdown-title">Notifications</h3>
-                        </div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-file-alt"></i>
-                            <div>
-                                <div>Nouvelle FNE soumise</div>
-                                <small>Il y a 5 minutes</small>
-                            </div>
-                        </a>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-check-circle"></i>
-                            <div>
-                                <div>FNE approuvée</div>
-                                <small>Il y a 2 heures</small>
-                            </div>
-                        </a>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-user-plus"></i>
-                            <div>
-                                <div>Nouvel utilisateur enregistré</div>
-                                <small>Il y a 1 jour</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="header-item dropdown">
-                    <button class="header-button" id="user-toggle">
-                        <i class="fas fa-user-circle"></i>
-                    </button>
-                    
-                    <!-- User Dropdown -->
-                    <div class="dropdown-menu" id="user-dropdown">
-                        <div class="dropdown-header">
-                            <h3 class="dropdown-title" id="userNameDropdown">Utilisateur</h3>
-                        </div>
-                        <a href="/auth/profile" class="dropdown-item">
-                            <i class="fas fa-user"></i>
-                            <span>Mon profil</span>
-                        </a>
-                        <a href="/auth/settings" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            <span>Paramètres</span>
-                        </a>
-                        <a href="/auth/logout" class="dropdown-item logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Déconnexion</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </header>
+        
         
         <!-- Content -->
         <div class="content">
@@ -246,15 +164,12 @@
                 <iframe 
                     id="powerbi-frame"
                     class="dashboard-container" 
-                    src="https://app.powerbi.com/view?r=eyJrIjoiODFjOWM1NmQtM2U3Ny00MWFmLWFjYjQtYzQzM2EzOGIyYjI4IiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9"
+                    src="https://app.powerbi.com/view?r=eyJrIjoiODFjOWM1NmQtM2U3Ny00MWFmLWFjYjQtYzQzM2EzOGIyYjI4IiwidCI6ImRiZDY2NjRkLTRlYjktNDZlYi05OWQ4LTVjNDNiYTE1M2M2MSIsImMiOjl9&pageName=7787f52860ad770d3912"
                     frameborder="0" 
                     allowFullScreen="true">
                 </iframe>
                 
-                <div class="refresh-info">
-                    <span id="last-refresh">Dernière actualisation: --:--:--</span>
-                    <span>Actualisation automatique toutes les 5 minutes</span>
-                </div>
+                
             </div>
         </div>
         
@@ -345,85 +260,6 @@
             }
         });
         
-        // Fonction pour mettre à jour la date et l'heure
-        function updateDateTime() {
-            const now = new Date();
-            
-            // Format de la date: JJ/MM/AAAA
-            const dateOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
-            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', dateOptions);
-            
-            // Format de l'heure: HH:MM:SS
-            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR', timeOptions);
-        }
-        
-        // Fonction pour récupérer les données météo
-        async function fetchMeteo() {
-            const apiKey = '17cf16edeaed1f9b3bb60006a242d5d1';
-            const url = `https://api.openweathermap.org/data/2.5/weather?q=Tunis,tn&units=metric&lang=fr&appid=${apiKey}`;
-            
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP : ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                // Vérification des données
-                if (!data.weather || !data.main) {
-                    throw new Error("Données météo non disponibles");
-                }
-                
-                // Récupération des valeurs
-                const iconCode = data.weather[0].icon;
-                const temperature = Math.round(data.main.temp) + "°C";
-                const description = data.weather[0].description;
-                
-                // Affichage des valeurs avec animation
-                const meteoIcon = document.getElementById("meteo-icon");
-                const meteoTemp = document.getElementById("meteo-temp");
-                const meteoDesc = document.getElementById("meteo-description");
-                
-                // Choisir l'icône appropriée
-                const weatherCode = data.weather[0].id;
-                
-                if (weatherCode >= 200 && weatherCode < 300) {
-                    meteoIcon.innerHTML = '<i class="fas fa-bolt"></i>'; // Orage
-                } else if (weatherCode >= 300 && weatherCode < 500) {
-                    meteoIcon.innerHTML = '<i class="fas fa-cloud-rain"></i>'; // Bruine
-                } else if (weatherCode >= 500 && weatherCode < 600) {
-                    meteoIcon.innerHTML = '<i class="fas fa-cloud-showers-heavy"></i>'; // Pluie
-                } else if (weatherCode >= 600 && weatherCode < 700) {
-                    meteoIcon.innerHTML = '<i class="fas fa-snowflake"></i>'; // Neige
-                } else if (weatherCode >= 700 && weatherCode < 800) {
-                    meteoIcon.innerHTML = '<i class="fas fa-smog"></i>'; // Brouillard
-                } else if (weatherCode === 800) {
-                    meteoIcon.innerHTML = '<i class="fas fa-sun"></i>'; // Ciel dégagé
-                } else {
-                    meteoIcon.innerHTML = '<i class="fas fa-cloud-sun"></i>'; // Nuageux
-                }
-                
-                // Animation simple pour les valeurs de température et description
-                meteoTemp.style.opacity = "0";
-                meteoDesc.style.opacity = "0";
-                
-                setTimeout(() => {
-                    meteoTemp.textContent = temperature;
-                    meteoDesc.textContent = description;
-                    meteoTemp.style.transition = "opacity 0.5s ease";
-                    meteoDesc.style.transition = "opacity 0.5s ease";
-                    meteoTemp.style.opacity = "1";
-                    meteoDesc.style.opacity = "1";
-                }, 300);
-            } catch (error) {
-                console.error("Erreur : ", error);
-                document.getElementById("meteo-icon").innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
-                document.getElementById("meteo-temp").textContent = "--°C";
-                document.getElementById("meteo-description").textContent = "Non disponible";
-            }
-        }
         
         // Fonction pour actualiser l'iframe
         function refreshDashboard() {
@@ -441,26 +277,6 @@
             refreshDashboard();
         }
         
-        // Initialisation
-        document.addEventListener("DOMContentLoaded", () => {
-            // Mettre à jour la date et l'heure immédiatement
-            updateDateTime();
-            
-            // Mettre à jour la date et l'heure toutes les secondes
-            setInterval(updateDateTime, 1000);
-            
-            // Récupérer les données météo
-            fetchMeteo();
-            
-            // Récupérer les données météo toutes les 30 minutes
-            setInterval(fetchMeteo, 30 * 60 * 1000);
-            
-            // Actualiser immédiatement pour afficher l'heure
-            refreshDashboard();
-            
-            // Configurer l'actualisation périodique
-            setInterval(refreshDashboard, 300000);
-        });
     </script>
 </body>
 </html>

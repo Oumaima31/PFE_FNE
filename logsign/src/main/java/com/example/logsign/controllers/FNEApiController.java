@@ -14,15 +14,17 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping("/auth/api")
+@RestController //Cette classe est un contrôleur web REST.
+// Toutes ses méthodes vont gérer des requêtes HTTP et renvoyer des données (JSON, texte, etc.), pas des pages HTML.
+
+@RequestMapping("/auth/api") //Toutes les méthodes de ce contrôleur auront comme chemin de base /auth/api (Pour organiser les routes de ton API.)
 public class FNEApiController {
     private static final Logger logger = Logger.getLogger(FNEApiController.class.getName());
 
     @Autowired
     private FNEService fneService;
 
-    // Modifier cette méthode pour filtrer les FNE selon le rôle de l'utilisateur
+    // cette méthode pour filtrer les FNE selon le rôle de l'utilisateur
     @GetMapping("/gestionFNE")
     public List<FNE> getAllFNE(HttpSession session) {
         logger.info("Récupération des FNE selon le rôle via FNEApiController.getAllFNE");
