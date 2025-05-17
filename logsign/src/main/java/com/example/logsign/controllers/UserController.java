@@ -78,10 +78,9 @@ public class UserController {
         } else {
             // Si l'utilisateur n'est pas trouvé, affiche un message d'erreur
             System.out.println("Aucun utilisateur trouvé avec ce matricule et ce mot de passe.");
-            model.addAttribute("error", "Aucun utilisateur trouvé avec ce matricule ou ce mot de passe.");
+            model.addAttribute("error", "Matricule ou mot de passe incorrect");
+            return "index"; 
         }
-        // Retourne la vue de la page de connexion en cas d'erreur
-        return "index"; 
     }
     
     @GetMapping("/dashboard")
@@ -94,6 +93,29 @@ public class UserController {
         // L'utilisateur est connecté, afficher le tableau de bord
         return "dashboard";
     }
+    
+    // Autres méthodes inchangées...
+    
+    @PostMapping("/register")
+    @ResponseBody
+    public String register(@RequestParam String nom, @RequestParam String prenom, @RequestParam String email,
+                           @RequestParam String role, @RequestParam String matricule, @RequestParam String motDePasse,
+                           @RequestParam String aeroport) {
+        // Crée un nouvel objet utilisateur et définit ses propriétés
+        User user = new User();
+        user.setNom(nom);
+        user.setPrenom(prenom);
+        user.setEmail(email);
+        user.setRole(role);
+        user.setMatricule(matricule);
+        user.setMotDePasse(motDePasse);
+        user.setAeroport(aeroport);
+
+        // Enregistre l'utilisateur via le service
+        userService.registerUser(user);
+        return "Inscription avec succès"; // Retourne un message de succès
+    }
+    
     
     @GetMapping("/redirectToFneSML")
     public String redirectToFneSML(HttpSession session) {
@@ -127,25 +149,6 @@ public class UserController {
         return "redirect:/auth/fneAdmin";
     }
     
-    @PostMapping("/register")
-    @ResponseBody
-    public String register(@RequestParam String nom, @RequestParam String prenom, @RequestParam String email,
-                           @RequestParam String role, @RequestParam String matricule, @RequestParam String motDePasse,
-                           @RequestParam String aeroport) {
-        // Crée un nouvel objet utilisateur et définit ses propriétés
-        User user = new User();
-        user.setNom(nom);
-        user.setPrenom(prenom);
-        user.setEmail(email);
-        user.setRole(role);
-        user.setMatricule(matricule);
-        user.setMotDePasse(motDePasse);
-        user.setAeroport(aeroport);
-
-        // Enregistre l'utilisateur via le service
-        userService.registerUser(user);
-        return "Inscription avec succès"; // Retourne un message de succès
-    }
     
     // API pour récupérer tous les utilisateurs
     @GetMapping("/api/users")

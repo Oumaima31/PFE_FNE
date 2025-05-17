@@ -27,12 +27,29 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
-    // Authentifier un utilisateur
+    // Authentifier un utilisateur avec BCrypt
     public User loginUser(String matricule, String motDePasse) {
-        return userRepository.findByMatriculeAndMotDePasse(matricule, motDePasse);
+        Optional<User> userOpt = userRepository.findByMatricule(matricule);
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            // Vérifier si le mot de passe est en texte brut (non haché)
+            if (user.getMotDePasse().equals(motDePasse)) {
+                // Mettre à jour le mot de passe avec un hash
+                user.setMotDePasse(Passwordservice.hashPassword(motDePasse));
+                userRepository.save(user);
+                return user;
+            }
+            // Vérifier si le mot de passe correspond avec BCrypt
+            else if (Passwordservice.checkPassword(motDePasse, user.getMotDePasse())) {
+                return user;
+            }
+        }
+        
+        return null;
     }
 
-    // Enregistrer un nouvel utilisateur
+    // Enregistrer un nouvel utilisateur avec mot de passe haché
     public User registerUser(User user) {
         // Vérifier si le matricule existe déjà
         if (userRepository.existsByMatricule(user.getMatricule())) {
@@ -43,6 +60,9 @@ public class UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Cet email est déjà utilisé");
         }
+        
+        // Hacher le mot de passe avant de l'enregistrer
+        user.setMotDePasse(Passwordservice.hashPassword(user.getMotDePasse()));
         
         return userRepository.save(user);
     }
@@ -58,10 +78,13 @@ public class UserService {
             throw new RuntimeException("Cet email est déjà utilisé par un autre utilisateur");
         }
         
-        // Si le mot de passe n'est pas modifié, conserver l'ancien
-        if (user.getMotDePasse() == null || user.getMotDePasse().isEmpty()) {
+        // Si le mot de passe est modifié, le hacher
+        if (user.getMotDePasse() != null && !user.getMotDePasse().isEmpty()) {
+            user.setMotDePasse(Passwordservice.hashPassword(user.getMotDePasse()));
+        } else {
             user.setMotDePasse(existingUser.getMotDePasse());
-        }       
+        }
+        
         return userRepository.save(user);
     }
 
@@ -73,4 +96,3 @@ public class UserService {
         userRepository.deleteById(id);
     }
 }
-

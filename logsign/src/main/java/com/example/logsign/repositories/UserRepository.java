@@ -13,17 +13,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     Optional<User> findByEmail(String email);
     
-    @Query("SELECT u FROM User u WHERE u.matricule = :matricule AND u.motDePasse = :motDePasse")
-    User findByMatriculeAndMotDePasse(
-        @Param("matricule") String matricule, 
-        @Param("motDePasse") String motDePasse
-    );
-    
+    // Nouvelle méthode pour trouver un utilisateur par matricule
+    Optional<User> findByMatricule(String matricule);
+
+    // Nouvelle méthode pour verifier si la matricule existe ou pas 
     boolean existsByMatricule(String matricule);
+
+    // Nouvelle méthode pour verifier si l'email existe ou pas
     boolean existsByEmail(String email);
+
     // Nouvelle méthode pour trouver les utilisateurs par rôle
     @Query("SELECT u FROM User u WHERE u.role = :role")
     List<User> findByRole(@Param("role") String role);
-    
 }
-
