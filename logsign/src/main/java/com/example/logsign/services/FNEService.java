@@ -675,8 +675,6 @@ existingFne.setVitesse_b(updatedFne.getVitesse_b());
     // Description
     existingFne.setDescription_evt(updatedFne.getDescription_evt());
 }
-// Modification de la méthode updateFNE dans FNEService.java
-
 @Transactional
 public FNE updateFNE(FNE updatedFne, User user) {
     // Récupérer la FNE existante
@@ -688,8 +686,8 @@ public FNE updateFNE(FNE updatedFne, User user) {
         throw new RuntimeException("Vous n'êtes pas autorisé à modifier cette FNE");
     }
     
-    // Vérifier que la FNE est en statut "En attente"
-    if (!"En attente".equals(existingFne.getStatut())) {
+    // Vérifier que la FNE est en statut "En attente" (seulement pour les non-admins)
+    if (!"admin".equals(user.getRole()) && !"En attente".equals(existingFne.getStatut())) {
         throw new RuntimeException("Seules les FNE en attente peuvent être modifiées");
     }
     
@@ -717,11 +715,11 @@ public FNE updateFNE(FNE updatedFne, User user) {
         // Enregistrer la FNE mise à jour
         FNE savedFne = fneRepository.save(existingFne);
         
-        
         return savedFne;
     } else {
         // Aucune modification détectée
         throw new RuntimeException("Aucune modification détectée");
     }
 }
+
 }

@@ -49,51 +49,50 @@ public class FNEApiController {
             .filter(fne -> fne.getUtilisateur() != null && fne.getUtilisateur().getId().equals(user.getId()))
             .collect(Collectors.toList());
     }
-
-    // Récupérer une FNE par son ID
-    @GetMapping("/fne/{id}")
-    public ResponseEntity<?> getFNEById(@PathVariable Long id, HttpSession session) {
-        try {
-            logger.info("Récupération de la FNE avec ID: " + id);
-        
-            // Vérifier si l'utilisateur est connecté
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                logger.warning("Tentative d'accès à la FNE sans être connecté");
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Utilisateur non connecté");
-                return ResponseEntity.status(401).body(error);
-            }
-        
-            // Récupérer la FNE
-            FNE fne = fneService.getFNEById(id);
-            if (fne == null) {
-                logger.warning("FNE non trouvée avec ID: " + id);
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "FNE non trouvée");
-                return ResponseEntity.status(404).body(error);
-            }
-        
-            // Vérifier les autorisations
-            // Les admins peuvent voir toutes les FNE
-            // Les SML ne peuvent voir que leurs propres FNE
-            if ("admin".equals(user.getRole()) || 
-                (fne.getUtilisateur() != null && fne.getUtilisateur().getId().equals(user.getId()))) {
-                return ResponseEntity.ok(fne);
-            } else {
-                logger.warning("Utilisateur " + user.getEmail() + " non autorisé à voir la FNE: " + id);
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Vous n'êtes pas autorisé à voir cette FNE");
-                return ResponseEntity.status(403).body(error);
-            }
-        } catch (Exception e) {
-            logger.severe("Erreur lors de la récupération de la FNE: " + e.getMessage());
-            e.printStackTrace();
+// Récupérer une FNE par son ID
+@GetMapping("/fne/{id}")
+public ResponseEntity<?> getFNEById(@PathVariable Long id, HttpSession session) {
+    try {
+        logger.info("Récupération de la FNE avec ID: " + id);
+    
+        // Vérifier si l'utilisateur est connecté
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            logger.warning("Tentative d'accès à la FNE sans être connecté");
             Map<String, String> error = new HashMap<>();
-            error.put("error", "Erreur lors de la récupération de la FNE: " + e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+            error.put("error", "Utilisateur non connecté");
+            return ResponseEntity.status(401).body(error);
         }
+    
+        // Récupérer la FNE
+        FNE fne = fneService.getFNEById(id);
+        if (fne == null) {
+            logger.warning("FNE non trouvée avec ID: " + id);
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "FNE non trouvée");
+            return ResponseEntity.status(404).body(error);
+        }
+    
+        // Vérifier les autorisations
+        // Les admins peuvent voir toutes les FNE
+        // Les SML ne peuvent voir que leurs propres FNE
+        if ("admin".equals(user.getRole()) || 
+            (fne.getUtilisateur() != null && fne.getUtilisateur().getId().equals(user.getId()))) {
+            return ResponseEntity.ok(fne);
+        } else {
+            logger.warning("Utilisateur " + user.getEmail() + " non autorisé à voir la FNE: " + id);
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Vous n'êtes pas autorisé à voir cette FNE");
+            return ResponseEntity.status(403).body(error);
+        }
+    } catch (Exception e) {
+        logger.severe("Erreur lors de la récupération de la FNE: " + e.getMessage());
+        e.printStackTrace();
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Erreur lors de la récupération de la FNE: " + e.getMessage());
+        return ResponseEntity.badRequest().body(error);
     }
+}
 
     // Ajouter l'endpoint pour récupérer les FNE en attente
     @GetMapping("/fne/en-attente")

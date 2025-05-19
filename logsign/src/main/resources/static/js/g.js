@@ -403,16 +403,19 @@ function renderTable() {
 
 // Fonction pour vérifier si l'utilisateur peut modifier une FNE
 function canModifyFNE(fne) {
+  // Si l'utilisateur est admin, il peut modifier n'importe quelle FNE
   if (userRole === "admin") {
     return true
   }
 
+  // Si l'utilisateur est SML, il ne peut modifier que ses propres FNE en attente
   if (userRole === "SML" && fne.statut === "En attente" && fne.utilisateur && fne.utilisateur.id == userId) {
     return true
   }
 
   return false
 }
+
 
 // Fonction pour mettre à jour la pagination
 function updatePagination() {

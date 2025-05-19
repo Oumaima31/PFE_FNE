@@ -15,7 +15,6 @@ import com.example.logsign.services.NotificationService;
 import jakarta.servlet.http.HttpSession;
 import java.util.logging.Logger;
 
-
 @Controller //utilisé quand tu veux afficher une page HTML avec Thymeleaf
 @RequestMapping("/auth") //Toutes les méthodes de ce contrôleur auront comme chemin de base /auth
 public class FNEController {
@@ -97,66 +96,67 @@ public class FNEController {
 
         return "redirect:/auth/ajoutFNE";
     }
-    
     // Méthode unifiée pour mettre à jour une FNE
-    @PostMapping("/updateFNE")
-    public String updateFNE(@ModelAttribute FNE fne, HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = (User) session.getAttribute("user");
+@PostMapping("/updateFNE")
+public String updateFNE(@ModelAttribute FNE fne, HttpSession session, RedirectAttributes redirectAttributes) {
+    User user = (User) session.getAttribute("user");
 
-        if (user != null) {
-            try {
-                // Vérifier que les champs importants sont remplis
-                if (fne.getType_evt() == null || fne.getType_evt().isEmpty()) {
-                    redirectAttributes.addFlashAttribute("error", "Le type d'événement est obligatoire.");
-                    return "redirect:/auth/ajoutFNE?id=" + fne.getFne_id();
-                }
-        
-                if (fne.getRef_gne() == null || fne.getRef_gne().isEmpty()) {
-                    redirectAttributes.addFlashAttribute("error", "La référence GNE est obligatoire.");
-                    return "redirect:/auth/ajoutFNE?id=" + fne.getFne_id();
-                }
-                
-                // Vérifier si l'utilisateur a le droit de modifier cette FNE
-                FNE existingFNE = fneService.getFNEById(fne.getFne_id());
-                if (existingFNE == null) {
-                    redirectAttributes.addFlashAttribute("error", "FNE non trouvée.");
-                    return "redirect:/auth/ajoutFNE";
-                }
-                
-                // Si l'utilisateur est un SML, vérifier qu'il est l'auteur de la FNE et que son statut est "En attente"
-                if ("SML".equals(user.getRole())) {
-                    if (!user.getId().equals(existingFNE.getUtilisateur().getId())) {
-                        redirectAttributes.addFlashAttribute("error", "Vous n'êtes pas autorisé à modifier cette FNE.");
-                        return "redirect:/auth/ajoutFNE?id=" + fne.getFne_id();
-                    }
-                    
-                    if (!"En attente".equals(existingFNE.getStatut())) {
-                        redirectAttributes.addFlashAttribute("error", "Vous ne pouvez modifier que les FNE en attente.");
-                        return "redirect:/auth/ajoutFNE?id=" + fne.getFne_id();
-                    }
-                    
-                    // Conserver le statut "En attente" pour les SML
-                    fne.setStatut("En attente");
-                }
-        
-                // Mettre à jour la FNE
-                FNE updatedFNE = fneService.updateFNE(fne, user);
-                
-                // Rediriger vers la page de gestion FNE avec un message de succès
-                redirectAttributes.addFlashAttribute("success", "FNE mise à jour avec succès !");
-                return "redirect:/auth/gestionFNE";
-
-            } catch (Exception e) {
-                redirectAttributes.addFlashAttribute("error", "Erreur lors de la mise à jour de la FNE : " + e.getMessage());
-                e.printStackTrace();
+    if (user != null) {
+        try {
+            // Vérifier que les champs importants sont remplis
+            if (fne.getType_evt() == null || fne.getType_evt().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Le type d'événement est obligatoire.");
                 return "redirect:/auth/ajoutFNE?id=" + fne.getFne_id();
             }
-        } else {
-            redirectAttributes.addFlashAttribute("error", "Utilisateur non connecté.");
-        }
+    
+            if (fne.getRef_gne() == null || fne.getRef_gne().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "La référence GNE est obligatoire.");
+                return "redirect:/auth/ajoutFNE?id=" + fne.getFne_id();
+            }
+            
+            // Vérifier si l'utilisateur a le droit de modifier cette FNE
+            FNE existingFNE = fneService.getFNEById(fne.getFne_id());
+            if (existingFNE == null) {
+                redirectAttributes.addFlashAttribute("error", "FNE non trouvée.");
+                return "redirect:/auth/ajoutFNE";
+            }
+            
+            // Si l'utilisateur est un SML, vérifier qu'il est l'auteur de la FNE et que son statut est "En attente"
+            if ("SML".equals(user.getRole())) {
+                if (!user.getId().equals(existingFNE.getUtilisateur().getId())) {
+                    redirectAttributes.addFlashAttribute("error", "Vous n'êtes pas autorisé à modifier cette FNE.");
+                    return "redirect:/auth/ajoutFNE?id=" + fne.getFne_id();
+                }
+                
+                if (!"En attente".equals(existingFNE.getStatut())) {
+                    redirectAttributes.addFlashAttribute("error", "Vous ne pouvez modifier que les FNE en attente.");
+                    return "redirect:/auth/ajoutFNE?id=" + fne.getFne_id();
+                }
+                
+                // Conserver le statut "En attente" pour les SML
+                fne.setStatut("En attente");
+            }
+            // Pour les admins, aucune restriction - ils peuvent modifier n'importe quelle FNE
+    
+            // Mettre à jour la FNE
+            FNE updatedFNE = fneService.updateFNE(fne, user);
+            
+            // Rediriger vers la page de gestion FNE avec un message de succès
+            redirectAttributes.addFlashAttribute("success", "FNE mise à jour avec succès !");
+            return "redirect:/auth/gestionFNE";
 
-        return "redirect:/auth/ajoutFNE";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Erreur lors de la mise à jour de la FNE : " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/auth/ajoutFNE?id=" + fne.getFne_id();
+        }
+    } else {
+        redirectAttributes.addFlashAttribute("error", "Utilisateur non connecté.");
     }
+
+    return "redirect:/auth/ajoutFNE";
+}
+
     
     // Ajouter les méthodes pour les administrateurs
     @PostMapping("/submitFNEAdmin")
